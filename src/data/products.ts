@@ -183,7 +183,7 @@ export const COLOR_PRESETS: { name: string; colors: ColorOption[] }[] = [
 ];
 
 // ============ Country List ============
-const countries = [
+export const countries = [
   "Argentina", "Brazil", "France", "England", "Spain", "Germany", "Portugal",
   "Netherlands", "Belgium", "Italy", "Croatia", "Uruguay", "Colombia", "Mexico",
   "USA", "Canada", "Japan", "South Korea", "Australia", "Morocco", "Senegal",
@@ -194,7 +194,7 @@ const countries = [
 ];
 
 // ============ Club List ============
-const clubs = [
+export const clubs = [
   "Real Madrid", "Barcelona", "Atletico Madrid", "Sevilla", "Real Sociedad",
   "Real Betis", "Villarreal", "Valencia", "Athletic Bilbao", "Celta Vigo",
   "Manchester United", "Manchester City", "Liverpool", "Arsenal", "Chelsea",
@@ -210,7 +210,7 @@ const clubs = [
 ];
 
 // ============ Boots List ============
-const boots = [
+export const boots = [
   { name: "Nike Mercurial Superfly 10", brand: "Nike", price: 279.99 },
   { name: "Nike Phantom GX 2 Elite", brand: "Nike", price: 259.99 },
   { name: "Nike Tiempo Legend 10 Elite", brand: "Nike", price: 239.99 },
@@ -244,7 +244,7 @@ const boots = [
 ];
 
 // ============ Image Sets ============
-const jerseyImages = [
+export const jerseyImages = [
   "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?q=80&w=600&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1553778263-73a83bab9b0c?q=80&w=600&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=600&auto=format&fit=crop",
@@ -255,48 +255,18 @@ const jerseyImages = [
   "https://images.unsplash.com/photo-1606925797300-0b35e9d1794e?q=80&w=600&auto=format&fit=crop",
 ];
 
-const bootImages = [
+export const bootImages = [
   "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?q=80&w=600&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?q=80&w=600&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1552346154-21d32810aba3?q=80&w=600&auto=format&fit=crop",
 ];
 
-// ============ Review Generator ============
-function generateReviews(rating: number): Review[] {
-  const names = ["Ahmed R.", "Sofia M.", "Karim H.", "Diego S.", "James A.", "Rahim K.", "Nadia H.", "Leo M."];
-  const comments = [
-    "Excellent quality! Very satisfied with the purchase.",
-    "Fast delivery and great condition. Highly recommend!",
-    "Perfect fit and premium feel. Worth every penny.",
-    "Good quality, but shipping took a bit longer than expected.",
-  ];
-  const dates = ["2 days ago", "1 week ago", "2 weeks ago", "1 month ago"];
-
-  return [
-    { name: names[Math.floor(Math.random() * names.length)], rating: 5, comment: comments[0], date: dates[1] },
-    { name: names[Math.floor(Math.random() * names.length)], rating: 4, comment: comments[3], date: dates[2] },
-  ];
-}
-
-function generateJerseyImages(baseIndex: number): string[] {
-  const result: string[] = [];
-  for (let i = 0; i < 4; i++) {
-    result.push(jerseyImages[(baseIndex + i) % jerseyImages.length]);
-  }
-  return result;
-}
-
-function generateBootImages(baseIndex: number): string[] {
-  const result: string[] = [];
-  for (let i = 0; i < 3; i++) {
-    result.push(bootImages[(baseIndex + i) % bootImages.length]);
-  }
-  return result;
-}
-
 // ============ Default Colors Per Category ============
-function getDefaultColorsForProduct(category: string, subCategory: string): ColorOption[] {
+export function getDefaultColorsForProduct(
+  category: string,
+  subCategory: string
+): ColorOption[] {
   if (category === "Football Shoes") {
     return [
       { name: "Black", hex: "#0A0A0A" },
@@ -321,169 +291,38 @@ function getDefaultColorsForProduct(category: string, subCategory: string): Colo
   ];
 }
 
-// ============ Product Generator ============
-function generateProducts(): Product[] {
-  const products: Product[] = [];
-  let id = 1;
+// ================================================================
+// MOCK PRODUCTS — DISABLED
+// ================================================================
+// Demo products are no longer generated.
+// Supabase is now the single source of truth for products.
+//
+// To add products:
+//   1. Login to admin panel: /admin/login
+//   2. Go to /admin/products
+//   3. Click "Add New Product"
+//
+// The `mockProducts` export is kept as an empty array for backward
+// compatibility with any code that still imports it. It will be
+// removed in a future version.
+// ================================================================
 
-  // Country Jerseys
-  countries.forEach((country, idx) => {
-    const rating = 4.6 + (idx % 4) * 0.1;
-    const reviews = 8 + (idx % 15);
-
-    products.push({
-      id: id++,
-      name: `${country} Home Jersey World Cup 2026`,
-      category: "Jerseys",
-      subCategory: "Country",
-      brand: idx % 3 === 0 ? "Nike" : idx % 3 === 1 ? "Adidas" : "Puma",
-      team: country,
-      type: "Home",
-      price: 89.99,
-      image_url: jerseyImages[idx % jerseyImages.length],
-      images: generateJerseyImages(idx),
-      rating: Number(rating.toFixed(1)),
-      reviews_count: reviews,
-      description: `Official ${country} home jersey for FIFA World Cup 2026. Premium breathable fabric with moisture-wicking technology. Perfect for match days and training.`,
-      sizes: ["S", "M", "L", "XL", "XXL"],
-      reviews: generateReviews(rating),
-      stock: 10 + (idx % 40),
-      colors: getDefaultColorsForProduct("Jerseys", "Country"),
-      season: "2025/26",
-      kitType: "Home",
-      sleeveType: "Short Sleeve",
-      collarType: "Crew Neck",
-      fitType: "Regular",
-    });
-
-    products.push({
-      id: id++,
-      name: `${country} Away Jersey World Cup 2026`,
-      category: "Jerseys",
-      subCategory: "Country",
-      brand: idx % 3 === 0 ? "Nike" : idx % 3 === 1 ? "Adidas" : "Puma",
-      team: country,
-      type: "Away",
-      price: 89.99,
-      image_url: jerseyImages[(idx + 3) % jerseyImages.length],
-      images: generateJerseyImages(idx + 3),
-      rating: Number((rating - 0.1).toFixed(1)),
-      reviews_count: reviews - 2,
-      description: `Official ${country} away jersey for FIFA World Cup 2026. Modern design with premium comfort for true supporters.`,
-      sizes: ["S", "M", "L", "XL", "XXL"],
-      reviews: generateReviews(rating - 0.1),
-      stock: 8 + (idx % 35),
-      colors: getDefaultColorsForProduct("Jerseys", "Country"),
-      season: "2025/26",
-      kitType: "Away",
-      sleeveType: "Short Sleeve",
-      collarType: "Crew Neck",
-      fitType: "Regular",
-    });
-  });
-
-  // Club Jerseys
-  clubs.forEach((club, idx) => {
-    const rating = 4.7 + (idx % 4) * 0.05;
-    const reviews = 10 + (idx % 20);
-
-    products.push({
-      id: id++,
-      name: `${club} Home Jersey 24/25`,
-      category: "Jerseys",
-      subCategory: "Club",
-      brand: idx % 3 === 0 ? "Nike" : idx % 3 === 1 ? "Adidas" : "Puma",
-      team: club,
-      type: "Home",
-      price: 89.99,
-      image_url: jerseyImages[(idx + 5) % jerseyImages.length],
-      images: generateJerseyImages(idx + 5),
-      rating: Number(rating.toFixed(1)),
-      reviews_count: reviews,
-      description: `Authentic ${club} home jersey for the 2024/25 season. Show your support with this premium quality kit.`,
-      sizes: ["S", "M", "L", "XL", "XXL"],
-      reviews: generateReviews(rating),
-      stock: 12 + (idx % 45),
-      colors: getDefaultColorsForProduct("Jerseys", "Club"),
-      season: "2024/25",
-      kitType: "Home",
-      sleeveType: "Short Sleeve",
-      collarType: "Crew Neck",
-      fitType: "Regular",
-    });
-
-    products.push({
-      id: id++,
-      name: `${club} Away Jersey 24/25`,
-      category: "Jerseys",
-      subCategory: "Club",
-      brand: idx % 3 === 0 ? "Nike" : idx % 3 === 1 ? "Adidas" : "Puma",
-      team: club,
-      type: "Away",
-      price: 89.99,
-      image_url: jerseyImages[(idx + 2) % jerseyImages.length],
-      images: generateJerseyImages(idx + 2),
-      rating: Number((rating - 0.05).toFixed(1)),
-      reviews_count: reviews - 3,
-      description: `Premium ${club} away jersey for 2024/25. Designed for performance and style.`,
-      sizes: ["S", "M", "L", "XL", "XXL"],
-      reviews: generateReviews(rating - 0.05),
-      stock: 6 + (idx % 30),
-      colors: getDefaultColorsForProduct("Jerseys", "Club"),
-      season: "2024/25",
-      kitType: "Away",
-      sleeveType: "Short Sleeve",
-      collarType: "Crew Neck",
-      fitType: "Regular",
-    });
-  });
-
-  // Boots
-  boots.forEach((boot, idx) => {
-    const rating = 4.6 + (idx % 4) * 0.1;
-    products.push({
-      id: id++,
-      name: boot.name,
-      category: "Football Shoes",
-      subCategory: "Boot",
-      brand: boot.brand,
-      team: boot.brand,
-      type: "Boot",
-      price: boot.price,
-      image_url: bootImages[idx % bootImages.length],
-      images: generateBootImages(idx),
-      rating: Number(rating.toFixed(1)),
-      reviews_count: 12 + (idx % 20),
-      description: `Premium ${boot.brand} football boots engineered for speed, control, and precision. Lightweight construction with superior grip.`,
-      sizes: ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10", "UK 11"],
-      reviews: generateReviews(rating),
-      stock: 5 + (idx % 25),
-      colors: getDefaultColorsForProduct("Football Shoes", "Boot"),
-      surface: "FG",
-      playStyle: "Speed",
-      bootHeight: "Low",
-      closureType: "Lace-up",
-      releaseYear: 2025,
-    });
-  });
-
-  return products;
-}
-
-export const mockProducts: Product[] = generateProducts();
+export const mockProducts: Product[] = [];
 
 // ============ Helper Functions ============
-export const getProductsByCategory = (category: string) =>
-  mockProducts.filter((p) => p.category === category);
+export const getProductsByCategory = (products: Product[], category: string) =>
+  products.filter((p) => p.category === category);
 
-export const getProductsBySubCategory = (subCategory: string) =>
-  mockProducts.filter((p) => p.subCategory === subCategory);
+export const getProductsBySubCategory = (
+  products: Product[],
+  subCategory: string
+) => products.filter((p) => p.subCategory === subCategory);
 
-export const getProductsByBrand = (brand: string) =>
-  mockProducts.filter((p) => p.brand === brand);
+export const getProductsByBrand = (products: Product[], brand: string) =>
+  products.filter((p) => p.brand === brand);
 
-export const getAllBrands = () =>
-  Array.from(new Set(mockProducts.map((p) => p.brand))).sort();
+export const getAllBrands = (products: Product[]) =>
+  Array.from(new Set(products.map((p) => p.brand))).sort();
 
 export const getAllCountries = () => countries;
 export const getAllClubs = () => clubs;
