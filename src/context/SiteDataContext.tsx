@@ -13,7 +13,6 @@ import { supabase } from "@/lib/supabase";
 import {
   Product,
   Review,
-  DEFAULT_COLORS,
   ColorOption,
 } from "@/data/products";
 
@@ -66,7 +65,7 @@ export interface Brand {
   name: string;
   slug: string;
   tagline: string;
-  logo?: string;
+  logo?: string; // 👈 brand logo
 }
 
 export interface Team {
@@ -106,6 +105,7 @@ export interface SiteConfigData {
   twitter: string;
   youtube: string;
   whatsapp: string;
+  newArrivalIds: number[]; // 👈 required (default [])
 }
 
 interface SiteDataContextType {
@@ -152,6 +152,7 @@ const defaultSiteConfig: SiteConfigData = {
   twitter: "https://twitter.com/goalwear",
   youtube: "https://youtube.com/@goalwear",
   whatsapp: "8801234567890",
+  newArrivalIds: [],
 };
 
 const defaultHeroSlides: HeroSlide[] = [
@@ -281,26 +282,58 @@ const defaultCategories: Category[] = [
 ];
 
 const defaultBrands: Brand[] = [
-  { id: 1, name: "Nike", slug: "nike", tagline: "Just Do It" },
-  { id: 2, name: "Adidas", slug: "adidas", tagline: "Impossible is Nothing" },
-  { id: 3, name: "Puma", slug: "puma", tagline: "Forever Faster" },
-  { id: 4, name: "Reebok", slug: "reebok", tagline: "Sport the Unexpected" },
+  { id: 1, name: "Nike", slug: "nike", tagline: "Just Do It", logo: "" },
+  {
+    id: 2,
+    name: "Adidas",
+    slug: "adidas",
+    tagline: "Impossible is Nothing",
+    logo: "",
+  },
+  { id: 3, name: "Puma", slug: "puma", tagline: "Forever Faster", logo: "" },
+  {
+    id: 4,
+    name: "Reebok",
+    slug: "reebok",
+    tagline: "Sport the Unexpected",
+    logo: "",
+  },
   {
     id: 5,
     name: "New Balance",
     slug: "new-balance",
     tagline: "Fearlessly Independent",
+    logo: "",
   },
   {
     id: 6,
     name: "Under Armour",
     slug: "under-armour",
     tagline: "The Only Way is Through",
+    logo: "",
   },
-  { id: 7, name: "Mizuno", slug: "mizuno", tagline: "Never Settle" },
-  { id: 8, name: "Asics", slug: "asics", tagline: "Sound Mind Sound Body" },
-  { id: 9, name: "Umbro", slug: "umbro", tagline: "The Heart of the Game" },
-  { id: 10, name: "Diadora", slug: "diadora", tagline: "Italian Sportswear" },
+  { id: 7, name: "Mizuno", slug: "mizuno", tagline: "Never Settle", logo: "" },
+  {
+    id: 8,
+    name: "Asics",
+    slug: "asics",
+    tagline: "Sound Mind Sound Body",
+    logo: "",
+  },
+  {
+    id: 9,
+    name: "Umbro",
+    slug: "umbro",
+    tagline: "The Heart of the Game",
+    logo: "",
+  },
+  {
+    id: 10,
+    name: "Diadora",
+    slug: "diadora",
+    tagline: "Italian Sportswear",
+    logo: "",
+  },
 ];
 
 const defaultTeams: Team[] = [
@@ -402,6 +435,7 @@ const defaultCoupons: CouponData[] = [
 function normalizeProducts(products: any[]): Product[] {
   return products.map((p) => ({
     ...p,
+    // 👇 empty colors allowed — no forced defaults
     colors: Array.isArray(p.colors) ? p.colors : [],
   }));
 }
@@ -424,7 +458,7 @@ function dbToProduct(row: any): Product {
     sizes: row.sizes || [],
     reviews: row.reviews || [],
     stock: row.stock || 0,
-    colors: row.colors || [],
+    colors: Array.isArray(row.colors) ? row.colors : [],
 
     // Advanced fields
     season: row.season || "",
@@ -650,13 +684,18 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
           setSiteConfig({
             ...defaultSiteConfig,
             ...siteConfigRes.data.config,
+            // 👇 ensure newArrivalIds is always an array
+            newArrivalIds: Array.isArray(
+              siteConfigRes.data.config.newArrivalIds
+            )
+              ? siteConfigRes.data.config.newArrivalIds
+              : [],
           });
         }
 
         console.log("🎉 All data loaded from Supabase");
       } catch (err) {
         console.error("❌ Failed to load data:", err);
-        // ✅ On error, products stay empty
         setProducts([]);
       } finally {
         setIsHydrated(true);
@@ -794,7 +833,7 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
         name: b.name,
         slug: b.slug,
         tagline: b.tagline,
-        logo: b.logo || null,
+        logo: b.logo || null, // 👈 brand logo
         sort_order: i,
       }))
     );
@@ -979,7 +1018,7 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
     setFeatures(defaultFeatures);
     setCategories(defaultCategories);
     setBrands(defaultBrands);
-    setProducts([]); // ✅ Empty, no mockProducts
+    setProducts([]);
     setTeams(defaultTeams);
     setTestimonials(defaultTestimonials);
     setInstagramImages(defaultInstagramImages);

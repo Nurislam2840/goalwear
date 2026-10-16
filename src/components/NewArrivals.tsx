@@ -4,20 +4,21 @@
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
 import { useSiteData } from "@/context/SiteDataContext";
+import { Product } from "@/data/products";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 export default function NewArrivals() {
   const { products, siteConfig } = useSiteData();
 
-  // 👇 Admin-selected IDs, otherwise latest 4 products
-  const selectedIds = siteConfig.newArrivalIds || [];
+  // 👇 Safe array reference (never undefined)
+  const selectedIds: number[] = siteConfig.newArrivalIds || [];
 
-  let newProducts: typeof products = [];
+  let newProducts: Product[] = [];
 
   if (selectedIds.length > 0) {
     newProducts = selectedIds
       .map((id) => products.find((p) => p.id === id))
-      .filter((p): p is (typeof products)[number] => Boolean(p))
+      .filter((p): p is Product => Boolean(p))
       .slice(0, 8);
   }
 

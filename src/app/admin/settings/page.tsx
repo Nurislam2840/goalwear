@@ -73,6 +73,9 @@ export default function AdminSettingsPage() {
     }, 400);
   };
 
+  // 👇 Safe array reference (never undefined)
+  const newArrivalIds: number[] = formData.newArrivalIds || [];
+
   return (
     <div className="p-4 md:p-8">
       <div className="mb-6">
@@ -135,7 +138,7 @@ export default function AdminSettingsPage() {
               </p>
             </div>
             <span className="bg-brand-green text-black text-[10px] font-bold px-3 py-1.5 rounded-full">
-              {(formData.newArrivalIds || []).length} selected
+              {newArrivalIds.length} selected
             </span>
           </div>
 
@@ -152,9 +155,7 @@ export default function AdminSettingsPage() {
             ) : (
               <div className="space-y-2">
                 {products.map((product) => {
-                  const isSelected = (formData.newArrivalIds || []).includes(
-                    product.id
-                  );
+                  const isSelected = newArrivalIds.includes(product.id);
                   return (
                     <label
                       key={product.id}
@@ -168,10 +169,9 @@ export default function AdminSettingsPage() {
                         type="checkbox"
                         checked={isSelected}
                         onChange={(e) => {
-                          const current = formData.newArrivalIds || [];
                           const updated = e.target.checked
-                            ? [...current, product.id]
-                            : current.filter((id) => id !== product.id);
+                            ? [...newArrivalIds, product.id]
+                            : newArrivalIds.filter((id) => id !== product.id);
                           setFormData({ ...formData, newArrivalIds: updated });
                         }}
                         className="w-4 h-4 accent-brand-green"
@@ -201,7 +201,7 @@ export default function AdminSettingsPage() {
             )}
           </div>
 
-          {(formData.newArrivalIds || []).length > 0 && (
+          {newArrivalIds.length > 0 && (
             <button
               type="button"
               onClick={() => setFormData({ ...formData, newArrivalIds: [] })}
