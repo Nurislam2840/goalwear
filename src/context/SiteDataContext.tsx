@@ -66,6 +66,7 @@ export interface Brand {
   name: string;
   slug: string;
   tagline: string;
+  logo?: string;
 }
 
 export interface Team {
@@ -401,10 +402,7 @@ const defaultCoupons: CouponData[] = [
 function normalizeProducts(products: any[]): Product[] {
   return products.map((p) => ({
     ...p,
-    colors:
-      p.colors && Array.isArray(p.colors) && p.colors.length > 0
-        ? p.colors
-        : [...DEFAULT_COLORS],
+    colors: Array.isArray(p.colors) ? p.colors : [],
   }));
 }
 
@@ -513,6 +511,7 @@ function dbToBrand(row: any): Brand {
     name: row.name,
     slug: row.slug,
     tagline: row.tagline,
+    logo: row.logo || "",
   };
 }
 
@@ -795,6 +794,7 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
         name: b.name,
         slug: b.slug,
         tagline: b.tagline,
+        logo: b.logo || null,
         sort_order: i,
       }))
     );

@@ -2,8 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export async function POST(req: NextRequest) {
   try {
@@ -45,7 +44,9 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Fetch REAL prices from Supabase
-    const productIds = items.map((i: any) => Number(i.id)).filter(Boolean);
+    const productIds = items
+      .map((i: any) => Number(i.id))
+      .filter((n: number) => Number.isFinite(n) && n > 0);
 
     const { data: dbProducts, error: dbError } = await supabaseAdmin
       .from("products")
@@ -138,21 +139,38 @@ export async function POST(req: NextRequest) {
           }
 
           if (discountAmountCents > 0) {
-            const stripeCoupon = await stripe.coupons.create({
-              amount_off: discountAmountCents,
-              currency: "usd",
-              duration: "once",
-              name: coupon.code,
-            });
+            // Try to reuse an existing Stripe coupon (idempotent by name)
+            const reusableName = `GW-${coupon.code}-${discountAmountCents}`;
+            let stripeCouponId: string | null = null;
 
-            discounts = [{ coupon: stripeCoupon.id }];
+            try {
+              const list = await stripe.coupons.list({ limit: 100 });
+              const existing = list.data.find(
+                (c) => c.name === reusableName && c.valid
+              );
+              if (existing) stripeCouponId = existing.id;
+            } catch (err) {
+              console.warn("[checkout] coupons.list failed, will create new");
+            }
+
+            if (!stripeCouponId) {
+              const created = await stripe.coupons.create({
+                amount_off: discountAmountCents,
+                currency: "usd",
+                duration: "once",
+                name: reusableName,
+              });
+              stripeCouponId = created.id;
+            }
+
+            discounts = [{ coupon: stripeCouponId }];
             appliedCouponCode = coupon.code;
           }
         }
       }
     }
 
-    // 7. Truncate metadata
+    // 7. Truncate metadata (Stripe limit ~500 chars per value)
     const truncate = (s: string, n = 480) => (s || "").slice(0, n);
 
     // 8. Build success URL with user_id
@@ -163,7 +181,7 @@ export async function POST(req: NextRequest) {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items,
-      discounts,
+      discounts: discounts.length > 0 ? discounts : undefined,
       customer_email: customerInfo.email || undefined,
       metadata: {
         customerName: truncate(customerInfo.name || ""),

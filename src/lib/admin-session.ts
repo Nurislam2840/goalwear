@@ -5,10 +5,6 @@ import crypto from "crypto";
 const COOKIE_NAME = "goalwear-admin-session";
 const SESSION_DURATION = 60 * 60; // 1 hour in seconds
 
-// In-memory session store (development-এর জন্য)
-// Production-এ Supabase/Redis ব্যবহার করো
-const validSessions = new Map<string, { expiry: number }>();
-
 function getSecret(): string {
   const secret = process.env.ADMIN_SESSION_SECRET;
   if (!secret || secret.length < 32) {
@@ -18,7 +14,7 @@ function getSecret(): string {
 }
 
 /**
- * Create a new session token
+ * Create a new session token (stateless, HMAC-signed)
  */
 export function createSessionToken(): string {
   const randomBytes = crypto.randomBytes(32).toString("hex");
@@ -30,19 +26,11 @@ export function createSessionToken(): string {
     .update(data)
     .digest("hex");
 
-  const token = `${data}.${signature}`;
-  validSessions.set(token, { expiry });
-
-  // Cleanup expired sessions
-  for (const [key, value] of validSessions.entries()) {
-    if (value.expiry < Date.now()) validSessions.delete(key);
-  }
-
-  return token;
+  return `${data}.${signature}`;
 }
 
 /**
- * Verify a session token
+ * Verify a session token (stateless — works across serverless instances)
  */
 export function verifySessionToken(token: string): boolean {
   try {
@@ -52,10 +40,7 @@ export function verifySessionToken(token: string): boolean {
     const [randomBytes, expiryStr, signature] = parts;
     const expiry = Number(expiryStr);
 
-    if (Date.now() > expiry) {
-      validSessions.delete(token);
-      return false;
-    }
+    if (!Number.isFinite(expiry) || Date.now() > expiry) return false;
 
     const data = `${randomBytes}.${expiryStr}`;
     const expectedSignature = crypto
@@ -63,9 +48,13 @@ export function verifySessionToken(token: string): boolean {
       .update(data)
       .digest("hex");
 
-    if (signature !== expectedSignature) return false;
+    // timing-safe compare
+    const sigBuf = Buffer.from(signature, "hex");
+    const expBuf = Buffer.from(expectedSignature, "hex");
 
-    return validSessions.has(token);
+    if (sigBuf.length !== expBuf.length) return false;
+
+    return crypto.timingSafeEqual(sigBuf, expBuf);
   } catch {
     return false;
   }
@@ -98,8 +87,6 @@ export async function getAdminSessionToken(): Promise<string | null> {
  */
 export async function clearAdminSessionCookie() {
   const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value;
-  if (token) validSessions.delete(token);
   cookieStore.delete(COOKIE_NAME);
 }
 

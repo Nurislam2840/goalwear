@@ -91,10 +91,10 @@ export interface Product {
   id: number;
   name: string;
   category: string;
-  subCategory: "Country" | "Club" | "Boot";
+  subCategory: string; // 👈 loose type — any string allowed
   brand: string;
   team: string;
-  type: "Home" | "Away" | "Boot";
+  type: string;
   price: number;
   image_url: string;
   images: string[];

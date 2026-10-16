@@ -3,32 +3,25 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { cookies } from "next/headers";
 
-// Helper: get user id from cookie OR header
-async function getUserId(req: NextRequest): Promise<string | null> {
-  // 1. Try header first (sent from client)
-  const headerUserId = req.headers.get("x-user-id");
-  if (headerUserId) {
-    console.log("[orders API] User ID from header:", headerUserId);
-    return headerUserId;
-  }
-
-  // 2. Try cookie fallback
+// Helper: get user id from SECURE httpOnly-cookie-adjacent cookie only
+async function getUserId(_req: NextRequest): Promise<string | null> {
   const cookieStore = await cookies();
   const userCookie = cookieStore.get("goalwear-user")?.value;
 
-  if (userCookie) {
-    try {
-      const parsed = JSON.parse(userCookie);
-      if (parsed && parsed.id) {
-        console.log("[orders API] User ID from cookie:", parsed.id);
-        return parsed.id;
-      }
-    } catch {
-      // ignore
-    }
+  if (!userCookie) {
+    console.log("[orders API] ❌ No user cookie");
+    return null;
   }
 
-  console.log("[orders API] ❌ No user ID found");
+  try {
+    const parsed = JSON.parse(userCookie);
+    if (parsed && typeof parsed.id === "string" && parsed.id.length > 0) {
+      return parsed.id;
+    }
+  } catch {
+    // ignore malformed cookie
+  }
+
   return null;
 }
 
@@ -98,6 +91,60 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 🔒 Recompute total server-side from DB prices
+    const productIds = items
+      .map((i: any) => Number(i.id))
+      .filter((n: number) => Number.isFinite(n) && n > 0);
+
+    const { data: dbProducts, error: dbError } = await supabaseAdmin
+      .from("products")
+      .select("id, price, stock")
+      .in("id", productIds);
+
+    if (dbError) {
+      console.error("[POST orders] DB fetch error:", dbError.message);
+      return NextResponse.json(
+        { error: "Failed to verify products" },
+        { status: 500 }
+      );
+    }
+
+    let verifiedTotal = 0;
+    const verifiedItems: any[] = [];
+
+    for (const item of items) {
+      const product = (dbProducts || []).find(
+        (p) => p.id === Number(item.id)
+      );
+      if (!product) {
+        return NextResponse.json(
+          { error: `Product ${item.id} not found` },
+          { status: 400 }
+        );
+      }
+
+      const qty = Math.max(1, Math.min(Number(item.quantity) || 1, 10));
+      const price = Number(product.price);
+
+      verifiedTotal += price * qty;
+      verifiedItems.push({
+        id: product.id,
+        name: item.name,
+        price,
+        image_url: item.image_url,
+        quantity: qty,
+      });
+    }
+
+    verifiedTotal = Math.round(verifiedTotal * 100) / 100;
+
+    // Optionally accept client total only if it matches (for logging)
+    if (typeof total === "number" && Math.abs(total - verifiedTotal) > 0.01) {
+      console.warn(
+        `[POST orders] ⚠️ Client total ${total} != server total ${verifiedTotal}`
+      );
+    }
+
     const orderId = `GW-${Date.now().toString().slice(-8)}`;
 
     const { data, error } = await supabaseAdmin
@@ -105,8 +152,8 @@ export async function POST(req: NextRequest) {
       .insert({
         id: orderId,
         user_id: userId,
-        items,
-        total: Number(total) || 0,
+        items: verifiedItems,
+        total: verifiedTotal,
         status: "Processing",
         customer_info: customerInfo,
         payment_method: paymentMethod || "Cash on Delivery",

@@ -1,16 +1,32 @@
 // src/app/admin/products/page.tsx
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSiteData } from "@/context/SiteDataContext";
 import ProductFormModal from "@/components/admin/ProductFormModal";
 import { Product } from "@/data/products";
 import {
-  Plus, Search, Edit3, Trash2, Package, X
+  Plus,
+  Search,
+  Edit3,
+  Trash2,
+  Package,
+  X,
+  CheckCircle2,
+  AlertCircle,
+  Info,
 } from "lucide-react";
 
 const getCategoryLabel = (category: string) =>
   category === "Football Shoes" ? "Boots" : category;
+
+type ToastType = "success" | "error" | "info";
+
+interface Toast {
+  id: number;
+  message: string;
+  type: ToastType;
+}
 
 export default function AdminProductsPage() {
   const { products, updateProducts } = useSiteData();
@@ -20,6 +36,21 @@ export default function AdminProductsPage() {
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [deleteConfirm, setDeleteConfirm] = useState<Product | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  // 👇 Local toasts
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const showToast = (message: string, type: ToastType = "success") => {
+    const id = Date.now() + Math.random();
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 3500);
+  };
+
+  const removeToast = (id: number) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
 
   const existingIds = useMemo(() => products.map((p) => p.id), [products]);
 
@@ -70,12 +101,10 @@ export default function AdminProductsPage() {
       let newProducts: Product[];
 
       if (editingProduct) {
-        // Update existing
         newProducts = products.map((p) =>
           p.id === product.id ? product : p
         );
       } else {
-        // Add new
         newProducts = [product, ...products];
       }
 
@@ -84,8 +113,12 @@ export default function AdminProductsPage() {
       console.log("[handleSave] ✅ Save completed");
       console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
-      // Success alert (debugging)
-      alert(`✅ Product "${product.name}" saved to Supabase!`);
+      showToast(
+        editingProduct
+          ? `"${product.name}" updated successfully`
+          : `"${product.name}" added successfully`,
+        "success"
+      );
 
       setIsModalOpen(false);
       setEditingProduct(null);
@@ -93,8 +126,9 @@ export default function AdminProductsPage() {
       console.error("[handleSave] ❌ Save FAILED:", err.message);
       console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
-      alert(
-        `❌ Failed to save product!\n\nReason: ${err.message}\n\nCheck browser console (F12) for details.`
+      showToast(
+        err.message || "Failed to save product. Check console for details.",
+        "error"
       );
     } finally {
       setIsSaving(false);
@@ -106,7 +140,11 @@ export default function AdminProductsPage() {
   // ============================================
   const handleDelete = async (product: Product) => {
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    console.log("[handleDelete] 🗑️  Deleting product:", product.id, product.name);
+    console.log(
+      "[handleDelete] 🗑️  Deleting product:",
+      product.id,
+      product.name
+    );
 
     try {
       const newProducts = products.filter((p) => p.id !== product.id);
@@ -115,15 +153,31 @@ export default function AdminProductsPage() {
       console.log("[handleDelete] ✅ Delete completed");
       console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
+      showToast(`"${product.name}" deleted`, "success");
       setDeleteConfirm(null);
     } catch (err: any) {
       console.error("[handleDelete] ❌ Delete FAILED:", err.message);
       console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
-      alert(
-        `❌ Failed to delete product!\n\nReason: ${err.message}\n\nCheck browser console (F12) for details.`
+      showToast(
+        err.message || "Failed to delete product. Check console for details.",
+        "error"
       );
     }
+  };
+
+  const getToastIcon = (type: ToastType) => {
+    if (type === "success")
+      return <CheckCircle2 className="w-5 h-5 text-black" strokeWidth={2.5} />;
+    if (type === "error")
+      return <AlertCircle className="w-5 h-5 text-white" strokeWidth={2.5} />;
+    return <Info className="w-5 h-5 text-white" strokeWidth={2.5} />;
+  };
+
+  const getToastBg = (type: ToastType) => {
+    if (type === "success") return "bg-brand-green text-black";
+    if (type === "error") return "bg-red-500 text-white";
+    return "bg-blue-500 text-white";
   };
 
   return (
@@ -447,6 +501,40 @@ export default function AdminProductsPage() {
           </div>
         </div>
       )}
+
+      {/* ============================================
+          THEMED TOAST NOTIFICATIONS
+          ============================================ */}
+      <div className="fixed top-20 right-4 z-[300] flex flex-col gap-2 pointer-events-none">
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl animate-slide-up min-w-[280px] max-w-sm border-2 ${
+              toast.type === "success"
+                ? "bg-brand-green border-brand-green/50 text-black"
+                : toast.type === "error"
+                ? "bg-red-500 border-red-600/50 text-white"
+                : "bg-blue-500 border-blue-600/50 text-white"
+            }`}
+          >
+            <div className="flex-shrink-0">{getToastIcon(toast.type)}</div>
+            <p className="text-sm font-bold flex-1 leading-snug">
+              {toast.message}
+            </p>
+            <button
+              onClick={() => removeToast(toast.id)}
+              className={`p-1 rounded-full transition-colors flex-shrink-0 ${
+                toast.type === "success"
+                  ? "hover:bg-black/10"
+                  : "hover:bg-white/20"
+              }`}
+              aria-label="Dismiss"
+            >
+              <X className="w-3.5 h-3.5" strokeWidth={3} />
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

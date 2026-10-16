@@ -41,6 +41,10 @@ const nextConfig: NextConfig = {
         hostname: "upload.wikimedia.org",
       },
       {
+      	protocol: "https",
+      	hostname: "i.postimg.cc",
+      },
+      {
         protocol: "https",
         hostname: "via.placeholder.com",
       },

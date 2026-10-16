@@ -1,7 +1,7 @@
 // src/components/admin/ProductFormModal.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   X,
   Plus,
@@ -11,11 +11,11 @@ import {
   Check,
   Sparkles,
   Award,
+  ChevronDown,
 } from "lucide-react";
 import {
   Product,
   ColorOption,
-  DEFAULT_COLORS,
   COLOR_PRESETS,
   getHexFromColorName,
 } from "@/data/products";
@@ -31,11 +31,23 @@ interface ProductFormModalProps {
   existingIds: number[];
 }
 
-const SUB_CATEGORIES = ["Country", "Club", "Boot"];
-const BRANDS = [
-  "Nike", "Adidas", "Puma", "Reebok", "New Balance",
-  "Under Armour", "Mizuno", "Asics", "Umbro", "Diadora", "Other",
+const SUB_CATEGORY_PRESETS = ["Country", "Club", "Boot"];
+
+// 👇 Fallback list — only used when admin Brands list is empty
+const FALLBACK_BRANDS = [
+  "Nike",
+  "Adidas",
+  "Puma",
+  "Reebok",
+  "New Balance",
+  "Under Armour",
+  "Mizuno",
+  "Asics",
+  "Umbro",
+  "Diadora",
+  "Other",
 ];
+
 const TYPE_OPTIONS = ["Home", "Away", "Boot"];
 const JERSEY_SIZES = ["S", "M", "L", "XL", "XXL"];
 const BOOT_SIZES = ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10", "UK 11"];
@@ -57,18 +69,38 @@ export default function ProductFormModal({
   product,
   existingIds,
 }: ProductFormModalProps) {
-  const { categories: siteCategories } = useSiteData();
+  const { categories: siteCategories, brands: siteBrands } = useSiteData();
+
   const CATEGORIES =
     siteCategories.length > 0
       ? siteCategories.map((c) => c.name)
       : ["Jerseys", "Football Shoes"];
+
+  // 👇 Use admin brands if available, else fallback
+  const brandNames = useMemo(() => {
+    if (siteBrands && siteBrands.length > 0) {
+      return siteBrands.map((b) => b.name);
+    }
+    return FALLBACK_BRANDS;
+  }, [siteBrands]);
+
+  // For logo lookup
+  const brandByName = useMemo(() => {
+    const map = new Map<string, { logo?: string; slug: string }>();
+    (siteBrands || []).forEach((b) => {
+      map.set(b.name.toLowerCase(), { logo: b.logo, slug: b.slug });
+    });
+    return map;
+  }, [siteBrands]);
+
+  const [isBrandDropdownOpen, setIsBrandDropdownOpen] = useState(false);
 
   const emptyProduct: Product = {
     id: 0,
     name: "",
     category: CATEGORIES[0] || "Jerseys",
     subCategory: "Club",
-    brand: "Nike",
+    brand: brandNames[0] || "Nike",
     team: "",
     type: "Home",
     price: 0,
@@ -80,7 +112,7 @@ export default function ProductFormModal({
     sizes: ["S", "M", "L", "XL"],
     reviews: [],
     stock: 50,
-    colors: [...DEFAULT_COLORS],
+    colors: [],
     season: "",
     highlights: [],
     specifications: [],
@@ -109,6 +141,20 @@ export default function ProductFormModal({
   const [sizesInput, setSizesInput] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    if (e.target.value === "0") {
+      e.target.value = "";
+    }
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    if (e.target.value === "" || e.target.value === "-") {
+      const name = e.target.name;
+      setFormData((prev) => ({ ...prev, [name]: 0 }));
+      e.target.value = "0";
+    }
+  };
+
   useEffect(() => {
     if (isOpen) {
       if (product) {
@@ -126,9 +172,7 @@ export default function ProductFormModal({
           images,
           image_url: images[0] || product.image_url || "",
           colors:
-            product.colors && product.colors.length > 0
-              ? product.colors
-              : [...DEFAULT_COLORS],
+            product.colors && product.colors.length > 0 ? product.colors : [],
           highlights: product.highlights || [],
           specifications: product.specifications || [],
           customFields: product.customFields || [],
@@ -150,14 +194,30 @@ export default function ProductFormModal({
     };
   }, [isOpen]);
 
-  const isJersey = formData.subCategory === "Club" || formData.subCategory === "Country";
-  const isBoot = formData.subCategory === "Boot";
+  const subLower = (formData.subCategory || "").toLowerCase();
+  const isJersey =
+    subLower === "club" ||
+    subLower === "country" ||
+    subLower.includes("jersey") ||
+    subLower.includes("kit");
+  const isBoot =
+    subLower === "boot" ||
+    subLower.includes("boot") ||
+    subLower.includes("shoe");
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value, type } = e.target;
-    const isNumeric = ["price", "rating", "reviews_count", "stock", "playerNumber", "weightGrams", "releaseYear"].includes(name);
+    const isNumeric = [
+      "price",
+      "rating",
+      "reviews_count",
+      "stock",
+      "playerNumber",
+      "weightGrams",
+      "releaseYear",
+    ].includes(name);
     const isCheckbox = type === "checkbox";
 
     setFormData((prev) => ({
@@ -178,9 +238,11 @@ export default function ProductFormModal({
     }));
   };
 
-  // Highlights
   const handleAddHighlight = () => {
-    setFormData({ ...formData, highlights: [...(formData.highlights || []), ""] });
+    setFormData({
+      ...formData,
+      highlights: [...(formData.highlights || []), ""],
+    });
   };
   const handleUpdateHighlight = (index: number, value: string) => {
     const updated = [...(formData.highlights || [])];
@@ -194,14 +256,20 @@ export default function ProductFormModal({
     });
   };
 
-  // Specifications
   const handleAddSpec = () => {
     setFormData({
       ...formData,
-      specifications: [...(formData.specifications || []), { label: "", value: "" }],
+      specifications: [
+        ...(formData.specifications || []),
+        { label: "", value: "" },
+      ],
     });
   };
-  const handleUpdateSpec = (index: number, field: "label" | "value", value: string) => {
+  const handleUpdateSpec = (
+    index: number,
+    field: "label" | "value",
+    value: string
+  ) => {
     const updated = [...(formData.specifications || [])];
     updated[index] = { ...updated[index], [field]: value };
     setFormData({ ...formData, specifications: updated });
@@ -209,18 +277,23 @@ export default function ProductFormModal({
   const handleRemoveSpec = (index: number) => {
     setFormData({
       ...formData,
-      specifications: (formData.specifications || []).filter((_, i) => i !== index),
+      specifications: (formData.specifications || []).filter(
+        (_, i) => i !== index
+      ),
     });
   };
 
-  // Custom Fields
   const handleAddCustomField = () => {
     setFormData({
       ...formData,
       customFields: [...(formData.customFields || []), { label: "", value: "" }],
     });
   };
-  const handleUpdateCustomField = (index: number, field: "label" | "value", value: string) => {
+  const handleUpdateCustomField = (
+    index: number,
+    field: "label" | "value",
+    value: string
+  ) => {
     const updated = [...(formData.customFields || [])];
     updated[index] = { ...updated[index], [field]: value };
     setFormData({ ...formData, customFields: updated });
@@ -228,27 +301,35 @@ export default function ProductFormModal({
   const handleRemoveCustomField = (index: number) => {
     setFormData({
       ...formData,
-      customFields: (formData.customFields || []).filter((_, i) => i !== index),
+      customFields: (formData.customFields || []).filter(
+        (_, i) => i !== index
+      ),
     });
   };
 
-  // Colors
   const handleAddColor = () => {
     setFormData({
       ...formData,
-      colors: [...formData.colors, { name: "New Color", hex: "#CCFF00" }],
+      colors: [
+        ...(formData.colors || []),
+        { name: "New Color", hex: "#CCFF00" },
+      ],
     });
   };
   const handleRemoveColor = (index: number) => {
     setFormData({
       ...formData,
-      colors: formData.colors.filter((_, i) => i !== index),
+      colors: (formData.colors || []).filter((_, i) => i !== index),
     });
   };
-  const handleColorChange = (index: number, field: "name" | "hex", value: string) => {
+  const handleColorChange = (
+    index: number,
+    field: "name" | "hex",
+    value: string
+  ) => {
     setFormData({
       ...formData,
-      colors: formData.colors.map((c, i) => {
+      colors: (formData.colors || []).map((c, i) => {
         if (i !== index) return c;
         if (field === "name") {
           const autoHex = getHexFromColorName(value);
@@ -284,11 +365,12 @@ export default function ProductFormModal({
     const finalProduct: Product = {
       ...formData,
       id: newId,
+      subCategory: (formData.subCategory || "").trim() || "Other",
       sizes: parsedSizes.length > 0 ? parsedSizes : ["S", "M", "L", "XL"],
       image_url: mainImage,
       images: formData.images.length > 0 ? formData.images : [mainImage],
       stock: formData.stock ?? 0,
-      colors: formData.colors.length > 0 ? formData.colors : [...DEFAULT_COLORS],
+      colors: formData.colors || [],
       highlights: (formData.highlights || []).filter((h) => h.trim() !== ""),
       specifications: (formData.specifications || []).filter(
         (s) => s.label.trim() !== "" && s.value.trim() !== ""
@@ -305,6 +387,11 @@ export default function ProductFormModal({
   };
 
   if (!isOpen) return null;
+
+  const colors = formData.colors || [];
+  const currentBrandData = brandByName.get(
+    (formData.brand || "").toLowerCase()
+  );
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
@@ -361,7 +448,9 @@ export default function ProductFormModal({
               </label>
               <ThemedSelect
                 value={formData.category}
-                onChange={(value) => setFormData({ ...formData, category: value })}
+                onChange={(value) =>
+                  setFormData({ ...formData, category: value })
+                }
                 options={CATEGORIES}
                 fullWidth
               />
@@ -370,23 +459,155 @@ export default function ProductFormModal({
               <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                 Sub Category
               </label>
-              <ThemedSelect
+              <input
+                type="text"
+                name="subCategory"
                 value={formData.subCategory}
-                onChange={(value) => setFormData({ ...formData, subCategory: value as any })}
-                options={SUB_CATEGORIES}
-                fullWidth
+                onChange={handleChange}
+                placeholder="e.g. Club, Country, Training..."
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-brand-dark border border-gray-200 dark:border-brand-border rounded-xl text-sm dark:text-white outline-none focus:border-brand-green"
               />
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {SUB_CATEGORY_PRESETS.map((sub) => (
+                  <button
+                    key={sub}
+                    type="button"
+                    onClick={() =>
+                      setFormData({ ...formData, subCategory: sub })
+                    }
+                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full transition-colors ${
+                      formData.subCategory === sub
+                        ? "bg-brand-green text-black"
+                        : "bg-gray-100 dark:bg-brand-dark text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-brand-border hover:border-brand-green"
+                    }`}
+                  >
+                    {sub}
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="col-span-2 md:col-span-1">
               <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                 Brand *
               </label>
-              <ThemedSelect
-                value={formData.brand}
-                onChange={(value) => setFormData({ ...formData, brand: value })}
-                options={BRANDS}
-                fullWidth
-              />
+
+              {/* 👇 Custom brand dropdown with logos */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsBrandDropdownOpen(!isBrandDropdownOpen)}
+                  className="w-full flex items-center justify-between gap-2 px-3 py-3 bg-gray-50 dark:bg-brand-dark border border-gray-200 dark:border-brand-border rounded-xl text-sm dark:text-white outline-none focus:border-brand-green"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    {currentBrandData?.logo ? (
+                      <div className="w-6 h-6 bg-white dark:bg-brand-card rounded flex items-center justify-center flex-shrink-0 border border-gray-100 dark:border-brand-border">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={currentBrandData.logo}
+                          alt={formData.brand}
+                          className="max-h-full max-w-full object-contain"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display =
+                              "none";
+                          }}
+                        />
+                      </div>
+                    ) : null}
+                    <span className="font-semibold truncate">
+                      {formData.brand || "Select brand"}
+                    </span>
+                  </div>
+                  <ChevronDown
+                    className={`w-4 h-4 text-gray-500 flex-shrink-0 transition-transform ${
+                      isBrandDropdownOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {isBrandDropdownOpen && (
+                  <>
+                    {/* Mobile overlay */}
+                    <div
+                      className="fixed inset-0 z-[299] bg-black/20 md:hidden"
+                      onClick={() => setIsBrandDropdownOpen(false)}
+                    ></div>
+
+                    <div className="absolute top-full left-0 right-0 mt-2 z-[300] bg-white dark:bg-brand-card border border-gray-200 dark:border-brand-border rounded-2xl shadow-2xl overflow-hidden animate-slide-up max-h-72 overflow-y-auto">
+                      {brandNames.length === 0 ? (
+                        <div className="p-4 text-xs text-gray-500 dark:text-gray-400 text-center">
+                          No brands. Add brands first in Admin → Brands.
+                        </div>
+                      ) : (
+                        brandNames.map((brandName) => {
+                          const brandInfo = brandByName.get(
+                            brandName.toLowerCase()
+                          );
+                          const isSelected = formData.brand === brandName;
+
+                          return (
+                            <button
+                              key={brandName}
+                              type="button"
+                              onClick={() => {
+                                setFormData({ ...formData, brand: brandName });
+                                setIsBrandDropdownOpen(false);
+                              }}
+                              className={`w-full flex items-center justify-between gap-2 px-4 py-3 text-sm font-semibold text-left transition-colors ${
+                                isSelected
+                                  ? "bg-brand-green text-black"
+                                  : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-brand-dark"
+                              }`}
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                {brandInfo?.logo ? (
+                                  <div className="w-8 h-8 bg-white dark:bg-brand-card rounded flex items-center justify-center flex-shrink-0 border border-gray-100 dark:border-brand-border">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                      src={brandInfo.logo}
+                                      alt={brandName}
+                                      className="max-h-full max-w-full object-contain p-0.5"
+                                      onError={(e) => {
+                                        (
+                                          e.target as HTMLImageElement
+                                        ).style.display = "none";
+                                      }}
+                                    />
+                                  </div>
+                                ) : (
+                                  <div
+                                    className={`w-8 h-8 rounded flex items-center justify-center flex-shrink-0 text-xs font-extrabold ${
+                                      isSelected
+                                        ? "bg-black/10 text-black"
+                                        : "bg-gray-100 dark:bg-brand-dark text-gray-600 dark:text-gray-300"
+                                    }`}
+                                  >
+                                    {brandName.charAt(0)}
+                                  </div>
+                                )}
+                                <span className="truncate">{brandName}</span>
+                              </div>
+                              {isSelected && (
+                                <Check
+                                  className="w-4 h-4 flex-shrink-0"
+                                  strokeWidth={3}
+                                />
+                              )}
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Helper text */}
+              <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1.5">
+                Manage brands in{" "}
+                <span className="font-bold text-brand-green">
+                  Admin → Brands
+                </span>
+              </p>
             </div>
           </div>
 
@@ -411,7 +632,9 @@ export default function ProductFormModal({
               </label>
               <ThemedSelect
                 value={formData.type}
-                onChange={(value) => setFormData({ ...formData, type: value as any })}
+                onChange={(value) =>
+                  setFormData({ ...formData, type: value as any })
+                }
                 options={TYPE_OPTIONS}
                 fullWidth
               />
@@ -447,6 +670,8 @@ export default function ProductFormModal({
                 min="0"
                 value={formData.price}
                 onChange={handleChange}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
                 className="w-full px-4 py-3 bg-gray-50 dark:bg-brand-dark border border-gray-200 dark:border-brand-border rounded-xl text-sm dark:text-white outline-none focus:border-brand-green"
               />
             </div>
@@ -475,6 +700,8 @@ export default function ProductFormModal({
                 min="0"
                 value={formData.reviews_count}
                 onChange={handleChange}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
                 className="w-full px-4 py-3 bg-gray-50 dark:bg-brand-dark border border-gray-200 dark:border-brand-border rounded-xl text-sm dark:text-white outline-none focus:border-brand-green"
               />
             </div>
@@ -489,6 +716,8 @@ export default function ProductFormModal({
                 min="0"
                 value={formData.stock}
                 onChange={handleChange}
+                onFocus={handleFocus}
+                onBlur={handleBlur}
                 className="w-full px-4 py-3 bg-gray-50 dark:bg-brand-dark border border-gray-200 dark:border-brand-border rounded-xl text-sm dark:text-white outline-none focus:border-brand-green"
               />
             </div>
@@ -506,7 +735,10 @@ export default function ProductFormModal({
           {isJersey && (
             <div className="bg-brand-green/5 border-2 border-brand-green/30 rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-4 h-4 text-brand-green" strokeWidth={2.5} />
+                <Sparkles
+                  className="w-4 h-4 text-brand-green"
+                  strokeWidth={2.5}
+                />
                 <h3 className="text-sm font-bold dark:text-white">
                   Jersey Details
                 </h3>
@@ -519,7 +751,9 @@ export default function ProductFormModal({
                   </label>
                   <ThemedSelect
                     value={formData.kitType || "Home"}
-                    onChange={(value) => setFormData({ ...formData, kitType: value as any })}
+                    onChange={(value) =>
+                      setFormData({ ...formData, kitType: value as any })
+                    }
                     options={KIT_TYPE_OPTIONS}
                     fullWidth
                   />
@@ -564,6 +798,8 @@ export default function ProductFormModal({
                     max="99"
                     value={formData.playerNumber || ""}
                     onChange={handleChange}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
                     placeholder="9"
                     className="w-full px-4 py-3 bg-white dark:bg-brand-dark border border-gray-200 dark:border-brand-border rounded-xl text-sm dark:text-white outline-none focus:border-brand-green"
                   />
@@ -577,7 +813,9 @@ export default function ProductFormModal({
                   </label>
                   <ThemedSelect
                     value={formData.sleeveType || "Short Sleeve"}
-                    onChange={(value) => setFormData({ ...formData, sleeveType: value as any })}
+                    onChange={(value) =>
+                      setFormData({ ...formData, sleeveType: value as any })
+                    }
                     options={SLEEVE_OPTIONS}
                     fullWidth
                   />
@@ -588,7 +826,9 @@ export default function ProductFormModal({
                   </label>
                   <ThemedSelect
                     value={formData.collarType || "Crew Neck"}
-                    onChange={(value) => setFormData({ ...formData, collarType: value as any })}
+                    onChange={(value) =>
+                      setFormData({ ...formData, collarType: value as any })
+                    }
                     options={COLLAR_OPTIONS}
                     fullWidth
                   />
@@ -599,7 +839,9 @@ export default function ProductFormModal({
                   </label>
                   <ThemedSelect
                     value={formData.fitType || "Regular"}
-                    onChange={(value) => setFormData({ ...formData, fitType: value as any })}
+                    onChange={(value) =>
+                      setFormData({ ...formData, fitType: value as any })
+                    }
                     options={FIT_OPTIONS}
                     fullWidth
                   />
@@ -638,7 +880,9 @@ export default function ProductFormModal({
                   </label>
                   <ThemedSelect
                     value={formData.surface || "FG"}
-                    onChange={(value) => setFormData({ ...formData, surface: value as any })}
+                    onChange={(value) =>
+                      setFormData({ ...formData, surface: value as any })
+                    }
                     options={SURFACE_OPTIONS}
                     fullWidth
                   />
@@ -649,7 +893,9 @@ export default function ProductFormModal({
                   </label>
                   <ThemedSelect
                     value={formData.playStyle || "Speed"}
-                    onChange={(value) => setFormData({ ...formData, playStyle: value as any })}
+                    onChange={(value) =>
+                      setFormData({ ...formData, playStyle: value as any })
+                    }
                     options={PLAY_STYLE_OPTIONS}
                     fullWidth
                   />
@@ -660,7 +906,9 @@ export default function ProductFormModal({
                   </label>
                   <ThemedSelect
                     value={formData.bootHeight || "Low"}
-                    onChange={(value) => setFormData({ ...formData, bootHeight: value as any })}
+                    onChange={(value) =>
+                      setFormData({ ...formData, bootHeight: value as any })
+                    }
                     options={BOOT_HEIGHT_OPTIONS}
                     fullWidth
                   />
@@ -674,7 +922,9 @@ export default function ProductFormModal({
                   </label>
                   <ThemedSelect
                     value={formData.closureType || "Lace-up"}
-                    onChange={(value) => setFormData({ ...formData, closureType: value as any })}
+                    onChange={(value) =>
+                      setFormData({ ...formData, closureType: value as any })
+                    }
                     options={CLOSURE_OPTIONS}
                     fullWidth
                   />
@@ -705,6 +955,8 @@ export default function ProductFormModal({
                     min="0"
                     value={formData.weightGrams || ""}
                     onChange={handleChange}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
                     placeholder="195"
                     className="w-full px-4 py-3 bg-white dark:bg-brand-dark border border-gray-200 dark:border-brand-border rounded-xl text-sm dark:text-white outline-none focus:border-brand-green"
                   />
@@ -720,6 +972,8 @@ export default function ProductFormModal({
                     max="2100"
                     value={formData.releaseYear || ""}
                     onChange={handleChange}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
                     placeholder="2025"
                     className="w-full px-4 py-3 bg-white dark:bg-brand-dark border border-gray-200 dark:border-brand-border rounded-xl text-sm dark:text-white outline-none focus:border-brand-green"
                   />
@@ -784,7 +1038,9 @@ export default function ProductFormModal({
                     <input
                       type="text"
                       value={h}
-                      onChange={(e) => handleUpdateHighlight(idx, e.target.value)}
+                      onChange={(e) =>
+                        handleUpdateHighlight(idx, e.target.value)
+                      }
                       placeholder="Premium breathable fabric"
                       className="flex-1 min-w-0 px-3 py-2 bg-white dark:bg-brand-card border border-gray-200 dark:border-brand-border rounded-lg text-xs dark:text-white outline-none focus:border-brand-green"
                     />
@@ -828,14 +1084,18 @@ export default function ProductFormModal({
                     <input
                       type="text"
                       value={spec.label}
-                      onChange={(e) => handleUpdateSpec(idx, "label", e.target.value)}
+                      onChange={(e) =>
+                        handleUpdateSpec(idx, "label", e.target.value)
+                      }
                       placeholder="Material"
                       className="w-[40%] px-3 py-2 bg-white dark:bg-brand-card border border-gray-200 dark:border-brand-border rounded-lg text-xs dark:text-white outline-none focus:border-brand-green"
                     />
                     <input
                       type="text"
                       value={spec.value}
-                      onChange={(e) => handleUpdateSpec(idx, "value", e.target.value)}
+                      onChange={(e) =>
+                        handleUpdateSpec(idx, "value", e.target.value)
+                      }
                       placeholder="100% Polyester"
                       className="flex-1 min-w-0 px-3 py-2 bg-white dark:bg-brand-card border border-gray-200 dark:border-brand-border rounded-lg text-xs dark:text-white outline-none focus:border-brand-green"
                     />
@@ -879,14 +1139,18 @@ export default function ProductFormModal({
                     <input
                       type="text"
                       value={cf.label}
-                      onChange={(e) => handleUpdateCustomField(idx, "label", e.target.value)}
+                      onChange={(e) =>
+                        handleUpdateCustomField(idx, "label", e.target.value)
+                      }
                       placeholder="Warranty"
                       className="w-[40%] px-3 py-2 bg-white dark:bg-brand-card border border-gray-200 dark:border-brand-border rounded-lg text-xs dark:text-white outline-none focus:border-brand-green"
                     />
                     <input
                       type="text"
                       value={cf.value}
-                      onChange={(e) => handleUpdateCustomField(idx, "value", e.target.value)}
+                      onChange={(e) =>
+                        handleUpdateCustomField(idx, "value", e.target.value)
+                      }
                       placeholder="6 months"
                       className="flex-1 min-w-0 px-3 py-2 bg-white dark:bg-brand-card border border-gray-200 dark:border-brand-border rounded-lg text-xs dark:text-white outline-none focus:border-brand-green"
                     />
@@ -903,16 +1167,19 @@ export default function ProductFormModal({
             )}
           </div>
 
-          {/* COLOR OPTIONS */}
+          {/* COLOR OPTIONS — OPTIONAL */}
           <div className="bg-gray-50 dark:bg-brand-dark rounded-2xl p-4 border border-gray-200 dark:border-brand-border">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <Palette className="w-4 h-4 text-brand-green" strokeWidth={2.5} />
+                <Palette
+                  className="w-4 h-4 text-brand-green"
+                  strokeWidth={2.5}
+                />
                 <h3 className="text-sm font-bold dark:text-white">
                   Color Options
                 </h3>
                 <span className="text-[10px] text-gray-500 dark:text-gray-400">
-                  ({formData.colors.length})
+                  ({colors.length}) — Optional
                 </span>
               </div>
               <button
@@ -923,6 +1190,13 @@ export default function ProductFormModal({
                 <Plus className="w-3 h-3" strokeWidth={2.5} />
                 Add Color
               </button>
+            </div>
+
+            <div className="mb-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900/30 rounded-xl p-2.5">
+              <p className="text-[10px] text-blue-700 dark:text-blue-400 font-semibold">
+                💡 Colors are optional. For jerseys with a mixed design
+                (multi-color stripes, patterns), you can leave this empty.
+              </p>
             </div>
 
             <div className="mb-3">
@@ -952,13 +1226,13 @@ export default function ProductFormModal({
               </div>
             </div>
 
-            {formData.colors.length === 0 ? (
+            {colors.length === 0 ? (
               <p className="text-xs text-gray-500 dark:text-gray-400 text-center py-4">
-                No colors added
+                No colors added — this product will have no color picker
               </p>
             ) : (
               <div className="space-y-2">
-                {formData.colors.map((color, index) => (
+                {colors.map((color, index) => (
                   <div
                     key={index}
                     className="flex items-center gap-2 bg-white dark:bg-brand-card rounded-xl p-2 border border-gray-100 dark:border-brand-border"
@@ -966,21 +1240,27 @@ export default function ProductFormModal({
                     <input
                       type="color"
                       value={color.hex}
-                      onChange={(e) => handleColorChange(index, "hex", e.target.value)}
+                      onChange={(e) =>
+                        handleColorChange(index, "hex", e.target.value)
+                      }
                       className="w-9 h-9 rounded-lg cursor-pointer border-2 border-gray-200 dark:border-brand-border"
                       style={{ padding: 0 }}
                     />
                     <input
                       type="text"
                       value={color.name}
-                      onChange={(e) => handleColorChange(index, "name", e.target.value)}
+                      onChange={(e) =>
+                        handleColorChange(index, "name", e.target.value)
+                      }
                       placeholder="Red, Blue..."
                       className="flex-1 min-w-0 px-3 py-2 bg-gray-50 dark:bg-brand-dark border border-gray-200 dark:border-brand-border rounded-lg text-xs dark:text-white outline-none focus:border-brand-green"
                     />
                     <input
                       type="text"
                       value={color.hex}
-                      onChange={(e) => handleColorChange(index, "hex", e.target.value)}
+                      onChange={(e) =>
+                        handleColorChange(index, "hex", e.target.value)
+                      }
                       placeholder="#000000"
                       className="w-20 flex-shrink-0 px-2 py-2 bg-gray-50 dark:bg-brand-dark border border-gray-200 dark:border-brand-border rounded-lg text-[10px] dark:text-white outline-none focus:border-brand-green font-mono uppercase"
                     />

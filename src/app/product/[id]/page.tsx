@@ -12,7 +12,6 @@ import { useSiteData } from "@/context/SiteDataContext";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { useRecentlyViewed } from "@/context/RecentlyViewedContext";
-import { DEFAULT_COLORS } from "@/data/products";
 import {
   ArrowLeft,
   Star,
@@ -33,7 +32,7 @@ import { useParams, useRouter } from "next/navigation";
 export default function ProductDetailsPage() {
   const params = useParams();
   const router = useRouter();
-  const { products } = useSiteData();
+  const { products, brands } = useSiteData();
   const { addToCart } = useCart();
   const { showToast } = useToast();
   const { addToRecentlyViewed } = useRecentlyViewed();
@@ -90,9 +89,7 @@ export default function ProductDetailsPage() {
   const isOutOfStock = stock <= 0;
 
   const productColors =
-    product.colors && product.colors.length > 0
-      ? product.colors
-      : DEFAULT_COLORS;
+    product.colors && product.colors.length > 0 ? product.colors : [];
 
   const handleAddToCart = () => {
     if (isOutOfStock) {
@@ -145,9 +142,12 @@ export default function ProductDetailsPage() {
     product.subCategory === "Club" || product.subCategory === "Country";
   const isBoot = product.subCategory === "Boot";
 
-  // ============================================
-  // Find sibling variants (same team + season)
-  // ============================================
+  // 👇 Find brand from admin brands list (matches by name)
+  const brandData = brands.find(
+    (b) => b.name.toLowerCase() === (product.brand || "").toLowerCase()
+  );
+
+  // Sibling variants (same team + season)
   const siblingVariants = product.team
     ? products.filter(
         (p) =>
@@ -170,9 +170,6 @@ export default function ProductDetailsPage() {
   const showVariants =
     sortedVariants.length > 1 && product.team && isJersey;
 
-  // ============================================
-  // Handle variant switch (smooth)
-  // ============================================
   const handleVariantSwitch = (variantId: number) => {
     if (variantId === product.id) return;
 
@@ -193,12 +190,9 @@ export default function ProductDetailsPage() {
           <ArrowLeft className="w-4 h-4" /> Back
         </button>
 
-        {/* ============================================
-            VARIANT SELECTOR (Home / Away / Third / GK)
-            ============================================ */}
+        {/* VARIANT SELECTOR */}
         {showVariants && (
           <div className="mb-6 bg-gradient-to-br from-gray-50 to-white dark:from-brand-card dark:to-brand-dark rounded-2xl border border-gray-100 dark:border-brand-border p-4 relative overflow-hidden">
-            {/* Loading overlay during transition */}
             {isPending && (
               <div className="absolute inset-0 bg-white/60 dark:bg-brand-dark/60 backdrop-blur-sm z-10 flex items-center justify-center">
                 <div className="flex items-center gap-2 bg-white dark:bg-brand-card px-4 py-2 rounded-full shadow-lg">
@@ -231,12 +225,6 @@ export default function ProductDetailsPage() {
                 const isActive = variant.id === product.id;
                 const label = variant.kitType || variant.type || "Home";
 
-                // Count GK variants
-                const gkCount = sortedVariants.filter(
-                  (v) => (v.kitType || v.type) === label
-                ).length;
-
-                // Add number if multiple variants with same label
                 const sameLabelVariants = sortedVariants.filter(
                   (v) => (v.kitType || v.type) === label
                 );
@@ -259,11 +247,12 @@ export default function ProductDetailsPage() {
                         : "bg-white dark:bg-brand-dark border-gray-200 dark:border-brand-border text-gray-700 dark:text-gray-300 hover:border-brand-green hover:shadow-md"
                     } ${isPending ? "opacity-50" : ""}`}
                   >
-                    {/* Variant thumbnail */}
                     {variant.image_url && (
                       <div
                         className={`w-full h-16 rounded-lg overflow-hidden ${
-                          isActive ? "bg-white/40" : "bg-gray-100 dark:bg-brand-card"
+                          isActive
+                            ? "bg-white/40"
+                            : "bg-gray-100 dark:bg-brand-card"
                         } flex items-center justify-center`}
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -279,20 +268,13 @@ export default function ProductDetailsPage() {
                       </div>
                     )}
 
-                    {/* Label */}
                     <div className="flex items-center gap-1">
-                      {isActive && (
-                        <Check
-                          className="w-3 h-3"
-                          strokeWidth={3}
-                        />
-                      )}
+                      {isActive && <Check className="w-3 h-3" strokeWidth={3} />}
                       <span className="text-[11px] font-bold uppercase tracking-wider">
                         {displayLabel}
                       </span>
                     </div>
 
-                    {/* Price tag (if different from current) */}
                     {!isActive && variant.price !== product.price && (
                       <span className="absolute top-1 right-1 bg-brand-green text-black text-[9px] font-bold px-1.5 py-0.5 rounded-full">
                         ${variant.price.toFixed(0)}
@@ -316,6 +298,42 @@ export default function ProductDetailsPage() {
           />
 
           <div className="flex flex-col">
+            {/* 👇 BRAND LOGO + NAME (top) */}
+            {brandData && (
+              <Link
+                href={`/shop?brand=${brandData.slug}`}
+                className="inline-flex items-center gap-3 mb-4 group w-fit"
+              >
+                {brandData.logo ? (
+                  <div className="w-14 h-14 bg-white dark:bg-brand-card rounded-xl border border-gray-100 dark:border-brand-border flex items-center justify-center p-2 flex-shrink-0 group-hover:border-brand-green transition-colors">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={brandData.logo}
+                      alt={brandData.name}
+                      className="max-h-full max-w-full object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-14 h-14 bg-brand-green rounded-xl flex items-center justify-center flex-shrink-0">
+                    <span className="text-lg font-extrabold text-black">
+                      {brandData.name.charAt(0)}
+                    </span>
+                  </div>
+                )}
+                <div>
+                  <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Brand
+                  </p>
+                  <p className="text-sm font-bold dark:text-white group-hover:text-brand-green transition-colors">
+                    {brandData.name}
+                  </p>
+                </div>
+              </Link>
+            )}
+
             <div className="inline-flex items-center gap-2 mb-3 flex-wrap">
               <span className="bg-brand-green text-black text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                 {categoryLabel}
@@ -601,7 +619,7 @@ export default function ProductDetailsPage() {
               </div>
             )}
 
-            {/* Color Picker */}
+            {/* Color Picker — only if colors exist */}
             {productColors.length > 0 && (
               <div className="mt-6">
                 <h3 className="text-sm font-bold dark:text-white mb-3">

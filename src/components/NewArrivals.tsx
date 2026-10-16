@@ -7,8 +7,26 @@ import { useSiteData } from "@/context/SiteDataContext";
 import { ArrowRight, Sparkles } from "lucide-react";
 
 export default function NewArrivals() {
-  const { products } = useSiteData();
-  const newProducts = products.slice(0, 4);
+  const { products, siteConfig } = useSiteData();
+
+  // 👇 Admin-selected IDs, otherwise latest 4 products
+  const selectedIds = siteConfig.newArrivalIds || [];
+
+  let newProducts: typeof products = [];
+
+  if (selectedIds.length > 0) {
+    newProducts = selectedIds
+      .map((id) => products.find((p) => p.id === id))
+      .filter((p): p is (typeof products)[number] => Boolean(p))
+      .slice(0, 8);
+  }
+
+  // Fallback: latest products (highest IDs)
+  if (newProducts.length === 0) {
+    newProducts = [...products].sort((a, b) => b.id - a.id).slice(0, 4);
+  }
+
+  if (newProducts.length === 0) return null;
 
   return (
     <section className="max-w-7xl mx-auto px-4 mt-16">

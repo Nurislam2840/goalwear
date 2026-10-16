@@ -4,8 +4,14 @@
 import { useState } from "react";
 import { useSiteData, HeroSlide } from "@/context/SiteDataContext";
 import { useToast } from "@/context/ToastContext";
+import ImageUploader from "@/components/ImageUploader";
 import {
-  Plus, Edit3, Trash2, X, Image as ImageIcon, Loader2
+  Plus,
+  Edit3,
+  Trash2,
+  X,
+  Image as ImageIcon,
+  Loader2,
 } from "lucide-react";
 
 export default function AdminHeroPage() {
@@ -44,11 +50,40 @@ export default function AdminHeroPage() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // 👇 Manual validation (required attribute won't catch ImageUploader)
+    if (!formData.image.trim()) {
+      showToast("Please add a hero image", "error");
+      return;
+    }
+    if (!formData.title.trim()) {
+      showToast("Please enter a title", "error");
+      return;
+    }
+    if (!formData.highlight.trim()) {
+      showToast("Please enter a highlight", "error");
+      return;
+    }
+    if (!formData.player.trim()) {
+      showToast("Please enter a player name", "error");
+      return;
+    }
+    if (!formData.badge.trim()) {
+      showToast("Please enter a badge text", "error");
+      return;
+    }
+    if (!formData.description.trim()) {
+      showToast("Please enter a description", "error");
+      return;
+    }
+
     setIsSaving(true);
 
     setTimeout(() => {
       if (editingSlide) {
-        updateHeroSlides(heroSlides.map((s) => (s.id === formData.id ? formData : s)));
+        updateHeroSlides(
+          heroSlides.map((s) => (s.id === formData.id ? formData : s))
+        );
         showToast("Slide updated!", "success");
       } else {
         updateHeroSlides([...heroSlides, formData]);
@@ -67,16 +102,19 @@ export default function AdminHeroPage() {
     setDeleteConfirm(null);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
     <div className="p-4 md:p-8">
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold dark:text-white">Hero Slider</h1>
+          <h1 className="text-2xl md:text-3xl font-bold dark:text-white">
+            Hero Slider
+          </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             {heroSlides.length} slides in your slider
           </p>
@@ -90,14 +128,15 @@ export default function AdminHeroPage() {
         </button>
       </div>
 
-      {/* Slides Grid */}
       {heroSlides.length === 0 ? (
         <div className="text-center py-20 bg-white dark:bg-brand-card rounded-2xl border border-gray-100 dark:border-brand-border">
           <div className="w-16 h-16 bg-brand-green rounded-full flex items-center justify-center mx-auto mb-4">
             <ImageIcon className="w-8 h-8 text-black" strokeWidth={2.5} />
           </div>
           <h3 className="font-bold dark:text-white mb-1">No slides yet</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">Add your first hero slide</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">
+            Add your first hero slide
+          </p>
           <button
             onClick={handleAddNew}
             className="inline-flex items-center gap-2 bg-brand-green text-black font-bold px-6 py-2.5 rounded-full hover:opacity-90"
@@ -114,16 +153,22 @@ export default function AdminHeroPage() {
               className="bg-white dark:bg-brand-card rounded-2xl border border-gray-100 dark:border-brand-border overflow-hidden"
             >
               <div className="relative h-40 bg-gray-100 dark:bg-brand-dark">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={slide.image}
-                  alt={slide.player}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src =
-                      "https://via.placeholder.com/400x200?text=No+Image";
-                  }}
-                />
+                {slide.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={slide.image}
+                    alt={slide.player}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        "https://via.placeholder.com/400x200?text=No+Image";
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <ImageIcon className="w-12 h-12 text-gray-300" />
+                  </div>
+                )}
                 <div className="absolute top-3 left-3 bg-brand-green text-black text-[10px] font-bold px-2.5 py-1 rounded-full">
                   {slide.badge}
                 </div>
@@ -186,8 +231,10 @@ export default function AdminHeroPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSave} className="flex-1 overflow-y-auto p-5 space-y-4">
-              {/* Badge + Player */}
+            <form
+              onSubmit={handleSave}
+              className="flex-1 overflow-y-auto p-5 space-y-4"
+            >
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
@@ -219,7 +266,6 @@ export default function AdminHeroPage() {
                 </div>
               </div>
 
-              {/* Title + Highlight */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
@@ -251,7 +297,6 @@ export default function AdminHeroPage() {
                 </div>
               </div>
 
-              {/* Quote */}
               <div>
                 <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                   Player Quote
@@ -266,7 +311,6 @@ export default function AdminHeroPage() {
                 />
               </div>
 
-              {/* Description */}
               <div>
                 <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                   Description *
@@ -282,36 +326,17 @@ export default function AdminHeroPage() {
                 ></textarea>
               </div>
 
-              {/* Image URL */}
-              <div>
-                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                  Image URL *
-                </label>
-                <input
-                  type="url"
-                  required
-                  name="image"
-                  value={formData.image}
-                  onChange={handleChange}
-                  placeholder="https://images.unsplash.com/..."
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-brand-dark border border-gray-200 dark:border-brand-border rounded-xl text-sm dark:text-white outline-none focus:border-brand-green"
-                />
-                {formData.image && (
-                  <div className="mt-3 w-full h-40 bg-gray-50 dark:bg-brand-dark rounded-xl overflow-hidden border border-gray-100 dark:border-brand-border">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={formData.image}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = "none";
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
+              {/* 👇 ImageUploader replaces old URL input */}
+              <ImageUploader
+                value={formData.image}
+                onChange={(value) =>
+                  setFormData({ ...formData, image: value })
+                }
+                label="Hero Image *"
+                placeholder="https://images.unsplash.com/... or upload"
+                previewHeight="h-40"
+              />
 
-              {/* CTA Link */}
               <div>
                 <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                   Button Link
@@ -371,7 +396,11 @@ export default function AdminHeroPage() {
               Delete Slide?
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">
-              Delete slide for <span className="font-bold dark:text-white">{deleteConfirm.player}</span>?
+              Delete slide for{" "}
+              <span className="font-bold dark:text-white">
+                {deleteConfirm.player}
+              </span>
+              ?
             </p>
             <div className="flex gap-3">
               <button

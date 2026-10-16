@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoalWear Theme — Documentation</title>
+<meta name="description" content="Complete setup and customization guide for GoalWear football e-commerce theme.">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --primary: #CCFF00;
+    --primary-dark: #5B8C00;
+    --bg: #FAFAFA;
+    --card: #FFFFFF;
+    --text: #0A0A0A;
+    --muted: #6B7280;
+    --border: #E5E7EB;
+    --code-bg: #F3F4F6;
+    --success: #22C55E;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --info: #3B82F6;
+  }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 16px;
+  }
+  
+  /* Header */
+  header {
+    background: linear-gradient(135deg, #0A0A0A 0%, #161616 100%);
+    color: white;
+    padding: 80px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  header::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 400px;
+    height: 400px;
+    background: rgba(204, 255, 0, 0.15);
+    border-radius: 50%;
+    filter: blur(80px);
+  }
+  
+  header h1 {
+    font-size: 48px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  
+  header h1 span { color: var(--primary); }
+  
+  header p {
+    color: #9CA3AF;
+    font-size: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  header .badge {
+    display: inline-block;
+    background: var(--primary);
+    color: #000;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 6px 14px;
+    border-radius: 999px;
+    margin-top: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  header .author-info {
+    margin-top: 24px;
+    font-size: 13px;
+    color: #9CA3AF;
+  }
+  
+  header .author-info a {
+    color: var(--primary);
+    text-decoration: none;
+  }
+  
+  /* Container */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+  
+  /* TOC */
+  .toc {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 40px;
+    border: 1px solid var(--border);
+  }
+  
+  .toc h2 {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--primary);
+    display: inline-block;
+  }
+  
+  .toc ol {
+    list-style: none;
+    counter-reset: section;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+  }
+  
+  .toc li {
+    counter-increment: section;
+    padding: 10px 16px;
+    background: #F9FAFB;
+    border-radius: 10px;
+    border-left: 3px solid var(--primary);
+    transition: all 0.2s;
+  }
+  
+  .toc li:hover {
+    background: #F3F4F6;
+    transform: translateX(4px);
+  }
+  
+  .toc li a {
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .toc li a::before {
+    content: counter(section, decimal-leading-zero);
+    color: var(--primary-dark);
+    font-weight: 800;
+    font-size: 12px;
+  }
+  
+  /* Sections */
+  section {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 40px;
+    margin-bottom: 32px;
+    border: 1px solid var(--border);
+  }
+  
+  section h2 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--primary);
+    display: inline-block;
+    letter-spacing: -0.02em;
+  }
+  
+  section h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-top: 32px;
+    margin-bottom: 12px;
+  }
+  
+  section h3:first-of-type { margin-top: 0; }
+  
+  section p {
+    margin-bottom: 16px;
+    color: #374151;
+  }
+  
+  section ul, section ol {
+    margin: 16px 0 16px 24px;
+  }
+  
+  section li {
+    margin-bottom: 8px;
+    color: #374151;
+  }
+  
+  /* Code blocks */
+  pre {
+    background: #1F2937;
+    color: #F9FAFB;
+    padding: 20px 24px;
+    border-radius: 12px;
+    overflow-x: auto;
+    margin: 16px 0;
+    font-family: "SF Mono", Monaco, "Cascadia Code", Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  
+  code {
+    background: var(--code-bg);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-family: "SF Mono", Monaco, monospace;
+    font-size: 13px;
+    color: #BE185D;
+  }
+  
+  pre code {
+    background: transparent;
+    padding: 0;
+    color: inherit;
+  }
+  
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  
+  th {
+    background: #F9FAFB;
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 700;
+    border-bottom: 2px solid var(--border);
+  }
+  
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  tr:hover td { background: #F9FAFB; }
+  
+  /* Info boxes */
+  .info, .warning, .success, .danger {
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin: 20px 0;
+    border-left: 4px solid;
+    font-size: 14px;
+  }
+  
+  .info { background: #EFF6FF; border-color: var(--info); color: #1E40AF; }
+  .warning { background: #FFFBEB; border-color: var(--warning); color: #92400E; }
+  .success { background: #ECFDF5; border-color: var(--success); color: #065F46; }
+  .danger { background: #FEF2F2; border-color: var(--danger); color: #991B1B; }
+  
+  /* Steps */
+  .step {
+    background: #F9FAFB;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 16px 0;
+    border-left: 3px solid var(--primary);
+  }
+  
+  .step strong {
+    display: inline-block;
+    background: var(--primary);
+    color: #000;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-right: 8px;
+  }
+  
+  /* Links */
+  a {
+    color: var(--primary-dark);
+    text-decoration: none;
+    font-weight: 600;
+  }
+  
+  a:hover { text-decoration: underline; }
+  
+  /* Footer */
+  footer {
+    background: #0A0A0A;
+    color: #9CA3AF;
+    text-align: center;
+    padding: 40px 24px;
+    margin-top: 60px;
+  }
+  
+  footer a { color: var(--primary); }
+  
+  footer .author {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    header h1 { font-size: 32px; }
+    header { padding: 60px 20px; }
+    section { padding: 24px; }
+    section h2 { font-size: 22px; }
+    .container { padding: 24px 16px; }
+  }
+  
+  /* Print styles */
+  @media print {
+    header { background: white; color: black; padding: 20px; }
+    header h1 { color: black; }
+    header h1 span { color: #5B8C00; }
+    section { page-break-inside: avoid; border: 1px solid #ccc; }
+    pre { background: #f5f5f5; color: #000; border: 1px solid #ddd; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Goal<span>Wear</span></h1>
+  <p>Complete Setup &amp; Customization Documentation</p>
+  <div class="badge">Version 1.0.0</div>
+  <div class="author-info">
+    By <strong>MD NUR ISLAM</strong> •
+    <a href="https://themes-store.vercel.app">themes-store.vercel.app</a> •
+    <a href="mailto:imdnur284@gmail.com">imdnur284@gmail.com</a>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- TOC -->
+  <div class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#intro">Introduction</a></li>
+      <li><a href="#requirements">Requirements</a></li>
+      <li><a href="#install">Installation</a></li>
+      <li><a href="#supabase">Supabase Setup</a></li>
+      <li><a href="#stripe">Stripe Setup</a></li>
+      <li><a href="#env">Environment Variables</a></li>
+      <li><a href="#database">Database Setup</a></li>
+      <li><a href="#running">Running the Theme</a></li>
+      <li><a href="#admin">Admin Access</a></li>
+      <li><a href="#products">Adding Products</a></li>
+      <li><a href="#customize">Customization</a></li>
+      <li><a href="#deploy">Deployment</a></li>
+      <li><a href="#troubleshoot">Troubleshooting</a></li>
+      <li><a href="#support">Support</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. Introduction -->
+  <section id="intro">
+    <h2>1. Introduction</h2>
+    <p>Welcome to <strong>GoalWear</strong> — a premium football gear e-commerce theme built with modern web technologies. This theme is production-ready and includes everything you need to launch a professional online store.</p>
+    
+    <h3>What's Included</h3>
+    <ul>
+      <li>Full Next.js 16 + React 19 source code</li>
+      <li>Supabase database &amp; authentication integration</li>
+      <li>Stripe payment gateway</li>
+      <li>Complete admin panel with 12 sections</li>
+      <li>User account system</li>
+      <li>Product variants (Home/Away/Third/Goalkeeper)</li>
+      <li>Order management system</li>
+      <li>Coupon &amp; discount system</li>
+      <li>SEO optimized (sitemap, robots, metadata)</li>
+      <li>Mobile-first responsive design</li>
+      <li>Dark &amp; Light mode</li>
+    </ul>
+
+    <div class="info">
+      💡 <strong>Tip:</strong> Read this documentation sequentially. Each section builds on the previous one.
+    </div>
+  </section>
+
+  <!-- 2. Requirements -->
+  <section id="requirements">
+    <h2>2. Requirements</h2>
+    
+    <h3>Software</h3>
+    <table>
+      <tr><th>Item</th><th>Version</th><th>Link</th></tr>
+      <tr><td>Node.js</td><td>20.9+</td><td><a href="https://nodejs.org">nodejs.org</a></td></tr>
+      <tr><td>npm</td><td>Latest</td><td>Included with Node</td></tr>
+      <tr><td>Code Editor</td><td>Any</td><td><a href="https://code.visualstudio.com">VS Code</a></td></tr>
+    </table>
+
+    <h3>Accounts (Free)</h3>
+    <ul>
+      <li><strong>Supabase</strong> — <a href="https://supabase.com">supabase.com</a></li>
+      <li><strong>Stripe</strong> — <a href="https://stripe.com">stripe.com</a></li>
+      <li><strong>Vercel</strong> (for hosting) — <a href="https://vercel.com">vercel.com</a></li>
+    </ul>
+  </section>
+
+  <!-- 3. Installation -->
+  <section id="install">
+    <h2>3. Installation</h2>
+
+    <div class="step">
+      <strong>STEP 1</strong> Extract the theme zip file
+    </div>
+    <pre><code>unzip goalwear-theme-v1.0.zip
+cd goalwear</code></pre>
+
+    <div class="step">
+      <strong>STEP 2</strong> Install dependencies
+    </div>
+    <pre><code>npm install</code></pre>
+    <p>⏱ This takes about 2 minutes.</p>
+
+    <div class="step">
+      <strong>STEP 3</strong> Copy environment template
+    </div>
+    <pre><code>cp .env.example .env.local</code></pre>
+
+    <div class="success">
+      ✅ Installation complete! Now proceed to Supabase setup.
+    </div>
+  </section>
+
+  <!-- 4. Supabase -->
+  <section id="supabase">
+    <h2>4. Supabase Setup</h2>
+
+    <h3>4.1 Create Project</h3>
+    <ol>
+      <li>Go to <a href="https://supabase.com/dashboard">supabase.com/dashboard</a></li>
+      <li>Click <strong>"New project"</strong></li>
+      <li>Name: <code>goalwear</code> (or your brand)</li>
+      <li>Database Password: Create a strong password</li>
+      <li>Region: Choose closest to your users</li>
+      <li>Click <strong>"Create new project"</strong></li>
+      <li>Wait 1-2 minutes for setup</li>
+    </ol>
+
+    <h3>4.2 Get API Keys</h3>
+    <p>In your Supabase project:</p>
+    <ol>
+      <li>Go to <strong>Settings → API</strong></li>
+      <li>Copy these three values:</li>
+    </ol>
+    <table>
+      <tr><th>Key</th><th>Looks Like</th></tr>
+      <tr><td>Project URL</td><td><code>https://xxxxx.supabase.co</code></td></tr>
+      <tr><td>anon public key</td><td><code>eyJhbGc...</code></td></tr>
+      <tr><td>service_role key</td><td><code>eyJhbGc...</code> (click Reveal)</td></tr>
+    </table>
+
+    <div class="warning">
+      ⚠️ <strong>Service Role Key</strong> is sensitive. Never share it publicly or commit it to Git.
+    </div>
+
+    <h3>4.3 Enable Email Auth</h3>
+    <ol>
+      <li>Go to <strong>Authentication → Providers</strong></li>
+      <li>Enable <strong>Email</strong> provider</li>
+      <li>Set <strong>Confirm email:</strong> ON for production, OFF for testing</li>
+      <li>Go to <strong>Authentication → URL Configuration</strong></li>
+      <li>Site URL: <code>http://localhost:3000</code></li>
+      <li>Redirect URLs:
+        <ul>
+          <li><code>http://localhost:3000/**</code></li>
+          <li><code>http://localhost:3000/reset-password</code></li>
+          <li><code>http://localhost:3000/auth/callback</code></li>
+        </ul>
+      </li>
+    </ol>
+  </section>
+
+  <!-- 5. Stripe -->
+  <section id="stripe">
+    <h2>5. Stripe Setup</h2>
+
+    <h3>5.1 Create Account</h3>
+    <ol>
+      <li>Go to <a href="https://dashboard.stripe.com">dashboard.stripe.com</a></li>
+      <li>Sign up or log in</li>
+      <li>Stay in <strong>Test mode</strong> initially</li>
+    </ol>
+
+    <h3>5.2 Get API Keys</h3>
+    <ol>
+      <li>Go to <strong>Developers → API keys</strong></li>
+      <li>Copy the following:</li>
+    </ol>
+    <table>
+      <tr><th>Key</th><th>Looks Like</th></tr>
+      <tr><td>Publishable key</td><td><code>pk_test_...</code></td></tr>
+      <tr><td>Secret key</td><td><code>sk_test_...</code> (click Reveal)</td></tr>
+    </table>
+
+    <h3>5.3 Enable Payment Methods</h3>
+    <ol>
+      <li>Go to <strong>Settings → Payment methods</strong></li>
+      <li>Enable <strong>Cards</strong> (required)</li>
+      <li>Click Save</li>
+    </ol>
+  </section>
+
+  <!-- 6. Environment -->
+  <section id="env">
+    <h2>6. Environment Variables</h2>
+    <p>Open <code>.env.local</code> in your code editor and fill in the values:</p>
+
+    <pre><code># ---------- Supabase ----------
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...
+
+# ---------- Stripe ----------
+STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+
+# ---------- Admin ----------
+ADMIN_EMAIL=admin@yourstore.com
+ADMIN_PASSWORD=ChangeThisStrongPassword123!
+ADMIN_SESSION_SECRET=your-random-64-character-string
+
+# ---------- Site ----------
+NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3000</code></pre>
+
+    <h3>Generate Admin Session Secret</h3>
+    <p>Run this in your terminal:</p>
+    <pre><code>node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"</code></pre>
+    <p>Copy the 64-character output to <code>ADMIN_SESSION_SECRET</code>.</p>
+
+    <div class="warning">
+      ⚠️ Choose a <strong>strong password</strong> for <code>ADMIN_PASSWORD</code>. This is your admin panel login.
+    </div>
+  </section>
+
+  <!-- 7. Database -->
+  <section id="database">
+    <h2>7. Database Setup</h2>
+    <p>In Supabase Dashboard, go to <strong>SQL Editor → New query</strong>, then paste and run this SQL:</p>
+
+    <pre><code>-- ============================================
+-- GOALWEAR DATABASE SCHEMA
+-- ============================================
+
+-- 1. PRODUCTS TABLE
+CREATE TABLE IF NOT EXISTS products (
+  id BIGINT PRIMARY KEY,
+  name TEXT NOT NULL,
+  category TEXT NOT NULL,
+  sub_category TEXT,
+  brand TEXT,
+  team TEXT,
+  type TEXT,
+  price NUMERIC(10, 2) NOT NULL,
+  image_url TEXT,
+  images JSONB DEFAULT '[]'::jsonb,
+  rating NUMERIC(2, 1) DEFAULT 0,
+  reviews_count INTEGER DEFAULT 0,
+  description TEXT,
+  sizes JSONB DEFAULT '[]'::jsonb,
+  reviews JSONB DEFAULT '[]'::jsonb,
+  stock INTEGER DEFAULT 0,
+  colors JSONB DEFAULT '[]'::jsonb,
+  season TEXT,
+  highlights JSONB DEFAULT '[]'::jsonb,
+  specifications JSONB DEFAULT '[]'::jsonb,
+  custom_fields JSONB DEFAULT '[]'::jsonb,
+  kit_type TEXT,
+  player_name TEXT,
+  player_number INTEGER,
+  is_player_edition BOOLEAN DEFAULT FALSE,
+  sleeve_type TEXT,
+  collar_type TEXT,
+  fit_type TEXT,
+  sponsor TEXT,
+  surface TEXT,
+  play_style TEXT,
+  boot_height TEXT,
+  weight_grams INTEGER,
+  upper_material TEXT,
+  soleplate TEXT,
+  stud_type TEXT,
+  closure_type TEXT,
+  collection TEXT,
+  release_year INTEGER,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 2. ORDERS TABLE
+CREATE TABLE IF NOT EXISTS orders (
+  id TEXT PRIMARY KEY,
+  user_id TEXT,
+  items JSONB NOT NULL,
+  total NUMERIC(10, 2) NOT NULL,
+  status TEXT DEFAULT 'Processing',
+  customer_info JSONB NOT NULL,
+  payment_method TEXT,
+  stripe_session_id TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 3. ADDRESSES TABLE
+CREATE TABLE IF NOT EXISTS addresses (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  label TEXT NOT NULL,
+  name TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  address TEXT NOT NULL,
+  city TEXT NOT NULL,
+  is_default BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 4. COUPONS TABLE
+CREATE TABLE IF NOT EXISTS coupons (
+  id BIGINT PRIMARY KEY,
+  code TEXT UNIQUE NOT NULL,
+  type TEXT NOT NULL,
+  value NUMERIC(10, 2) DEFAULT 0,
+  description TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+  expires_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 5. SITE CONFIG TABLE
+CREATE TABLE IF NOT EXISTS site_config (
+  id INTEGER PRIMARY KEY DEFAULT 1,
+  config JSONB NOT NULL DEFAULT '{}'::jsonb,
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT single_row CHECK (id = 1)
+);
+
+INSERT INTO site_config (id, config)
+VALUES (1, '{}'::jsonb)
+ON CONFLICT (id) DO NOTHING;
+
+-- 6. HERO SLIDES
+CREATE TABLE IF NOT EXISTS hero_slides (
+  id BIGINT PRIMARY KEY,
+  badge TEXT,
+  title TEXT,
+  highlight TEXT,
+  player TEXT,
+  quote TEXT,
+  description TEXT,
+  image TEXT,
+  cta TEXT,
+  sort_order INTEGER DEFAULT 0
+);
+
+-- 7. OFFERS
+CREATE TABLE IF NOT EXISTS offers (
+  id BIGINT PRIMARY KEY,
+  badge TEXT,
+  title TEXT,
+  highlight TEXT,
+  discount_text TEXT,
+  description TEXT,
+  coupon_code TEXT,
+  image TEXT,
+  cta TEXT,
+  end_date TIMESTAMPTZ,
+  is_active BOOLEAN DEFAULT TRUE
+);
+
+-- 8. FEATURES
+CREATE TABLE IF NOT EXISTS features (
+  id BIGINT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  icon TEXT,
+  sort_order INTEGER DEFAULT 0
+);
+
+-- 9. CATEGORIES
+CREATE TABLE IF NOT EXISTS categories (
+  id BIGINT PRIMARY KEY,
+  name TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  description TEXT,
+  image TEXT,
+  sort_order INTEGER DEFAULT 0
+);
+
+-- 10. BRANDS
+CREATE TABLE IF NOT EXISTS brands (
+  id BIGINT PRIMARY KEY,
+  name TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  tagline TEXT,
+  sort_order INTEGER DEFAULT 0
+);
+
+-- 11. TEAMS
+CREATE TABLE IF NOT EXISTS teams (
+  id BIGINT PRIMARY KEY,
+  name TEXT NOT NULL,
+  logo TEXT,
+  bg_color TEXT,
+  sort_order INTEGER DEFAULT 0
+);
+
+-- 12. TESTIMONIALS
+CREATE TABLE IF NOT EXISTS testimonials (
+  id BIGINT PRIMARY KEY,
+  name TEXT NOT NULL,
+  role TEXT,
+  avatar TEXT,
+  text TEXT NOT NULL,
+  rating INTEGER DEFAULT 5,
+  sort_order INTEGER DEFAULT 0
+);
+
+-- 13. INSTAGRAM IMAGES
+CREATE TABLE IF NOT EXISTS instagram_images (
+  id BIGINT PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY,
+  image_url TEXT NOT NULL,
+  sort_order INTEGER DEFAULT 0
+);
+
+-- ============================================
+-- RLS POLICIES — Public Read Access
+-- ============================================
+ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hero_slides ENABLE ROW LEVEL SECURITY;
+ALTER TABLE offers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE features ENABLE ROW LEVEL SECURITY;
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE brands ENABLE ROW LEVEL SECURITY;
+ALTER TABLE teams ENABLE ROW LEVEL SECURITY;
+ALTER TABLE testimonials ENABLE ROW LEVEL SECURITY;
+ALTER TABLE instagram_images ENABLE ROW LEVEL SECURITY;
+ALTER TABLE coupons ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public read access" ON products FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON hero_slides FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON offers FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON features FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON categories FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON brands FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON teams FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON testimonials FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON instagram_images FOR SELECT USING (true);
+CREATE POLICY "Public read access" ON coupons FOR SELECT USING (true);
+
+-- Reload schema cache
+NOTIFY pgrst, 'reload schema';</code></pre>
+
+    <div class="success">
+      ✅ After running, verify with:<br>
+      <code>SELECT COUNT(*) FROM products;</code>
+    </div>
+  </section>
+
+  <!-- 8. Running -->
+  <section id="running">
+    <h2>8. Running the Theme</h2>
+
+    <h3>Development Mode</h3>
+    <pre><code>npm run dev</code></pre>
+    <p>Open in browser: <a href="http://127.0.0.1:3000">http://127.0.0.1:3000</a></p>
+
+    <div class="warning">
+      ⚠️ Use <code>127.0.0.1</code>, not <code>localhost</code>. The theme uses IPv4-first DNS for mobile network compatibility.
+    </div>
+
+    <h3>Production Build</h3>
+    <pre><code>npm run build
+npm start</code></pre>
+  </section>
+
+  <!-- 9. Admin -->
+  <section id="admin">
+    <h2>9. Admin Access</h2>
+
+    <h3>URL</h3>
+    <pre><code>http://127.0.0.1:3000/admin/login</code></pre>
+
+    <h3>Credentials</h3>
+    <p>Use the <code>ADMIN_EMAIL</code> and <code>ADMIN_PASSWORD</code> you set in <code>.env.local</code>.</p>
+
+    <h3>Admin Panel Sections</h3>
+    <table>
+      <tr><th>Section</th><th>Purpose</th></tr>
+      <tr><td>Dashboard</td><td>Revenue, orders, top products</td></tr>
+      <tr><td>Products</td><td>Add/edit/delete products</td></tr>
+      <tr><td>Orders</td><td>Manage customer orders</td></tr>
+      <tr><td>Hero Slider</td><td>Homepage carousel</td></tr>
+      <tr><td>Offers</td><td>Flash sales with countdown</td></tr>
+      <tr><td>Categories</td><td>Product categories</td></tr>
+      <tr><td>Brands</td><td>Brand management</td></tr>
+      <tr><td>Teams</td><td>Popular teams section</td></tr>
+      <tr><td>Testimonials</td><td>Customer reviews</td></tr>
+      <tr><td>Features</td><td>Feature badges</td></tr>
+      <tr><td>Coupons</td><td>Discount codes</td></tr>
+      <tr><td>Site Settings</td><td>Name, logo, contact, social</td></tr>
+    </table>
+
+    <div class="success">
+      ✅ All changes save instantly to Supabase and reflect on the site immediately.
+    </div>
+  </section>
+
+  <!-- 10. Products -->
+  <section id="products">
+    <h2>10. Adding Products</h2>
+
+    <h3>Step-by-Step</h3>
+    <ol>
+      <li>Login to admin panel</li>
+      <li>Go to <strong>Products</strong></li>
+      <li>Click <strong>"Add New Product"</strong></li>
+      <li>Fill in the form:
+        <ul>
+          <li><strong>Product Name</strong> — e.g., "Real Madrid Home Jersey 2026/27"</li>
+          <li><strong>Category</strong> — Jerseys / Football Shoes</li>
+          <li><strong>Sub Category</strong> — Club / Country / Boot</li>
+          <li><strong>Brand</strong> — Adidas / Nike / Puma, etc.</li>
+          <li><strong>Team</strong> — Real Madrid, Barcelona, etc.</li>
+          <li><strong>Type</strong> — Home / Away / Boot</li>
+          <li><strong>Season</strong> — e.g., "2026/27"</li>
+          <li><strong>Price</strong>, <strong>Stock</strong>, <strong>Rating</strong></li>
+          <li><strong>Images</strong> — URLs or file uploads</li>
+        </ul>
+      </li>
+      <li>For <strong>Jerseys</strong>: fill Kit Type, Sponsor, Player Edition, Sleeve, Collar, Fit</li>
+      <li>For <strong>Boots</strong>: fill Surface, Play Style, Boot Height, Weight, etc.</li>
+      <li>Add <strong>Highlights</strong> and <strong>Specifications</strong></li>
+      <li>Add <strong>Colors</strong> and <strong>Sizes</strong></li>
+      <li>Click <strong>Save</strong></li>
+    </ol>
+
+    <h3>Product Variants (Home/Away/Third/GK)</h3>
+    <p>To show a kit selector on the product page, add multiple products with:</p>
+    <ul>
+      <li><strong>Same Team</strong> — e.g., "Real Madrid"</li>
+      <li><strong>Same Season</strong> — e.g., "2026/27"</li>
+      <li><strong>Same Sub Category</strong> — e.g., "Club"</li>
+      <li><strong>Different Kit Type</strong> — Home, Away, Third, Goalkeeper</li>
+    </ul>
+
+    <div class="info">
+      💡 The system automatically groups them and shows a kit selector.
+    </div>
+  </section>
+
+  <!-- 11. Customize -->
+  <section id="customize">
+    <h2>11. Customization</h2>
+
+    <h3>Change Colors</h3>
+    <p>Edit <code>src/app/globals.css</code>:</p>
+    <pre><code>@theme {
+  --color-brand-green: #CCFF00;  /* Change to your brand color */
+  --color-brand-dark: #0A0A0A;
+  --color-brand-card: #161616;
+}</code></pre>
+
+    <h3>Change Store Name &amp; Info</h3>
+    <p><strong>Easiest way:</strong> Go to <code>/admin/settings</code> in your browser.</p>
+
+    <h3>Change Logo</h3>
+    <p>Admin panel → Site Settings → Upload logo (max 2MB).</p>
+
+    <h3>Change Hero Slides</h3>
+    <p>Admin panel → Hero Slider → Edit slides.</p>
+
+    <h3>Change Contact Email</h3>
+    <p>Edit these files:</p>
+    <ul>
+      <li><code>src/components/Newsletter.tsx</code></li>
+      <li><code>src/app/contact/page.tsx</code></li>
+    </ul>
+  </section>
+
+  <!-- 12. Deploy -->
+  <section id="deploy">
+    <h2>12. Deployment</h2>
+
+    <h3>Deploy to Vercel (Recommended)</h3>
+    <ol>
+      <li>Push code to GitHub</li>
+      <li>Go to <a href="https://vercel.com">vercel.com</a></li>
+      <li>Click <strong>"Add New Project"</strong></li>
+      <li>Import your GitHub repository</li>
+      <li>Add these <strong>Environment Variables</strong>:
+        <ul>
+          <li><code>NEXT_PUBLIC_SUPABASE_URL</code></li>
+          <li><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></li>
+          <li><code>SUPABASE_SERVICE_ROLE_KEY</code></li>
+          <li><code>STRIPE_SECRET_KEY</code></li>
+          <li><code>NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code></li>
+          <li><code>ADMIN_EMAIL</code></li>
+          <li><code>ADMIN_PASSWORD</code></li>
+          <li><code>ADMIN_SESSION_SECRET</code></li>
+          <li><code>NEXT_PUBLIC_SITE_URL</code> (e.g., <code>https://your-app.vercel.app</code>)</li>
+        </ul>
+      </li>
+      <li>Click <strong>Deploy</strong></li>
+    </ol>
+
+    <h3>After Deployment</h3>
+    <ol>
+      <li>Update Supabase URLs:
+        <ul>
+          <li>Authentication → URL Configuration</li>
+          <li>Site URL: <code>https://your-domain.com</code></li>
+          <li>Redirect URLs: <code>https://your-domain.com/**</code></li>
+        </ul>
+      </li>
+      <li>Test all features</li>
+    </ol>
+
+    <div class="info">
+      💡 <strong>Custom Domain:</strong> Add in Vercel → Settings → Domains.
+    </div>
+  </section>
+
+  <!-- 13. Troubleshooting -->
+  <section id="troubleshoot">
+    <h2>13. Troubleshooting</h2>
+
+    <h3>"Invalid API key" Error</h3>
+    <p><strong>Cause:</strong> Wrong Supabase anon key.</p>
+    <p><strong>Fix:</strong> Copy the <code>anon</code> key again from Supabase Dashboard → Settings → API.</p>
+
+    <h3>Products Not Loading</h3>
+    <p><strong>Cause:</strong> Empty Supabase tables or missing env vars.</p>
+    <p><strong>Fix:</strong></p>
+    <ol>
+      <li>Verify <code>.env.local</code> has correct Supabase keys</li>
+      <li>Add products from Admin Panel</li>
+      <li>Check RLS policies exist (see SQL in Section 7)</li>
+    </ol>
+
+    <h3>Admin Login Fails</h3>
+    <p><strong>Cause:</strong> Wrong <code>ADMIN_EMAIL</code> or <code>ADMIN_PASSWORD</code>.</p>
+    <p><strong>Fix:</strong> Verify <code>.env.local</code> values and restart server.</p>
+
+    <h3>Vercel Deployment Issues</h3>
+    <p><strong>Cause:</strong> Missing env vars in Vercel.</p>
+    <p><strong>Fix:</strong> Add all 9 environment variables in Vercel Settings.</p>
+  </section>
+
+  <!-- 14. Support -->
+  <section id="support">
+    <h2>14. Support</h2>
+
+    <p>For support, license questions, or feature requests:</p>
+
+    <table>
+      <tr><th>Channel</th><th>Contact</th></tr>
+      <tr><td>Author</td><td>MD NUR ISLAM</td></tr>
+      <tr><td>Website</td><td><a href="https://themes-store.vercel.app">themes-store.vercel.app</a></td></tr>
+      <tr><td>Email</td><td><a href="mailto:imdnur284@gmail.com">imdnur284@gmail.com</a></td></tr>
+    </table>
+
+    <h3>Support Includes</h3>
+    <ul>
+      <li>Email support (6 months for Single License)</li>
+      <li>Free minor updates (1.x.x)</li>
+      <li>Bug fixes</li>
+    </ul>
+
+    <h3>Support Does Not Include</h3>
+    <ul>
+      <li>Custom development</li>
+      <li>Third-party service issues (Supabase, Stripe)</li>
+      <li>Server/hosting issues</li>
+    </ul>
+
+    <div class="success">
+      🎉 <strong>Setup Complete!</strong> Enjoy your GoalWear theme.
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="author">
+    <strong>GoalWear v1.0.0</strong> — Premium Football E-commerce Theme
+  </div>
+  <div>By <strong>MD NUR ISLAM</strong></div>
+  <div style="margin-top: 12px;">
+    <a href="https://themes-store.vercel.app">themes-store.vercel.app</a> •
+    <a href="mailto:imdnur284@gmail.com">imdnur284@gmail.com</a>
+  </div>
+  <div style="margin-top: 16px; font-size: 12px; opacity: 0.7;">
+    © 2026 MD NUR ISLAM. All rights reserved.
+  </div>
+</footer>
+
+</body>
+</html>

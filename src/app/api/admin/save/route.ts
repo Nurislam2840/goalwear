@@ -20,6 +20,21 @@ const ALLOWED_TABLES = [
 
 type AllowedTable = (typeof ALLOWED_TABLES)[number];
 
+// Tables that support id-based upsert + cleanup
+const UPSERT_TABLES: AllowedTable[] = [
+  "products",
+  "hero_slides",
+  "offers",
+  "features",
+  "categories",
+  "brands",
+  "teams",
+  "testimonials",
+  "coupons",
+];
+
+const DELETE_BATCH_SIZE = 200;
+
 export async function POST(req: NextRequest) {
   try {
     // 🔒 Verify admin
@@ -39,18 +54,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!data) {
+    if (data === undefined || data === null) {
       return NextResponse.json({ error: "Data required" }, { status: 400 });
     }
 
-    // Special case: site_config (single row)
+    // ---------- Special case: site_config (single row) ----------
     if (table === "site_config") {
-      const { error } = await supabaseAdmin
-        .from("site_config")
-        .upsert(
-          { id: 1, config: data.config, updated_at: new Date().toISOString() },
-          { onConflict: "id" }
-        );
+      const { error } = await supabaseAdmin.from("site_config").upsert(
+        {
+          id: 1,
+          config: data.config,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "id" }
+      );
 
       if (error) {
         console.error("[save site_config]", error.message);
@@ -60,16 +77,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
-    // Special case: instagram_images (delete + insert, no stable id)
+    // ---------- Special case: instagram_images (delete + insert) ----------
     if (table === "instagram_images") {
       // Delete all first
       const { error: delError } = await supabaseAdmin
         .from(table)
         .delete()
-        .neq("id", 0);
+        .gte("id", 0);
 
       if (delError) {
-        console.error("[delete instagram_images]", delError.message);
+        console.warn("[delete instagram_images]", delError.message);
       }
 
       // Then insert new
@@ -85,7 +102,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true });
     }
 
-    // Default: upsert array of rows
+    // ---------- Default: upsert array of rows ----------
     if (!Array.isArray(data)) {
       return NextResponse.json(
         { error: "Data must be an array for this table" },
@@ -93,36 +110,59 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Empty array = delete everything from this table
     if (data.length === 0) {
+      const { error } = await supabaseAdmin
+        .from(table)
+        .delete()
+        .gte("id", 0);
+
+      if (error) {
+        console.error(`[save ${table}] empty-delete`, error.message);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
       return NextResponse.json({ success: true });
     }
 
-    const { error } = await supabaseAdmin
+    // Upsert all rows in one shot
+    const { error: upsertError } = await supabaseAdmin
       .from(table)
       .upsert(data, { onConflict: "id" });
 
-    if (error) {
-      console.error(`[save ${table}]`, error.message);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (upsertError) {
+      console.error(`[save ${table}]`, upsertError.message);
+      return NextResponse.json({ error: upsertError.message }, { status: 500 });
     }
 
-    // For products/categories/brands/etc — also handle deletions?
-    // Delete rows whose ids are NOT in the new array
-    if (
-      ["products", "categories", "brands", "teams", "testimonials", "coupons", "features", "offers", "hero_slides"].includes(
-        table
-      )
-    ) {
-      const ids = data.map((r: any) => r.id).filter((id) => id != null);
+    // Cleanup — delete rows whose id is NOT in the new set
+    if (UPSERT_TABLES.includes(table as AllowedTable)) {
+      const ids = data
+        .map((r: any) => r.id)
+        .filter((id: any) => id != null);
 
       if (ids.length > 0) {
-        const { error: delError } = await supabaseAdmin
+        // Batch delete to avoid URL limits
+        const existingRes = await supabaseAdmin
           .from(table)
-          .delete()
-          .not("id", "in", `(${ids.join(",")})`);
+          .select("id");
 
-        if (delError) {
-          console.warn(`[cleanup ${table}]`, delError.message);
+        if (!existingRes.error && existingRes.data) {
+          const existingIds = existingRes.data.map((r: any) => r.id);
+          const keep = new Set(ids);
+          const toDelete = existingIds.filter((id: any) => !keep.has(id));
+
+          for (let i = 0; i < toDelete.length; i += DELETE_BATCH_SIZE) {
+            const chunk = toDelete.slice(i, i + DELETE_BATCH_SIZE);
+            const { error: delErr } = await supabaseAdmin
+              .from(table)
+              .delete()
+              .in("id", chunk);
+
+            if (delErr) {
+              console.warn(`[cleanup ${table}]`, delErr.message);
+            }
+          }
         }
       }
     }

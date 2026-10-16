@@ -9,7 +9,11 @@ import { useToast } from "@/context/ToastContext";
 /**
  * Cart-এ থাকা প্রোডাক্টের stock কমে গেলে user-কে alert দেবে।
  */
-export default function StockNotifier({ children }: { children: React.ReactNode }) {
+export default function StockNotifier({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { cart } = useCart();
   const { products, isHydrated } = useSiteData();
   const { showToast } = useToast();
@@ -20,43 +24,29 @@ export default function StockNotifier({ children }: { children: React.ReactNode 
 
     cart.forEach((cartItem) => {
       const product = products.find((p) => p.id === cartItem.id);
-      if (!product) return;
-
-      const stock = product.stock ?? 999;
 
       // Product deleted from store
       if (!product) {
         if (!notifiedRef.current.has(cartItem.id)) {
           notifiedRef.current.add(cartItem.id);
-          showToast(
-            `"${cartItem.name}" is no longer available`,
-            "error"
-          );
+          showToast(`"${cartItem.name}" is no longer available`, "error");
         }
         return;
       }
 
+      const stock = product.stock ?? 999;
+
       // Out of stock
       if (stock <= 0 && !notifiedRef.current.has(cartItem.id)) {
         notifiedRef.current.add(cartItem.id);
-        showToast(
-          `"${product.name}" is out of stock`,
-          "error"
-        );
+        showToast(`"${product.name}" is out of stock`, "error");
       }
       // Low stock warning
-      else if (
-        stock > 0 &&
-        stock <= 3 &&
-        !notifiedRef.current.has(cartItem.id)
-      ) {
+      else if (stock > 0 && stock <= 3 && !notifiedRef.current.has(cartItem.id)) {
         notifiedRef.current.add(cartItem.id);
-        showToast(
-          `Only ${stock} left of "${product.name}"!`,
-          "wishlist"
-        );
+        showToast(`Only ${stock} left of "${product.name}"!`, "wishlist");
       }
-      // Back in stock
+      // Back in stock — reset so future warnings can fire
       else if (stock > 5) {
         notifiedRef.current.delete(cartItem.id);
       }

@@ -8,8 +8,7 @@ import { X, Star, Heart, ShoppingBag, ArrowRight, Sparkles, Check } from "lucide
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useToast } from "@/context/ToastContext";
-import { useSiteData, Product } from "@/context/SiteDataContext";
-import { DEFAULT_COLORS } from "@/data/products";
+import { Product } from "@/context/SiteDataContext";
 
 interface QuickViewModalProps {
   product: Product | null;
@@ -56,10 +55,9 @@ export default function QuickViewModal({
       ? product.images
       : [product.image_url];
 
+  // 👇 No forced defaults — empty if not defined
   const productColors =
-    product.colors && product.colors.length > 0
-      ? product.colors
-      : DEFAULT_COLORS;
+    product.colors && product.colors.length > 0 ? product.colors : [];
 
   const currentColorImage =
     productImages.length > 1
@@ -244,7 +242,6 @@ export default function QuickViewModal({
               {product.description}
             </p>
 
-            {/* Highlights */}
             {product.highlights && product.highlights.length > 0 && (
               <div className="mt-4 bg-brand-green/5 border border-brand-green/20 rounded-xl p-3">
                 <p className="text-xs font-bold dark:text-white mb-2 flex items-center gap-1.5">
@@ -271,7 +268,6 @@ export default function QuickViewModal({
               </div>
             )}
 
-            {/* Jersey/Boot quick info */}
             {isJersey && (product.sleeveType || product.fitType) && (
               <div className="mt-3 flex flex-wrap gap-2">
                 {product.sleeveType && (
@@ -312,7 +308,7 @@ export default function QuickViewModal({
               </div>
             )}
 
-            {/* Color Picker */}
+            {/* Color Picker — only if colors exist */}
             {productColors.length > 0 && (
               <div className="mt-4">
                 <h3 className="text-sm font-bold dark:text-white mb-2">
@@ -337,7 +333,6 @@ export default function QuickViewModal({
               </div>
             )}
 
-            {/* Size Selection */}
             <div className="mt-4">
               <h3 className="text-sm font-bold dark:text-white mb-2">
                 Select Size
@@ -362,7 +357,6 @@ export default function QuickViewModal({
               </div>
             </div>
 
-            {/* Quantity */}
             <div className="mt-4">
               <h3 className="text-sm font-bold dark:text-white mb-2">
                 Quantity
@@ -388,7 +382,6 @@ export default function QuickViewModal({
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="mt-auto pt-5 space-y-3">
               <button
                 onClick={handleAddToCart}

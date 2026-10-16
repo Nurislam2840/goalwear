@@ -9,7 +9,6 @@ import {
   Star,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,7 +16,6 @@ import { useCart, Product } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useToast } from "@/context/ToastContext";
 import { useSiteData } from "@/context/SiteDataContext";
-import { DEFAULT_COLORS } from "@/data/products";
 import QuickViewModal from "@/components/QuickViewModal";
 
 interface ProductProps extends Product {
@@ -38,7 +36,7 @@ export default function ProductCard({
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { showToast } = useToast();
-  const { products } = useSiteData();
+  const { products, brands } = useSiteData();
   const [showQuickView, setShowQuickView] = useState(false);
   const [selectedColor, setSelectedColor] = useState(0);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -63,10 +61,19 @@ export default function ProductCard({
   const kitType = fullProduct?.kitType || fullProduct?.type || "";
   const showNew = isNew ?? (id > 200 && id < 210);
 
+  // 👇 Brand logo lookup (case-insensitive match by name)
+  const brandData = fullProduct
+    ? brands.find(
+        (b) =>
+          b.name.toLowerCase() === (fullProduct.brand || "").toLowerCase()
+      )
+    : null;
+
+  // 👇 Color list — empty if not defined (no forced defaults)
   const productColors =
     fullProduct?.colors && fullProduct.colors.length > 0
       ? fullProduct.colors
-      : DEFAULT_COLORS;
+      : [];
 
   const productImages =
     fullProduct?.images && fullProduct.images.length > 0
@@ -169,7 +176,6 @@ export default function ProductCard({
               }`}
             />
 
-            {/* Navigation Arrows */}
             {hasMultipleImages && (
               <>
                 <button
@@ -195,7 +201,6 @@ export default function ProductCard({
               </>
             )}
 
-            {/* Image Dots */}
             {hasMultipleImages && (
               <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 z-10">
                 {productImages.slice(0, 5).map((_, idx) => (
@@ -213,7 +218,6 @@ export default function ProductCard({
               </div>
             )}
 
-            {/* Badges */}
             {showNew && !isOutOfStock && !isLowStock && (
               <div className="absolute top-2.5 left-2.5 bg-black dark:bg-white text-white dark:text-black text-[9px] font-black uppercase tracking-[0.15em] px-2 py-0.5 rounded-full z-10">
                 New
@@ -232,7 +236,6 @@ export default function ProductCard({
               </div>
             )}
 
-            {/* Floating Actions */}
             <div className="absolute top-2.5 right-2.5 flex flex-col gap-1.5 z-10">
               <button
                 onClick={handleWishlist}
@@ -261,16 +264,31 @@ export default function ProductCard({
 
           {/* ============ INFO AREA ============ */}
           <div className="mt-3">
-            <p className="product-card-minimal-cat">
-              {categoryLabel}
-              {subLabel && ` • ${subLabel}`}
-            </p>
+            {/* 👇 Brand logo + Category row */}
+            <div className="flex items-center gap-1.5 min-w-0">
+              {brandData?.logo && (
+                <div className="w-3.5 h-3.5 flex items-center justify-center flex-shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={brandData.logo}
+                    alt={brandData.name}
+                    className="max-h-full max-w-full object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                </div>
+              )}
+              <p className="product-card-minimal-cat truncate">
+                {categoryLabel}
+                {subLabel && ` • ${subLabel}`}
+              </p>
+            </div>
 
             <h3 className="product-card-minimal-title text-gray-900 dark:text-white mt-1.5 min-h-[30px]">
               {name}
             </h3>
 
-            {/* Season / Kit Type badges */}
             {(season || kitType) && (
               <div className="flex items-center gap-1 mt-1.5 flex-wrap">
                 {kitType && (
@@ -286,34 +304,36 @@ export default function ProductCard({
               </div>
             )}
 
-            {/* Color Picker */}
-            <div className="flex items-center gap-1.5 mt-2">
-              {productColors.slice(0, 4).map((color, idx) => (
-                <button
-                  key={`${color.name}-${idx}`}
-                  onClick={(e) => handleColorClick(e, idx)}
-                  className={`w-3.5 h-3.5 rounded-full transition-all duration-200 border-2 ${
-                    selectedColor === idx
-                      ? "ring-2 ring-offset-1 ring-black dark:ring-white dark:ring-offset-brand-card scale-110"
-                      : "hover:scale-110 opacity-70 hover:opacity-100"
-                  }`}
-                  style={{
-                    backgroundColor: color.hex,
-                    borderColor:
+            {/* Color Picker — only if colors exist */}
+            {productColors.length > 0 && (
+              <div className="flex items-center gap-1.5 mt-2">
+                {productColors.slice(0, 4).map((color, idx) => (
+                  <button
+                    key={`${color.name}-${idx}`}
+                    onClick={(e) => handleColorClick(e, idx)}
+                    className={`w-3.5 h-3.5 rounded-full transition-all duration-200 border-2 ${
                       selectedColor === idx
-                        ? "transparent"
-                        : "rgba(0,0,0,0.1)",
-                  }}
-                  aria-label={color.name}
-                  title={color.name}
-                />
-              ))}
-              {productColors.length > 4 && (
-                <span className="text-[9px] font-bold text-gray-400 ml-0.5">
-                  +{productColors.length - 4}
-                </span>
-              )}
-            </div>
+                        ? "ring-2 ring-offset-1 ring-black dark:ring-white dark:ring-offset-brand-card scale-110"
+                        : "hover:scale-110 opacity-70 hover:opacity-100"
+                    }`}
+                    style={{
+                      backgroundColor: color.hex,
+                      borderColor:
+                        selectedColor === idx
+                          ? "transparent"
+                          : "rgba(0,0,0,0.1)",
+                    }}
+                    aria-label={color.name}
+                    title={color.name}
+                  />
+                ))}
+                {productColors.length > 4 && (
+                  <span className="text-[9px] font-bold text-gray-400 ml-0.5">
+                    +{productColors.length - 4}
+                  </span>
+                )}
+              </div>
+            )}
 
             {/* Rating */}
             <div className="flex items-center gap-1 mt-2">
