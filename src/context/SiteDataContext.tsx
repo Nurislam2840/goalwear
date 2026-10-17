@@ -65,7 +65,7 @@ export interface Brand {
   name: string;
   slug: string;
   tagline: string;
-  logo?: string; // 👈 brand logo
+  logo?: string;
 }
 
 export interface Team {
@@ -105,7 +105,7 @@ export interface SiteConfigData {
   twitter: string;
   youtube: string;
   whatsapp: string;
-  newArrivalIds: number[]; // 👈 required (default [])
+  newArrivalIds: number[];
 }
 
 interface SiteDataContextType {
@@ -283,57 +283,15 @@ const defaultCategories: Category[] = [
 
 const defaultBrands: Brand[] = [
   { id: 1, name: "Nike", slug: "nike", tagline: "Just Do It", logo: "" },
-  {
-    id: 2,
-    name: "Adidas",
-    slug: "adidas",
-    tagline: "Impossible is Nothing",
-    logo: "",
-  },
+  { id: 2, name: "Adidas", slug: "adidas", tagline: "Impossible is Nothing", logo: "" },
   { id: 3, name: "Puma", slug: "puma", tagline: "Forever Faster", logo: "" },
-  {
-    id: 4,
-    name: "Reebok",
-    slug: "reebok",
-    tagline: "Sport the Unexpected",
-    logo: "",
-  },
-  {
-    id: 5,
-    name: "New Balance",
-    slug: "new-balance",
-    tagline: "Fearlessly Independent",
-    logo: "",
-  },
-  {
-    id: 6,
-    name: "Under Armour",
-    slug: "under-armour",
-    tagline: "The Only Way is Through",
-    logo: "",
-  },
+  { id: 4, name: "Reebok", slug: "reebok", tagline: "Sport the Unexpected", logo: "" },
+  { id: 5, name: "New Balance", slug: "new-balance", tagline: "Fearlessly Independent", logo: "" },
+  { id: 6, name: "Under Armour", slug: "under-armour", tagline: "The Only Way is Through", logo: "" },
   { id: 7, name: "Mizuno", slug: "mizuno", tagline: "Never Settle", logo: "" },
-  {
-    id: 8,
-    name: "Asics",
-    slug: "asics",
-    tagline: "Sound Mind Sound Body",
-    logo: "",
-  },
-  {
-    id: 9,
-    name: "Umbro",
-    slug: "umbro",
-    tagline: "The Heart of the Game",
-    logo: "",
-  },
-  {
-    id: 10,
-    name: "Diadora",
-    slug: "diadora",
-    tagline: "Italian Sportswear",
-    logo: "",
-  },
+  { id: 8, name: "Asics", slug: "asics", tagline: "Sound Mind Sound Body", logo: "" },
+  { id: 9, name: "Umbro", slug: "umbro", tagline: "The Heart of the Game", logo: "" },
+  { id: 10, name: "Diadora", slug: "diadora", tagline: "Italian Sportswear", logo: "" },
 ];
 
 const defaultTeams: Team[] = [
@@ -435,7 +393,6 @@ const defaultCoupons: CouponData[] = [
 function normalizeProducts(products: any[]): Product[] {
   return products.map((p) => ({
     ...p,
-    // 👇 empty colors allowed — no forced defaults
     colors: Array.isArray(p.colors) ? p.colors : [],
   }));
 }
@@ -459,14 +416,10 @@ function dbToProduct(row: any): Product {
     reviews: row.reviews || [],
     stock: row.stock || 0,
     colors: Array.isArray(row.colors) ? row.colors : [],
-
-    // Advanced fields
     season: row.season || "",
     highlights: row.highlights || [],
     specifications: row.specifications || [],
     customFields: row.custom_fields || [],
-
-    // Jersey fields
     kitType: row.kit_type || undefined,
     playerName: row.player_name || "",
     playerNumber: row.player_number || undefined,
@@ -475,8 +428,6 @@ function dbToProduct(row: any): Product {
     collarType: row.collar_type || undefined,
     fitType: row.fit_type || undefined,
     sponsor: row.sponsor || "",
-
-    // Boot fields
     surface: row.surface || undefined,
     playStyle: row.play_style || undefined,
     bootHeight: row.boot_height || undefined,
@@ -594,10 +545,7 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] =
     useState<Category[]>(defaultCategories);
   const [brands, setBrands] = useState<Brand[]>(defaultBrands);
-
-  // ✅ Products start EMPTY — no mockProducts fallback
   const [products, setProducts] = useState<Product[]>([]);
-
   const [teams, setTeams] = useState<Team[]>(defaultTeams);
   const [testimonials, setTestimonials] =
     useState<Testimonial[]>(defaultTestimonials);
@@ -607,7 +555,6 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
   const [isHydrated, setIsHydrated] = useState(false);
   const hasLoadedRef = useRef(false);
 
-  // ============ Initial Load from Supabase ============
   useEffect(() => {
     if (hasLoadedRef.current) return;
     hasLoadedRef.current = true;
@@ -628,6 +575,7 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
           instagramRes,
           couponsRes,
           siteConfigRes,
+          reviewsRes,
         ] = await Promise.all([
           supabase.from("products").select("*").order("id"),
           supabase.from("hero_slides").select("*").order("sort_order"),
@@ -640,16 +588,52 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
           supabase.from("instagram_images").select("*").order("sort_order"),
           supabase.from("coupons").select("*").order("id"),
           supabase.from("site_config").select("*").eq("id", 1).maybeSingle(),
+          supabase.from("reviews").select("*").order("created_at", { ascending: false }),
         ]);
 
-        // ✅ Products — Supabase only, no fallback
+        // Format reviews into products
+        const allReviews = reviewsRes.data || [];
+        
         if (productsRes.data && productsRes.data.length > 0) {
-          setProducts(normalizeProducts(productsRes.data.map(dbToProduct)));
-          console.log(
-            `✅ Loaded ${productsRes.data.length} products from Supabase`
-          );
+          const formattedProducts = productsRes.data.map((row) => {
+            const product = dbToProduct(row);
+            // Attach real reviews from reviews table
+            const productReviews = allReviews
+              .filter((r: any) => r.product_id === product.id)
+              .map((r: any) => ({
+                name: r.user_name,
+                rating: r.rating,
+                comment: r.comment,
+                date: new Date(r.created_at).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                }),
+              }));
+            
+            // Combine with any legacy reviews in JSON + new table reviews
+            const legacyReviews = product.reviews || [];
+            const combinedReviews = [...productReviews, ...legacyReviews];
+
+            // Calculate avg if we have real reviews
+            let finalRating = product.rating;
+            let finalCount = product.reviews_count;
+            if (combinedReviews.length > 0) {
+              finalCount = combinedReviews.length;
+              finalRating = Number((combinedReviews.reduce((sum, r) => sum + r.rating, 0) / finalCount).toFixed(1));
+            }
+
+            return {
+              ...product,
+              reviews: combinedReviews,
+              reviews_count: finalCount,
+              rating: finalRating,
+            };
+          });
+
+          setProducts(normalizeProducts(formattedProducts));
+          console.log(`✅ Loaded ${productsRes.data.length} products & ${allReviews.length} reviews`);
         } else {
-          console.log("ℹ️ No products in Supabase — showing empty state");
           setProducts([]);
         }
 
@@ -684,16 +668,13 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
           setSiteConfig({
             ...defaultSiteConfig,
             ...siteConfigRes.data.config,
-            // 👇 ensure newArrivalIds is always an array
-            newArrivalIds: Array.isArray(
-              siteConfigRes.data.config.newArrivalIds
-            )
+            newArrivalIds: Array.isArray(siteConfigRes.data.config.newArrivalIds)
               ? siteConfigRes.data.config.newArrivalIds
               : [],
           });
         }
 
-        console.log("🎉 All data loaded from Supabase");
+        console.log("🎉 All data loaded");
       } catch (err) {
         console.error("❌ Failed to load data:", err);
         setProducts([]);
@@ -705,11 +686,7 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
     loadAllData();
   }, []);
 
-  // ============ saveToServer ============
   async function saveToServer(table: string, data: any) {
-    const dataCount = Array.isArray(data) ? data.length : 1;
-    console.log(`[saveToServer] 📤 Saving to "${table}" — ${dataCount} row(s)`);
-
     try {
       const res = await fetch("/api/admin/save", {
         method: "POST",
@@ -726,30 +703,16 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
         responseData = { raw: responseText };
       }
 
-      console.log(`[saveToServer] Response for "${table}":`, {
-        status: res.status,
-        ok: res.ok,
-        data: responseData,
-      });
-
       if (!res.ok) {
-        const errMsg = responseData.error || `HTTP ${res.status}`;
-        console.error(`[saveToServer] ❌ Failed:`, errMsg);
-        throw new Error(errMsg);
+        throw new Error(responseData.error || `HTTP ${res.status}`);
       }
-
-      console.log(`[saveToServer] ✅ Success for "${table}"`);
       return true;
     } catch (err: any) {
-      console.error(
-        `[saveToServer] ❌ Exception for "${table}":`,
-        err.message
-      );
+      console.error(`[saveToServer] Exception for "${table}":`, err.message);
       throw err;
     }
   }
 
-  // ============ Update Functions ============
   const updateSiteConfig = async (config: Partial<SiteConfigData>) => {
     const newConfig = { ...siteConfig, ...config };
     setSiteConfig(newConfig);
@@ -758,257 +721,148 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
 
   const updateHeroSlides = async (slides: HeroSlide[]) => {
     setHeroSlides(slides);
-    await saveToServer(
-      "hero_slides",
-      slides.map((s, i) => ({
-        id: s.id,
-        badge: s.badge,
-        title: s.title,
-        highlight: s.highlight,
-        player: s.player,
-        quote: s.quote,
-        description: s.description,
-        image: s.image,
-        cta: s.cta,
-        sort_order: i,
-      }))
-    );
+    await saveToServer("hero_slides", slides.map((s, i) => ({
+      id: s.id, badge: s.badge, title: s.title, highlight: s.highlight,
+      player: s.player, quote: s.quote, description: s.description,
+      image: s.image, cta: s.cta, sort_order: i,
+    })));
   };
 
   const updateOffers = async (offers: Offer[]) => {
     setOffers(offers);
-    await saveToServer(
-      "offers",
-      offers.map((o) => ({
-        id: o.id,
-        badge: o.badge,
-        title: o.title,
-        highlight: o.highlight,
-        discount_text: o.discountText,
-        description: o.description,
-        coupon_code: o.couponCode,
-        image: o.image,
-        cta: o.cta,
-        end_date: o.endDate,
-        is_active: o.isActive,
-      }))
-    );
+    await saveToServer("offers", offers.map((o) => ({
+      id: o.id, badge: o.badge, title: o.title, highlight: o.highlight,
+      discount_text: o.discountText, description: o.description,
+      coupon_code: o.couponCode, image: o.image, cta: o.cta,
+      end_date: o.endDate, is_active: o.isActive,
+    })));
   };
 
   const updateFeatures = async (features: Feature[]) => {
     setFeatures(features);
-    await saveToServer(
-      "features",
-      features.map((f, i) => ({
-        id: f.id,
-        title: f.title,
-        description: f.desc,
-        icon: f.icon,
-        sort_order: i,
-      }))
-    );
+    await saveToServer("features", features.map((f, i) => ({
+      id: f.id, title: f.title, description: f.desc, icon: f.icon, sort_order: i,
+    })));
   };
 
   const updateCategories = async (categories: Category[]) => {
     setCategories(categories);
-    await saveToServer(
-      "categories",
-      categories.map((c, i) => ({
-        id: c.id,
-        name: c.name,
-        slug: c.slug,
-        description: c.desc,
-        image: c.image,
-        sort_order: i,
-      }))
-    );
+    await saveToServer("categories", categories.map((c, i) => ({
+      id: c.id, name: c.name, slug: c.slug, description: c.desc, image: c.image, sort_order: i,
+    })));
   };
 
   const updateBrands = async (brands: Brand[]) => {
     setBrands(brands);
-    await saveToServer(
-      "brands",
-      brands.map((b, i) => ({
-        id: b.id,
-        name: b.name,
-        slug: b.slug,
-        tagline: b.tagline,
-        logo: b.logo || null, // 👈 brand logo
-        sort_order: i,
-      }))
-    );
+    await saveToServer("brands", brands.map((b, i) => ({
+      id: b.id, name: b.name, slug: b.slug, tagline: b.tagline, logo: b.logo || null, sort_order: i,
+    })));
   };
 
   const updateProducts = async (products: Product[]) => {
     setProducts(products);
-    await saveToServer(
-      "products",
-      products.map((p) => ({
-        id: p.id,
-        name: p.name,
-        category: p.category,
-        sub_category: p.subCategory,
-        brand: p.brand,
-        team: p.team,
-        type: p.type,
-        price: p.price,
-        image_url: p.image_url,
-        images: p.images || [],
-        rating: p.rating || 0,
-        reviews_count: p.reviews_count || 0,
-        description: p.description,
-        sizes: p.sizes || [],
-        reviews: p.reviews || [],
-        stock: p.stock || 0,
-        colors: p.colors || [],
-
-        // Advanced fields
-        season: p.season || null,
-        highlights: p.highlights || [],
-        specifications: p.specifications || [],
-        custom_fields: p.customFields || [],
-
-        // Jersey fields
-        kit_type: p.kitType || null,
-        player_name: p.playerName || null,
-        player_number: p.playerNumber || null,
-        is_player_edition: p.isPlayerEdition || false,
-        sleeve_type: p.sleeveType || null,
-        collar_type: p.collarType || null,
-        fit_type: p.fitType || null,
-        sponsor: p.sponsor || null,
-
-        // Boot fields
-        surface: p.surface || null,
-        play_style: p.playStyle || null,
-        boot_height: p.bootHeight || null,
-        weight_grams: p.weightGrams || null,
-        upper_material: p.upperMaterial || null,
-        soleplate: p.soleplate || null,
-        stud_type: p.studType || null,
-        closure_type: p.closureType || null,
-        collection: p.collection || null,
-        release_year: p.releaseYear || null,
-      }))
-    );
+    await saveToServer("products", products.map((p) => ({
+      id: p.id, name: p.name, category: p.category, sub_category: p.subCategory,
+      brand: p.brand, team: p.team, type: p.type, price: p.price,
+      image_url: p.image_url, images: p.images || [], rating: p.rating || 0,
+      reviews_count: p.reviews_count || 0, description: p.description,
+      sizes: p.sizes || [], reviews: p.reviews || [], stock: p.stock || 0,
+      colors: p.colors || [], season: p.season || null, highlights: p.highlights || [],
+      specifications: p.specifications || [], custom_fields: p.customFields || [],
+      kit_type: p.kitType || null, player_name: p.playerName || null,
+      player_number: p.playerNumber || null, is_player_edition: p.isPlayerEdition || false,
+      sleeve_type: p.sleeveType || null, collar_type: p.collarType || null,
+      fit_type: p.fitType || null, sponsor: p.sponsor || null,
+      surface: p.surface || null, play_style: p.playStyle || null,
+      boot_height: p.bootHeight || null, weight_grams: p.weightGrams || null,
+      upper_material: p.upperMaterial || null, soleplate: p.soleplate || null,
+      stud_type: p.studType || null, closure_type: p.closureType || null,
+      collection: p.collection || null, release_year: p.releaseYear || null,
+    })));
   };
 
   const updateTeams = async (teams: Team[]) => {
     setTeams(teams);
-    await saveToServer(
-      "teams",
-      teams.map((t, i) => ({
-        id: t.id,
-        name: t.name,
-        logo: t.logo,
-        bg_color: t.bgColor,
-        sort_order: i,
-      }))
-    );
+    await saveToServer("teams", teams.map((t, i) => ({
+      id: t.id, name: t.name, logo: t.logo, bg_color: t.bgColor, sort_order: i,
+    })));
   };
 
   const updateTestimonials = async (testimonials: Testimonial[]) => {
     setTestimonials(testimonials);
-    await saveToServer(
-      "testimonials",
-      testimonials.map((t, i) => ({
-        id: t.id,
-        name: t.name,
-        role: t.role,
-        avatar: t.avatar,
-        text: t.text,
-        rating: t.rating,
-        sort_order: i,
-      }))
-    );
+    await saveToServer("testimonials", testimonials.map((t, i) => ({
+      id: t.id, name: t.name, role: t.role, avatar: t.avatar, text: t.text, rating: t.rating, sort_order: i,
+    })));
   };
 
   const updateInstagramImages = async (images: string[]) => {
     setInstagramImages(images);
-    await saveToServer(
-      "instagram_images",
-      images.map((url, i) => ({
-        image_url: url,
-        sort_order: i,
-      }))
-    );
+    await saveToServer("instagram_images", images.map((url, i) => ({
+      image_url: url, sort_order: i,
+    })));
   };
 
   const updateCoupons = async (coupons: CouponData[]) => {
     setCoupons(coupons);
-    await saveToServer(
-      "coupons",
-      coupons.map((c) => ({
-        id: c.id,
-        code: c.code,
-        type: c.type,
-        value: c.value,
-        description: c.description,
-        is_active: true,
-      }))
-    );
+    await saveToServer("coupons", coupons.map((c) => ({
+      id: c.id, code: c.code, type: c.type, value: c.value,
+      description: c.description, is_active: true,
+    })));
   };
 
+  // 👇 আপডেটেড রিভিউ ফাংশন
   const addProductReview = async (productId: number, review: Review) => {
-    setProducts((prev) =>
-      prev.map((p) => {
-        if (p.id !== productId) return p;
-        const newReviews = [review, ...(p.reviews || [])];
-        const avgRating =
-          newReviews.reduce((sum, r) => sum + r.rating, 0) /
-          newReviews.length;
-        const updated = {
-          ...p,
-          reviews: newReviews,
-          reviews_count: newReviews.length,
-          rating: Number(avgRating.toFixed(1)),
-        };
-        saveToServer("products", [
-          {
-            id: updated.id,
-            name: updated.name,
-            category: updated.category,
-            sub_category: updated.subCategory,
-            brand: updated.brand,
-            team: updated.team,
-            type: updated.type,
-            price: updated.price,
-            image_url: updated.image_url,
-            images: updated.images || [],
-            rating: updated.rating,
-            reviews_count: updated.reviews_count,
-            description: updated.description,
-            sizes: updated.sizes || [],
-            reviews: updated.reviews || [],
-            stock: updated.stock || 0,
-            colors: updated.colors || [],
-            season: updated.season || null,
-            highlights: updated.highlights || [],
-            specifications: updated.specifications || [],
-            custom_fields: updated.customFields || [],
-            kit_type: updated.kitType || null,
-            player_name: updated.playerName || null,
-            player_number: updated.playerNumber || null,
-            is_player_edition: updated.isPlayerEdition || false,
-            sleeve_type: updated.sleeveType || null,
-            collar_type: updated.collarType || null,
-            fit_type: updated.fitType || null,
-            sponsor: updated.sponsor || null,
-            surface: updated.surface || null,
-            play_style: updated.playStyle || null,
-            boot_height: updated.bootHeight || null,
-            weight_grams: updated.weightGrams || null,
-            upper_material: updated.upperMaterial || null,
-            soleplate: updated.soleplate || null,
-            stud_type: updated.studType || null,
-            closure_type: updated.closureType || null,
-            collection: updated.collection || null,
-            release_year: updated.releaseYear || null,
-          },
-        ]).catch((e) => console.error("Failed to save review:", e));
-        return updated;
-      })
-    );
+    try {
+      // 1. Save to reviews table in Supabase
+      const { error: reviewError } = await supabase
+        .from("reviews")
+        .insert({
+          product_id: productId,
+          user_name: review.name,
+          rating: review.rating,
+          comment: review.comment,
+        });
+
+      if (reviewError) {
+        console.error("Error saving review:", reviewError.message);
+        throw new Error(reviewError.message);
+      }
+
+      // 2. Update local state with new review
+      setProducts((prev) =>
+        prev.map((p) => {
+          if (p.id !== productId) return p;
+          
+          const newReviews = [review, ...(p.reviews || [])];
+          const avgRating = newReviews.reduce((sum, r) => sum + r.rating, 0) / newReviews.length;
+          
+          const updatedProduct = {
+            ...p,
+            reviews: newReviews,
+            reviews_count: newReviews.length,
+            rating: Number(avgRating.toFixed(1)),
+          };
+
+          // 3. Optionally sync the aggregate rating to products table
+          // This ensures the rating is saved for future loads
+          supabase.from("products")
+            .update({ 
+              rating: updatedProduct.rating, 
+              reviews_count: updatedProduct.reviews_count 
+            })
+            .eq("id", productId)
+            .then(({ error }) => {
+              if (error) console.error("Failed to update aggregate:", error.message);
+            });
+
+          return updatedProduct;
+        })
+      );
+
+    } catch (err: any) {
+      console.error("Failed to add review:", err);
+      throw err;
+    }
   };
 
   const resetAll = async () => {
@@ -1028,31 +882,12 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
   return (
     <SiteDataContext.Provider
       value={{
-        siteConfig,
-        heroSlides,
-        offers,
-        features,
-        categories,
-        brands,
-        products,
-        teams,
-        testimonials,
-        instagramImages,
-        coupons,
-        updateSiteConfig,
-        updateHeroSlides,
-        updateOffers,
-        updateFeatures,
-        updateCategories,
-        updateBrands,
-        updateProducts,
-        updateTeams,
-        updateTestimonials,
-        updateInstagramImages,
-        updateCoupons,
-        addProductReview,
-        resetAll,
-        isHydrated,
+        siteConfig, heroSlides, offers, features, categories, brands,
+        products, teams, testimonials, instagramImages, coupons,
+        updateSiteConfig, updateHeroSlides, updateOffers, updateFeatures,
+        updateCategories, updateBrands, updateProducts, updateTeams,
+        updateTestimonials, updateInstagramImages, updateCoupons,
+        addProductReview, resetAll, isHydrated,
       }}
     >
       {children}
