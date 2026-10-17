@@ -91,7 +91,7 @@ export interface Product {
   id: number;
   name: string;
   category: string;
-  subCategory: string; // 👈 loose type — any string allowed
+  subCategory: string;
   brand: string;
   team: string;
   type: string;
@@ -111,6 +111,7 @@ export interface Product {
   highlights?: string[];
   specifications?: Specification[];
   customFields?: CustomField[];
+  deliveryTime?: string;
 
   // ============ Jersey-specific Fields ============
   kitType?: "Home" | "Away" | "Third" | "Goalkeeper";

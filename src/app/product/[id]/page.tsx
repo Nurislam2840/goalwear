@@ -406,6 +406,21 @@ export default function ProductDetailsPage() {
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-4 leading-relaxed">
               {product.description}
             </p>
+            
+            {/* 👇 Delivery Time Badge */}
+            <div className="mt-4 flex items-center gap-3 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/30 rounded-xl p-3 w-fit">
+            	<div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            		<Truck className="w-4 h-4 text-white" strokeWidth={2.5} />
+            	</div>
+            	<div>
+            	<p className="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider">
+            		Estimated Delivery
+            	</p>
+            	<p className="text-sm font-bold dark:text-white">
+            		{product.deliveryTime || "3-5 Business Days"}
+            	</p>
+            	</div>
+            </div>
 
             {/* HIGHLIGHTS */}
             {product.highlights && product.highlights.length > 0 && (

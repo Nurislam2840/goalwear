@@ -420,6 +420,7 @@ function dbToProduct(row: any): Product {
     highlights: row.highlights || [],
     specifications: row.specifications || [],
     customFields: row.custom_fields || [],
+    deliveryTime: row.delivery_time || "",
     kitType: row.kit_type || undefined,
     playerName: row.player_name || "",
     playerNumber: row.player_number || undefined,
@@ -769,6 +770,7 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
       sizes: p.sizes || [], reviews: p.reviews || [], stock: p.stock || 0,
       colors: p.colors || [], season: p.season || null, highlights: p.highlights || [],
       specifications: p.specifications || [], custom_fields: p.customFields || [],
+      delivery_time: p.deliveryTime || null,
       kit_type: p.kitType || null, player_name: p.playerName || null,
       player_number: p.playerNumber || null, is_player_edition: p.isPlayerEdition || false,
       sleeve_type: p.sleeveType || null, collar_type: p.collarType || null,
@@ -810,7 +812,7 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
     })));
   };
 
-  // 👇 আপডেটেড রিভিউ ফাংশন
+  // 👇 Update Review Function
   const addProductReview = async (productId: number, review: Review) => {
     try {
       // 1. Save to reviews table in Supabase

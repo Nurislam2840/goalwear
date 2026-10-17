@@ -117,6 +117,7 @@ export default function ProductFormModal({
     highlights: [],
     specifications: [],
     customFields: [],
+    deliveryTime: "",
     kitType: "Home",
     playerName: "",
     playerNumber: undefined,
@@ -654,6 +655,39 @@ export default function ProductFormModal({
               placeholder="2025/26"
               className="w-full px-4 py-3 bg-gray-50 dark:bg-brand-dark border border-gray-200 dark:border-brand-border rounded-xl text-sm dark:text-white outline-none focus:border-brand-green"
             />
+          </div>
+          
+          {/* Season & Delivery Time Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          	<div>
+          		<label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+          			Season
+          		</label>
+          		<input
+          			type="text"
+          			name="season"
+          			value={formData.season || ""}
+          			onChange={handleChange}
+          			placeholder="2025/26"
+          			className="w-full px-4 py-3 bg-gray-50 dark:bg-brand-dark border border-gray-200 dark:border-brand-border rounded-xl text-sm dark:text-white outline-none focus:border-brand-green"
+          		/>
+          	</div>
+          	<div>
+          		<label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+          			Delivery Time
+          		</label>
+          		<input
+          			type="text"
+          			name="deliveryTime"
+          			value={formData.deliveryTime || ""}
+          			onChange={handleChange}
+          			placeholder="e.g. 3-5 Business Days"
+          			className="w-full px-4 py-3 bg-gray-50 dark:bg-brand-dark border border-gray-200 dark:border-brand-border rounded-xl text-sm dark:text-white outline-none focus:border-brand-green"
+          		/>
+          		<p className="text-[10px] text-gray-400 mt-1">
+          			Leave empty for default "3-5 days"
+          		</p>
+          	</div>
           </div>
 
           {/* Price Row */}
