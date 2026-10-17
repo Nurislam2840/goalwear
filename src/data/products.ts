@@ -70,6 +70,7 @@ export interface Review {
   rating: number;
   comment: string;
   date: string;
+  image_url?: string; // 👈 নতুন: রিভিউ ছবি
 }
 
 export interface ColorOption {
@@ -111,7 +112,7 @@ export interface Product {
   highlights?: string[];
   specifications?: Specification[];
   customFields?: CustomField[];
-  deliveryTime?: string;
+  deliveryTime?: string; // 👈 নতুন: ডেলিভারি টাইম
 
   // ============ Jersey-specific Fields ============
   kitType?: "Home" | "Away" | "Third" | "Goalkeeper";
@@ -295,19 +296,6 @@ export function getDefaultColorsForProduct(
 // ================================================================
 // MOCK PRODUCTS — DISABLED
 // ================================================================
-// Demo products are no longer generated.
-// Supabase is now the single source of truth for products.
-//
-// To add products:
-//   1. Login to admin panel: /admin/login
-//   2. Go to /admin/products
-//   3. Click "Add New Product"
-//
-// The `mockProducts` export is kept as an empty array for backward
-// compatibility with any code that still imports it. It will be
-// removed in a future version.
-// ================================================================
-
 export const mockProducts: Product[] = [];
 
 // ============ Helper Functions ============

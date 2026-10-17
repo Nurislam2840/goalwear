@@ -1,7 +1,14 @@
 // src/context/CouponContext.tsx
 "use client";
 
-import { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  ReactNode,
+} from "react";
 
 export interface Coupon {
   code: string;
@@ -12,10 +19,30 @@ export interface Coupon {
 
 // 👇 এখানে কুপন যোগ/এডিট করবেন
 export const AVAILABLE_COUPONS: Coupon[] = [
-  { code: "GOAL10", type: "percent", value: 10, description: "10% off your order" },
-  { code: "WELCOME20", type: "percent", value: 20, description: "20% off for new customers" },
-  { code: "FLAT15", type: "fixed", value: 15, description: "$15 off your order" },
-  { code: "FREESHIP", type: "shipping", value: 0, description: "Free shipping" },
+  {
+    code: "GOAL10",
+    type: "percent",
+    value: 10,
+    description: "10% off your order",
+  },
+  {
+    code: "WELCOME20",
+    type: "percent",
+    value: 20,
+    description: "20% off for new customers",
+  },
+  {
+    code: "FLAT15",
+    type: "fixed",
+    value: 15,
+    description: "$15 off your order",
+  },
+  {
+    code: "FREESHIP",
+    type: "shipping",
+    value: 0,
+    description: "Free shipping",
+  },
 ];
 
 interface CouponContextType {
@@ -74,14 +101,13 @@ export function CouponProvider({ children }: { children: ReactNode }) {
     setAppliedCoupon(null);
   };
 
-  // 👇 Fixed: Math.floor — সবসময় নিচে round করব
-  // 10% of $99.99 = 9.999 → $9.99 (not $10.00)
+  // 👇 Fixed: Math.round — standard rounding (10% of $99.99 = $10.00)
   const calculateDiscount = (subtotal: number): number => {
     if (!appliedCoupon) return 0;
 
     if (appliedCoupon.type === "percent") {
       const rawDiscount = (subtotal * appliedCoupon.value) / 100;
-      return Math.floor(rawDiscount * 100) / 100;
+      return Math.round(rawDiscount * 100) / 100;
     }
     if (appliedCoupon.type === "fixed") {
       return Math.min(appliedCoupon.value, subtotal);
@@ -91,7 +117,13 @@ export function CouponProvider({ children }: { children: ReactNode }) {
 
   return (
     <CouponContext.Provider
-      value={{ appliedCoupon, applyCoupon, removeCoupon, calculateDiscount, isHydrated }}
+      value={{
+        appliedCoupon,
+        applyCoupon,
+        removeCoupon,
+        calculateDiscount,
+        isHydrated,
+      }}
     >
       {children}
     </CouponContext.Provider>

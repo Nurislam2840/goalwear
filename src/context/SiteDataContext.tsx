@@ -133,6 +133,7 @@ interface SiteDataContextType {
   updateInstagramImages: (images: string[]) => Promise<void>;
   updateCoupons: (coupons: CouponData[]) => Promise<void>;
   addProductReview: (productId: number, review: Review) => Promise<void>;
+  reduceStock: (items: { id: number; quantity: number }[]) => Promise<void>;
   resetAll: () => Promise<void>;
   isHydrated: boolean;
 }
@@ -165,8 +166,7 @@ const defaultHeroSlides: HeroSlide[] = [
     quote: "Speed. Precision. Greatness.",
     description:
       "Top jerseys & football shoes for every player. Premium quality gear delivered to your doorstep.",
-    image:
-      "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1600&auto=format&fit=crop",
+    image: "",
     cta: "/shop",
   },
   {
@@ -178,8 +178,7 @@ const defaultHeroSlides: HeroSlide[] = [
     quote: "Talent without working hard is nothing.",
     description:
       "Elite football boots built for champions. Feel the power in every step.",
-    image:
-      "https://images.unsplash.com/photo-1553778263-73a83bab9b0c?q=80&w=1600&auto=format&fit=crop",
+    image: "",
     cta: "/shoes",
   },
   {
@@ -191,8 +190,7 @@ const defaultHeroSlides: HeroSlide[] = [
     quote: "You have to fight to reach your dream.",
     description:
       "Jerseys and boots inspired by the greatest playmaker. Pure magic on the pitch.",
-    image:
-      "https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=1600&auto=format&fit=crop",
+    image: "",
     cta: "/jerseys",
   },
   {
@@ -204,8 +202,7 @@ const defaultHeroSlides: HeroSlide[] = [
     quote: "Hard work beats talent.",
     description:
       "Precision boots and jerseys for the modern striker. Score more, win more.",
-    image:
-      "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?q=80&w=1600&auto=format&fit=crop",
+    image: "",
     cta: "/shop",
   },
 ];
@@ -227,8 +224,7 @@ const defaultOffers: Offer[] = [
     description:
       "Limited time offer! Grab your favorite jerseys, boots, and gear at unbeatable prices. Use code GOAL10 for extra 10% off.",
     couponCode: "GOAL10",
-    image:
-      "https://images.unsplash.com/photo-1553778263-73a83bab9b0c?q=80&w=1600&auto=format&fit=crop",
+    image: "",
     cta: "/shop",
     endDate: getDefaultEndDate(),
     isActive: true,
@@ -268,16 +264,14 @@ const defaultCategories: Category[] = [
     name: "Jerseys",
     slug: "jerseys",
     desc: "Club & National Teams",
-    image:
-      "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
   {
     id: 2,
     name: "Football Shoes",
     slug: "shoes",
     desc: "Boots & Cleats",
-    image:
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
 ];
 
@@ -349,14 +343,7 @@ const defaultTestimonials: Testimonial[] = [
   },
 ];
 
-const defaultInstagramImages = [
-  "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=400&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1553778263-73a83bab9b0c?q=80&w=400&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=400&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?q=80&w=400&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=400&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?q=80&w=400&auto=format&fit=crop",
-];
+const defaultInstagramImages: string[] = [];
 
 const defaultCoupons: CouponData[] = [
   {
@@ -592,13 +579,11 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
           supabase.from("reviews").select("*").order("created_at", { ascending: false }),
         ]);
 
-        // Format reviews into products
         const allReviews = reviewsRes.data || [];
         
         if (productsRes.data && productsRes.data.length > 0) {
           const formattedProducts = productsRes.data.map((row) => {
             const product = dbToProduct(row);
-            // Attach real reviews from reviews table
             const productReviews = allReviews
               .filter((r: any) => r.product_id === product.id)
               .map((r: any) => ({
@@ -610,18 +595,22 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
                   day: "numeric",
                   year: "numeric",
                 }),
+                image_url: r.image_url || "",
               }));
             
-            // Combine with any legacy reviews in JSON + new table reviews
             const legacyReviews = product.reviews || [];
             const combinedReviews = [...productReviews, ...legacyReviews];
 
-            // Calculate avg if we have real reviews
             let finalRating = product.rating;
             let finalCount = product.reviews_count;
             if (combinedReviews.length > 0) {
               finalCount = combinedReviews.length;
-              finalRating = Number((combinedReviews.reduce((sum, r) => sum + r.rating, 0) / finalCount).toFixed(1));
+              finalRating = Number(
+                (
+                  combinedReviews.reduce((sum, r) => sum + r.rating, 0) /
+                  finalCount
+                ).toFixed(1)
+              );
             }
 
             return {
@@ -675,7 +664,7 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
           });
         }
 
-        console.log("🎉 All data loaded");
+        console.log("🎉 All data loaded from Supabase");
       } catch (err) {
         console.error("❌ Failed to load data:", err);
         setProducts([]);
@@ -722,122 +711,211 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
 
   const updateHeroSlides = async (slides: HeroSlide[]) => {
     setHeroSlides(slides);
-    await saveToServer("hero_slides", slides.map((s, i) => ({
-      id: s.id, badge: s.badge, title: s.title, highlight: s.highlight,
-      player: s.player, quote: s.quote, description: s.description,
-      image: s.image, cta: s.cta, sort_order: i,
-    })));
+    await saveToServer(
+      "hero_slides",
+      slides.map((s, i) => ({
+        id: s.id,
+        badge: s.badge,
+        title: s.title,
+        highlight: s.highlight,
+        player: s.player,
+        quote: s.quote,
+        description: s.description,
+        image: s.image,
+        cta: s.cta,
+        sort_order: i,
+      }))
+    );
   };
 
   const updateOffers = async (offers: Offer[]) => {
     setOffers(offers);
-    await saveToServer("offers", offers.map((o) => ({
-      id: o.id, badge: o.badge, title: o.title, highlight: o.highlight,
-      discount_text: o.discountText, description: o.description,
-      coupon_code: o.couponCode, image: o.image, cta: o.cta,
-      end_date: o.endDate, is_active: o.isActive,
-    })));
+    await saveToServer(
+      "offers",
+      offers.map((o) => ({
+        id: o.id,
+        badge: o.badge,
+        title: o.title,
+        highlight: o.highlight,
+        discount_text: o.discountText,
+        description: o.description,
+        coupon_code: o.couponCode,
+        image: o.image,
+        cta: o.cta,
+        end_date: o.endDate,
+        is_active: o.isActive,
+      }))
+    );
   };
 
   const updateFeatures = async (features: Feature[]) => {
     setFeatures(features);
-    await saveToServer("features", features.map((f, i) => ({
-      id: f.id, title: f.title, description: f.desc, icon: f.icon, sort_order: i,
-    })));
+    await saveToServer(
+      "features",
+      features.map((f, i) => ({
+        id: f.id,
+        title: f.title,
+        description: f.desc,
+        icon: f.icon,
+        sort_order: i,
+      }))
+    );
   };
 
   const updateCategories = async (categories: Category[]) => {
     setCategories(categories);
-    await saveToServer("categories", categories.map((c, i) => ({
-      id: c.id, name: c.name, slug: c.slug, description: c.desc, image: c.image, sort_order: i,
-    })));
+    await saveToServer(
+      "categories",
+      categories.map((c, i) => ({
+        id: c.id,
+        name: c.name,
+        slug: c.slug,
+        description: c.desc,
+        image: c.image,
+        sort_order: i,
+      }))
+    );
   };
 
   const updateBrands = async (brands: Brand[]) => {
     setBrands(brands);
-    await saveToServer("brands", brands.map((b, i) => ({
-      id: b.id, name: b.name, slug: b.slug, tagline: b.tagline, logo: b.logo || null, sort_order: i,
-    })));
+    await saveToServer(
+      "brands",
+      brands.map((b, i) => ({
+        id: b.id,
+        name: b.name,
+        slug: b.slug,
+        tagline: b.tagline,
+        logo: b.logo || null,
+        sort_order: i,
+      }))
+    );
   };
 
   const updateProducts = async (products: Product[]) => {
     setProducts(products);
-    await saveToServer("products", products.map((p) => ({
-      id: p.id, name: p.name, category: p.category, sub_category: p.subCategory,
-      brand: p.brand, team: p.team, type: p.type, price: p.price,
-      image_url: p.image_url, images: p.images || [], rating: p.rating || 0,
-      reviews_count: p.reviews_count || 0, description: p.description,
-      sizes: p.sizes || [], reviews: p.reviews || [], stock: p.stock || 0,
-      colors: p.colors || [], season: p.season || null, highlights: p.highlights || [],
-      specifications: p.specifications || [], custom_fields: p.customFields || [],
-      delivery_time: p.deliveryTime || null,
-      kit_type: p.kitType || null, player_name: p.playerName || null,
-      player_number: p.playerNumber || null, is_player_edition: p.isPlayerEdition || false,
-      sleeve_type: p.sleeveType || null, collar_type: p.collarType || null,
-      fit_type: p.fitType || null, sponsor: p.sponsor || null,
-      surface: p.surface || null, play_style: p.playStyle || null,
-      boot_height: p.bootHeight || null, weight_grams: p.weightGrams || null,
-      upper_material: p.upperMaterial || null, soleplate: p.soleplate || null,
-      stud_type: p.studType || null, closure_type: p.closureType || null,
-      collection: p.collection || null, release_year: p.releaseYear || null,
-    })));
+    await saveToServer(
+      "products",
+      products.map((p) => ({
+        id: p.id,
+        name: p.name,
+        category: p.category,
+        sub_category: p.subCategory,
+        brand: p.brand,
+        team: p.team,
+        type: p.type,
+        price: p.price,
+        image_url: p.image_url,
+        images: p.images || [],
+        rating: p.rating || 0,
+        reviews_count: p.reviews_count || 0,
+        description: p.description,
+        sizes: p.sizes || [],
+        reviews: p.reviews || [],
+        stock: p.stock || 0,
+        colors: p.colors || [],
+        season: p.season || null,
+        highlights: p.highlights || [],
+        specifications: p.specifications || [],
+        custom_fields: p.customFields || [],
+        delivery_time: p.deliveryTime || null,
+        kit_type: p.kitType || null,
+        player_name: p.playerName || null,
+        player_number: p.playerNumber || null,
+        is_player_edition: p.isPlayerEdition || false,
+        sleeve_type: p.sleeveType || null,
+        collar_type: p.collarType || null,
+        fit_type: p.fitType || null,
+        sponsor: p.sponsor || null,
+        surface: p.surface || null,
+        play_style: p.playStyle || null,
+        boot_height: p.bootHeight || null,
+        weight_grams: p.weightGrams || null,
+        upper_material: p.upperMaterial || null,
+        soleplate: p.soleplate || null,
+        stud_type: p.studType || null,
+        closure_type: p.closureType || null,
+        collection: p.collection || null,
+        release_year: p.releaseYear || null,
+      }))
+    );
   };
 
   const updateTeams = async (teams: Team[]) => {
     setTeams(teams);
-    await saveToServer("teams", teams.map((t, i) => ({
-      id: t.id, name: t.name, logo: t.logo, bg_color: t.bgColor, sort_order: i,
-    })));
+    await saveToServer(
+      "teams",
+      teams.map((t, i) => ({
+        id: t.id,
+        name: t.name,
+        logo: t.logo,
+        bg_color: t.bgColor,
+        sort_order: i,
+      }))
+    );
   };
 
   const updateTestimonials = async (testimonials: Testimonial[]) => {
     setTestimonials(testimonials);
-    await saveToServer("testimonials", testimonials.map((t, i) => ({
-      id: t.id, name: t.name, role: t.role, avatar: t.avatar, text: t.text, rating: t.rating, sort_order: i,
-    })));
+    await saveToServer(
+      "testimonials",
+      testimonials.map((t, i) => ({
+        id: t.id,
+        name: t.name,
+        role: t.role,
+        avatar: t.avatar,
+        text: t.text,
+        rating: t.rating,
+        sort_order: i,
+      }))
+    );
   };
 
   const updateInstagramImages = async (images: string[]) => {
     setInstagramImages(images);
-    await saveToServer("instagram_images", images.map((url, i) => ({
-      image_url: url, sort_order: i,
-    })));
+    await saveToServer(
+      "instagram_images",
+      images.map((url, i) => ({
+        image_url: url,
+        sort_order: i,
+      }))
+    );
   };
 
   const updateCoupons = async (coupons: CouponData[]) => {
     setCoupons(coupons);
-    await saveToServer("coupons", coupons.map((c) => ({
-      id: c.id, code: c.code, type: c.type, value: c.value,
-      description: c.description, is_active: true,
-    })));
+    await saveToServer(
+      "coupons",
+      coupons.map((c) => ({
+        id: c.id,
+        code: c.code,
+        type: c.type,
+        value: c.value,
+        description: c.description,
+        is_active: true,
+      }))
+    );
   };
 
-  // 👇 Update Review Function
   const addProductReview = async (productId: number, review: Review) => {
     try {
-      // 1. Save to reviews table in Supabase
-      const { error: reviewError } = await supabase
-        .from("reviews")
-        .insert({
-          product_id: productId,
-          user_name: review.name,
-          rating: review.rating,
-          comment: review.comment,
-        });
+      const { error: reviewError } = await supabase.from("reviews").insert({
+        product_id: productId,
+        user_name: review.name,
+        rating: review.rating,
+        comment: review.comment,
+        image_url: review.image_url || null,
+      });
 
-      if (reviewError) {
-        console.error("Error saving review:", reviewError.message);
-        throw new Error(reviewError.message);
-      }
+      if (reviewError) throw new Error(reviewError.message);
 
-      // 2. Update local state with new review
       setProducts((prev) =>
         prev.map((p) => {
           if (p.id !== productId) return p;
-          
           const newReviews = [review, ...(p.reviews || [])];
-          const avgRating = newReviews.reduce((sum, r) => sum + r.rating, 0) / newReviews.length;
-          
+          const avgRating =
+            newReviews.reduce((sum, r) => sum + r.rating, 0) /
+            newReviews.length;
           const updatedProduct = {
             ...p,
             reviews: newReviews,
@@ -845,12 +923,11 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
             rating: Number(avgRating.toFixed(1)),
           };
 
-          // 3. Optionally sync the aggregate rating to products table
-          // This ensures the rating is saved for future loads
-          supabase.from("products")
-            .update({ 
-              rating: updatedProduct.rating, 
-              reviews_count: updatedProduct.reviews_count 
+          supabase
+            .from("products")
+            .update({
+              rating: updatedProduct.rating,
+              reviews_count: updatedProduct.reviews_count,
             })
             .eq("id", productId)
             .then(({ error }) => {
@@ -860,10 +937,40 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
           return updatedProduct;
         })
       );
-
     } catch (err: any) {
       console.error("Failed to add review:", err);
       throw err;
+    }
+  };
+
+  // 👇 নতুন ফাংশন: অর্ডার হলে স্টক কমানো
+  const reduceStock = async (items: { id: number; quantity: number }[]) => {
+    try {
+      for (const item of items) {
+        const product = products.find((p) => p.id === item.id);
+        if (product) {
+          const newStock = Math.max(0, (product.stock || 0) - item.quantity);
+          await supabase
+            .from("products")
+            .update({ stock: newStock })
+            .eq("id", item.id);
+        }
+      }
+
+      setProducts((prev) =>
+        prev.map((p) => {
+          const orderedItem = items.find((i) => i.id === p.id);
+          if (orderedItem) {
+            return {
+              ...p,
+              stock: Math.max(0, (p.stock || 0) - orderedItem.quantity),
+            };
+          }
+          return p;
+        })
+      );
+    } catch (err) {
+      console.error("Failed to reduce stock:", err);
     }
   };
 
@@ -884,12 +991,32 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
   return (
     <SiteDataContext.Provider
       value={{
-        siteConfig, heroSlides, offers, features, categories, brands,
-        products, teams, testimonials, instagramImages, coupons,
-        updateSiteConfig, updateHeroSlides, updateOffers, updateFeatures,
-        updateCategories, updateBrands, updateProducts, updateTeams,
-        updateTestimonials, updateInstagramImages, updateCoupons,
-        addProductReview, resetAll, isHydrated,
+        siteConfig,
+        heroSlides,
+        offers,
+        features,
+        categories,
+        brands,
+        products,
+        teams,
+        testimonials,
+        instagramImages,
+        coupons,
+        updateSiteConfig,
+        updateHeroSlides,
+        updateOffers,
+        updateFeatures,
+        updateCategories,
+        updateBrands,
+        updateProducts,
+        updateTeams,
+        updateTestimonials,
+        updateInstagramImages,
+        updateCoupons,
+        addProductReview,
+        reduceStock,
+        resetAll,
+        isHydrated,
       }}
     >
       {children}

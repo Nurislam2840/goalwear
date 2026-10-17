@@ -3,15 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { cookies } from "next/headers";
 
-// Helper: get user id from SECURE httpOnly-cookie-adjacent cookie only
+// Helper: get user id from secure cookie ONLY (no header spoofing)
 async function getUserId(_req: NextRequest): Promise<string | null> {
   const cookieStore = await cookies();
   const userCookie = cookieStore.get("goalwear-user")?.value;
 
-  if (!userCookie) {
-    console.log("[orders API] ❌ No user cookie");
-    return null;
-  }
+  if (!userCookie) return null;
 
   try {
     const parsed = JSON.parse(userCookie);
@@ -91,18 +88,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 🔒 Recompute total server-side from DB prices
+    // 🔒 Recompute total server-side from DB prices (prevents price manipulation)
     const productIds = items
       .map((i: any) => Number(i.id))
       .filter((n: number) => Number.isFinite(n) && n > 0);
 
     const { data: dbProducts, error: dbError } = await supabaseAdmin
       .from("products")
-      .select("id, price, stock")
+      .select("id, price")
       .in("id", productIds);
 
     if (dbError) {
-      console.error("[POST orders] DB fetch error:", dbError.message);
       return NextResponse.json(
         { error: "Failed to verify products" },
         { status: 500 }
@@ -138,13 +134,6 @@ export async function POST(req: NextRequest) {
 
     verifiedTotal = Math.round(verifiedTotal * 100) / 100;
 
-    // Optionally accept client total only if it matches (for logging)
-    if (typeof total === "number" && Math.abs(total - verifiedTotal) > 0.01) {
-      console.warn(
-        `[POST orders] ⚠️ Client total ${total} != server total ${verifiedTotal}`
-      );
-    }
-
     const orderId = `GW-${Date.now().toString().slice(-8)}`;
 
     const { data, error } = await supabaseAdmin
@@ -166,19 +155,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const order = {
-      id: data.id,
-      date: data.created_at,
-      items: data.items || [],
-      total: Number(data.total),
-      status: data.status,
-      customerInfo: data.customer_info || {},
-      paymentMethod: data.payment_method,
-    };
-
-    console.log("[POST orders] ✅ Order created:", orderId);
-
-    return NextResponse.json({ success: true, order });
+    return NextResponse.json({
+      success: true,
+      order: {
+        id: data.id,
+        date: data.created_at,
+        items: data.items || [],
+        total: Number(data.total),
+        status: data.status,
+        customerInfo: data.customer_info || {},
+        paymentMethod: data.payment_method,
+      },
+    });
   } catch (err: any) {
     console.error("[POST orders] Error:", err.message);
     return NextResponse.json({ error: err.message }, { status: 500 });

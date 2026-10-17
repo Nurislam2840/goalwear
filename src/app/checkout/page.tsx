@@ -9,6 +9,7 @@ import { useCoupon } from "@/context/CouponContext";
 import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
 import { useAddresses, Address } from "@/context/AddressContext";
+import { useSiteData } from "@/context/SiteDataContext";
 import {
   ArrowLeft,
   Loader2,
@@ -32,6 +33,7 @@ const LABEL_ICONS: Record<string, any> = {
 export default function CheckoutPage() {
   const { cart, cartTotal, clearCart } = useCart();
   const { addOrder } = useOrders();
+  const { reduceStock } = useSiteData();
   const { appliedCoupon, calculateDiscount } = useCoupon();
   const { user, isAuthenticated, isHydrated: authHydrated } = useAuth();
   const { addresses, isHydrated: addrHydrated } = useAddresses();
@@ -100,9 +102,6 @@ export default function CheckoutPage() {
     setError("");
 
     try {
-      // ============================================
-      // COD — Save order to Supabase
-      // ============================================
       if (paymentMethod === "cod") {
         if (!isAuthenticated) {
           showToast("Please login to place an order", "error");
@@ -127,6 +126,9 @@ export default function CheckoutPage() {
             : "Cash on Delivery",
         });
 
+        // 👇 অর্ডার সফল হলে স্টক কমানো
+        await reduceStock(cart.map((item) => ({ id: item.id, quantity: item.quantity })));
+
         clearCart();
 
         showToast(`Order ${orderId} placed successfully!`, "success");
@@ -134,9 +136,6 @@ export default function CheckoutPage() {
         return;
       }
 
-      // ============================================
-      // CARD — Server-side Stripe (SECURE)
-      // ============================================
       const cartItemsForServer = cart.map((item) => ({
         id: item.id,
         quantity: item.quantity,
@@ -150,7 +149,7 @@ export default function CheckoutPage() {
           items: cartItemsForServer,
           customerInfo: formData,
           couponCode: appliedCoupon?.code || "",
-          userId: user?.id || "", // 👈 Send user ID
+          userId: user?.id || "",
         }),
       });
 
@@ -209,7 +208,6 @@ export default function CheckoutPage() {
           className="grid grid-cols-1 md:grid-cols-3 gap-8"
         >
           <div className="md:col-span-2 space-y-6">
-            {/* Saved Addresses */}
             {isAuthenticated && addresses.length > 0 && (
               <div className="bg-brand-green/5 dark:bg-brand-green/5 p-6 rounded-2xl border-2 border-brand-green/30">
                 <div className="flex items-center justify-between mb-4">
@@ -289,7 +287,6 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* Shipping Information */}
             <div className="bg-gray-50 dark:bg-brand-card p-6 rounded-2xl border border-gray-100 dark:border-brand-border">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold dark:text-white">
@@ -380,7 +377,6 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Payment Method */}
             <div className="bg-gray-50 dark:bg-brand-card p-6 rounded-2xl border border-gray-100 dark:border-brand-border">
               <h2 className="text-lg font-bold dark:text-white mb-4">
                 Payment Method
@@ -440,7 +436,6 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Order Summary */}
           <div className="bg-gray-50 dark:bg-brand-card p-6 rounded-2xl border border-gray-100 dark:border-brand-border h-fit">
             <h2 className="text-lg font-bold dark:text-white mb-4">
               Your Order

@@ -13,12 +13,11 @@ import {
 import { useSiteData } from "@/context/SiteDataContext";
 
 export default function HeroSlider() {
-  const { heroSlides } = useSiteData();
+  const { heroSlides, isHydrated } = useSiteData();
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  // Auto-slide every 7 seconds
   useEffect(() => {
     if (paused || heroSlides.length === 0) return;
     const timer = setInterval(() => {
@@ -31,10 +30,34 @@ export default function HeroSlider() {
     return () => clearInterval(timer);
   }, [paused, heroSlides.length]);
 
-  if (heroSlides.length === 0) return null;
+  // 👇 লোডিং স্কেলেটন
+  if (!isHydrated || heroSlides.length === 0) {
+    return (
+      <section className="max-w-7xl mx-auto px-4 mt-6">
+        <div className="relative bg-gray-200 dark:bg-brand-card rounded-3xl overflow-hidden animate-pulse w-full aspect-video min-h-[400px] md:min-h-[500px] flex items-center justify-center border border-gray-100 dark:border-brand-border">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-12 h-12 border-4 border-brand-green border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-xs font-bold text-gray-500 dark:text-gray-400">
+              Loading Premium Gear...
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   const safeCurrent = current >= heroSlides.length ? 0 : current;
   const slide = heroSlides[safeCurrent];
+
+  if (!slide.image) {
+    return (
+      <section className="max-w-7xl mx-auto px-4 mt-6">
+        <div className="relative bg-black rounded-3xl overflow-hidden w-full aspect-video min-h-[400px] md:min-h-[500px] flex items-center justify-center">
+          <p className="text-white">Image not available</p>
+        </div>
+      </section>
+    );
+  }
 
   const goToSlide = (index: number) => {
     setIsTransitioning(true);
@@ -46,9 +69,7 @@ export default function HeroSlider() {
 
   const nextSlide = () => goToSlide((safeCurrent + 1) % heroSlides.length);
   const prevSlide = () =>
-    goToSlide(
-      (safeCurrent - 1 + heroSlides.length) % heroSlides.length
-    );
+    goToSlide((safeCurrent - 1 + heroSlides.length) % heroSlides.length);
 
   return (
     <section className="max-w-7xl mx-auto px-4 mt-6">
@@ -57,9 +78,7 @@ export default function HeroSlider() {
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
       >
-        {/* 16:9 Aspect Ratio Container */}
         <div className="relative w-full aspect-video min-h-[400px] md:min-h-[500px]">
-          {/* Background Image with Zoom Effect */}
           <div
             key={`img-${slide.id}`}
             className={`absolute inset-0 transition-all duration-[1500ms] ease-out ${
@@ -78,11 +97,9 @@ export default function HeroSlider() {
             />
           </div>
 
-          {/* Gradient Overlays */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/10 to-transparent"></div>
 
-          {/* Content Overlay */}
           <div className="relative h-full flex items-center">
             <div className="w-full px-6 md:px-12 lg:px-16 py-8">
               <div
@@ -92,13 +109,11 @@ export default function HeroSlider() {
                     : "opacity-100 translate-y-0"
                 }`}
               >
-                {/* Badge */}
                 <div className="inline-flex items-center gap-2 bg-brand-green text-black text-[10px] md:text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider mb-4 shadow-lg shadow-brand-green/30">
                   <Sparkles className="w-3 h-3" strokeWidth={2.5} />
                   {slide.badge}
                 </div>
 
-                {/* Title with bright gradient (dark bg) */}
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-[1.05] tracking-tight mb-3 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
                   {slide.title}{" "}
                   <span className="text-gradient-bright drop-shadow-none">
@@ -106,7 +121,6 @@ export default function HeroSlider() {
                   </span>
                 </h1>
 
-                {/* Player Name */}
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-8 h-8 rounded-full bg-brand-green text-black flex items-center justify-center text-xs font-bold shadow-lg shadow-brand-green/30">
                     {slide.player.charAt(0)}
@@ -116,17 +130,14 @@ export default function HeroSlider() {
                   </p>
                 </div>
 
-                {/* Quote */}
                 <p className="text-xs md:text-sm italic text-gray-100 mb-4 border-l-2 border-brand-green pl-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
                   "{slide.quote}"
                 </p>
 
-                {/* Description */}
                 <p className="text-gray-100 text-sm md:text-base mb-6 max-w-lg leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
                   {slide.description}
                 </p>
 
-                {/* CTA Buttons */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                   <Link
                     href={slide.cta || "/shop"}
@@ -145,7 +156,6 @@ export default function HeroSlider() {
             </div>
           </div>
 
-          {/* Navigation Arrows */}
           {heroSlides.length > 1 && (
             <>
               <button
@@ -165,7 +175,6 @@ export default function HeroSlider() {
             </>
           )}
 
-          {/* Slide Indicators */}
           {heroSlides.length > 1 && (
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
               {heroSlides.map((s, idx) => (
@@ -183,7 +192,6 @@ export default function HeroSlider() {
             </div>
           )}
 
-          {/* Slide Counter */}
           <div className="absolute top-6 right-6 bg-black/50 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 z-20 hidden md:block">
             <p className="text-xs font-bold text-white">
               {String(safeCurrent + 1).padStart(2, "0")} /{" "}

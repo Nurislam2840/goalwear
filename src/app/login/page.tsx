@@ -3,9 +3,20 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Lock, Mail, User as UserIcon, Eye, EyeOff, ArrowLeft, Plus, Loader2, AlertCircle } from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User as UserIcon,
+  Eye,
+  EyeOff,
+  ArrowLeft,
+  Plus,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -15,6 +26,7 @@ export default function LoginPage() {
   const [inlineError, setInlineError] = useState("");
   const { login, signup } = useAuth();
   const { showToast } = useToast();
+  const router = useRouter();
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -32,9 +44,8 @@ export default function LoginPage() {
       const result = await login(loginEmail.trim(), loginPassword);
       if (result.success) {
         showToast("Welcome back!", "success");
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 400);
+        router.push("/");
+        router.refresh();
       } else {
         setInlineError(result.error || "Login failed");
         showToast(result.error || "Login failed", "error");
@@ -74,9 +85,8 @@ export default function LoginPage() {
 
       if (result.success) {
         showToast("Account created! Welcome 🎉", "success");
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 400);
+        router.push("/");
+        router.refresh();
       } else {
         setInlineError(result.error || "Signup failed");
         showToast(result.error || "Signup failed", "error");
@@ -90,7 +100,6 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-brand-dark dark:via-brand-dark dark:to-brand-card flex flex-col items-center justify-center p-4 relative py-12">
-      
       <Link
         href="/"
         className="absolute top-6 left-6 flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-brand-green transition-colors z-10"
@@ -110,13 +119,14 @@ export default function LoginPage() {
       {inlineError && (
         <div className="w-full max-w-md mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-3 flex items-center gap-2 animate-slide-up">
           <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-          <p className="text-xs font-semibold text-red-600 dark:text-red-400">{inlineError}</p>
+          <p className="text-xs font-semibold text-red-600 dark:text-red-400">
+            {inlineError}
+          </p>
         </div>
       )}
 
       <div className="flip-container">
         <div className={`flip-inner ${isFlipped ? "flipped" : ""}`}>
-          
           {/* ============ LOGIN PANEL ============ */}
           <div className="form-panel">
             <div className="w-16 h-16 rounded-2xl bg-brand-green flex items-center justify-center mx-auto mb-5">
@@ -158,16 +168,22 @@ export default function LoginPage() {
                   onClick={() => setShowLoginPassword(!showLoginPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-green z-10"
                 >
-                  {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showLoginPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </button>
               </div>
 
               <div className="flex items-center justify-between text-xs">
                 <label className="flex items-center gap-2 cursor-pointer text-gray-600 dark:text-gray-400">
-                  <input type="checkbox" className="accent-brand-green w-3.5 h-3.5" />
+                  <input
+                    type="checkbox"
+                    className="accent-brand-green w-3.5 h-3.5"
+                  />
                   Remember me
                 </label>
-                {/* 👇 Forgot Password link — এখন /forgot-password এ যাবে */}
                 <Link
                   href="/forgot-password"
                   className="bg-brand-green text-black font-bold px-3 py-1.5 rounded-full hover:opacity-90 transition-opacity text-[11px]"
@@ -192,7 +208,10 @@ export default function LoginPage() {
                 Don't have an account?
               </p>
               <button
-                onClick={() => { setIsFlipped(true); setInlineError(""); }}
+                onClick={() => {
+                  setIsFlipped(true);
+                  setInlineError("");
+                }}
                 className="w-12 h-12 bg-brand-green rounded-full flex items-center justify-center mx-auto hover:scale-110 transition-transform shadow-lg shadow-brand-green/30"
                 aria-label="Go to signup"
               >
@@ -255,11 +274,19 @@ export default function LoginPage() {
                   onClick={() => setShowSignupPassword(!showSignupPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-green z-10"
                 >
-                  {showSignupPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showSignupPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
                 </button>
               </div>
 
-              <button type="submit" disabled={isLoading} className="flip-btn mt-2">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="flip-btn mt-2"
+              >
                 {isLoading ? (
                   <span className="flex items-center justify-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" /> Creating...
@@ -275,7 +302,10 @@ export default function LoginPage() {
                 Already have an account?
               </p>
               <button
-                onClick={() => { setIsFlipped(false); setInlineError(""); }}
+                onClick={() => {
+                  setIsFlipped(false);
+                  setInlineError("");
+                }}
                 className="bg-brand-green text-black font-bold px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity text-xs shadow-lg shadow-brand-green/30"
               >
                 Login Instead

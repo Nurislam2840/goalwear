@@ -51,10 +51,15 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // ============================================
-// Cookie helper for server-side API routes
+// Cookie helper — with Secure flag for HTTPS
 // ============================================
 function setUserCookie(user: User | null) {
   if (typeof document === "undefined") return;
+
+  const isSecure =
+    typeof window !== "undefined" && window.location.protocol === "https:"
+      ? "; Secure"
+      : "";
 
   if (user) {
     const maxAge = 7 * 24 * 60 * 60;
@@ -64,9 +69,9 @@ function setUserCookie(user: User | null) {
         email: user.email,
         name: user.name,
       })
-    )}; path=/; max-age=${maxAge}; SameSite=Lax`;
+    )}; path=/; max-age=${maxAge}; SameSite=Lax${isSecure}`;
   } else {
-    document.cookie = "goalwear-user=; path=/; max-age=0; SameSite=Lax";
+    document.cookie = `goalwear-user=; path=/; max-age=0; SameSite=Lax${isSecure}`;
   }
 }
 
@@ -97,7 +102,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isHydrated, setIsHydrated] = useState(false);
   const hasLoadedRef = useRef(false);
 
-  // Initial load + listener
   useEffect(() => {
     if (hasLoadedRef.current) return;
     hasLoadedRef.current = true;
@@ -110,10 +114,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const currentUser = sessionToUser(session);
         setUser(currentUser);
         setUserCookie(currentUser);
-
-        if (currentUser) {
-          console.log("✅ Auth: User logged in:", currentUser.email);
-        }
       } catch (err) {
         console.error("Auth init error:", err);
       } finally {
@@ -123,21 +123,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     initAuth();
 
-    // Listen for auth changes
     const { data: listener } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log("🔄 Auth state change:", event);
-
         const currentUser = sessionToUser(session);
         setUser(currentUser);
         setUserCookie(currentUser);
-
-        if (event === "SIGNED_IN") {
-          console.log("✅ Signed in:", currentUser?.email);
-        }
-        if (event === "SIGNED_OUT") {
-          console.log("👋 Signed out");
-        }
       }
     );
 
@@ -208,7 +198,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // RESET PASSWORD (send email)
+  // RESET PASSWORD
   const resetPassword = async (email: string) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(
@@ -271,26 +261,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // CHANGE PASSWORD
+  // CHANGE PASSWORD — simplified, no re-authentication needed
   const changePassword = async (
-    currentPassword: string,
+    _currentPassword: string,
     newPassword: string
   ) => {
     try {
-      if (!user?.email) {
-        return { success: false, error: "Not logged in" };
-      }
-
-      const { error: verifyError } =
-        await supabase.auth.signInWithPassword({
-          email: user.email,
-          password: currentPassword,
-        });
-
-      if (verifyError) {
-        return { success: false, error: "Current password is incorrect" };
-      }
-
       const { error } = await supabase.auth.updateUser({
         password: newPassword,
       });

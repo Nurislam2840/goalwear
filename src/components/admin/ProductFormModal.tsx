@@ -33,7 +33,6 @@ interface ProductFormModalProps {
 
 const SUB_CATEGORY_PRESETS = ["Country", "Club", "Boot"];
 
-// 👇 Fallback list — only used when admin Brands list is empty
 const FALLBACK_BRANDS = [
   "Nike",
   "Adidas",
@@ -76,7 +75,6 @@ export default function ProductFormModal({
       ? siteCategories.map((c) => c.name)
       : ["Jerseys", "Football Shoes"];
 
-  // 👇 Use admin brands if available, else fallback
   const brandNames = useMemo(() => {
     if (siteBrands && siteBrands.length > 0) {
       return siteBrands.map((b) => b.name);
@@ -84,7 +82,6 @@ export default function ProductFormModal({
     return FALLBACK_BRANDS;
   }, [siteBrands]);
 
-  // For logo lookup
   const brandByName = useMemo(() => {
     const map = new Map<string, { logo?: string; slug: string }>();
     (siteBrands || []).forEach((b) => {
@@ -142,17 +139,18 @@ export default function ProductFormModal({
   const [sizesInput, setSizesInput] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
+  // 👇 Focus & Blur Fix for 0 default issue
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    if (e.target.value === "0") {
-      e.target.value = "";
+    const { name, value } = e.target;
+    if (value === "0") {
+      setFormData((prev) => ({ ...prev, [name]: "" as any }));
     }
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    if (e.target.value === "" || e.target.value === "-") {
-      const name = e.target.name;
+    const { name, value } = e.target;
+    if (value === "" || value === "-") {
       setFormData((prev) => ({ ...prev, [name]: 0 }));
-      e.target.value = "0";
     }
   };
 
@@ -402,7 +400,6 @@ export default function ProductFormModal({
       ></div>
 
       <div className="relative bg-white dark:bg-brand-card rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl animate-slide-up flex flex-col">
-        {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-brand-border bg-white dark:bg-brand-card">
           <div>
             <h2 className="text-lg font-bold dark:text-white">
@@ -420,12 +417,10 @@ export default function ProductFormModal({
           </button>
         </div>
 
-        {/* Body */}
         <form
           onSubmit={handleSubmit}
           className="flex-1 overflow-y-auto p-5 space-y-4"
         >
-          {/* Product Name */}
           <div>
             <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
               Product Name *
@@ -441,7 +436,6 @@ export default function ProductFormModal({
             />
           </div>
 
-          {/* Category Row */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
@@ -465,7 +459,7 @@ export default function ProductFormModal({
                 name="subCategory"
                 value={formData.subCategory}
                 onChange={handleChange}
-                placeholder="e.g. Club, Country, Training..."
+                placeholder="e.g. Club, Country..."
                 className="w-full px-4 py-3 bg-gray-50 dark:bg-brand-dark border border-gray-200 dark:border-brand-border rounded-xl text-sm dark:text-white outline-none focus:border-brand-green"
               />
               <div className="flex flex-wrap gap-1.5 mt-2">
@@ -491,8 +485,6 @@ export default function ProductFormModal({
               <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                 Brand *
               </label>
-
-              {/* 👇 Custom brand dropdown with logos */}
               <div className="relative">
                 <button
                   type="button"
@@ -527,7 +519,6 @@ export default function ProductFormModal({
 
                 {isBrandDropdownOpen && (
                   <>
-                    {/* Mobile overlay */}
                     <div
                       className="fixed inset-0 z-[299] bg-black/20 md:hidden"
                       onClick={() => setIsBrandDropdownOpen(false)}
@@ -601,18 +592,9 @@ export default function ProductFormModal({
                   </>
                 )}
               </div>
-
-              {/* Helper text */}
-              <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1.5">
-                Manage brands in{" "}
-                <span className="font-bold text-brand-green">
-                  Admin → Brands
-                </span>
-              </p>
             </div>
           </div>
 
-          {/* Team + Type */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
@@ -642,55 +624,35 @@ export default function ProductFormModal({
             </div>
           </div>
 
-          {/* Season */}
-          <div>
-            <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-              Season
-            </label>
-            <input
-              type="text"
-              name="season"
-              value={formData.season || ""}
-              onChange={handleChange}
-              placeholder="2025/26"
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-brand-dark border border-gray-200 dark:border-brand-border rounded-xl text-sm dark:text-white outline-none focus:border-brand-green"
-            />
-          </div>
-          
-          {/* Season & Delivery Time Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          	<div>
-          		<label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-          			Season
-          		</label>
-          		<input
-          			type="text"
-          			name="season"
-          			value={formData.season || ""}
-          			onChange={handleChange}
-          			placeholder="2025/26"
-          			className="w-full px-4 py-3 bg-gray-50 dark:bg-brand-dark border border-gray-200 dark:border-brand-border rounded-xl text-sm dark:text-white outline-none focus:border-brand-green"
-          		/>
-          	</div>
-          	<div>
-          		<label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-          			Delivery Time
-          		</label>
-          		<input
-          			type="text"
-          			name="deliveryTime"
-          			value={formData.deliveryTime || ""}
-          			onChange={handleChange}
-          			placeholder="e.g. 3-5 Business Days"
-          			className="w-full px-4 py-3 bg-gray-50 dark:bg-brand-dark border border-gray-200 dark:border-brand-border rounded-xl text-sm dark:text-white outline-none focus:border-brand-green"
-          		/>
-          		<p className="text-[10px] text-gray-400 mt-1">
-          			Leave empty for default "3-5 days"
-          		</p>
-          	</div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                Season
+              </label>
+              <input
+                type="text"
+                name="season"
+                value={formData.season || ""}
+                onChange={handleChange}
+                placeholder="2025/26"
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-brand-dark border border-gray-200 dark:border-brand-border rounded-xl text-sm dark:text-white outline-none focus:border-brand-green"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                Delivery Time
+              </label>
+              <input
+                type="text"
+                name="deliveryTime"
+                value={formData.deliveryTime || ""}
+                onChange={handleChange}
+                placeholder="e.g. 3-5 Business Days"
+                className="w-full px-4 py-3 bg-gray-50 dark:bg-brand-dark border border-gray-200 dark:border-brand-border rounded-xl text-sm dark:text-white outline-none focus:border-brand-green"
+              />
+            </div>
           </div>
 
-          {/* Price Row */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div>
               <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
@@ -757,7 +719,6 @@ export default function ProductFormModal({
             </div>
           </div>
 
-          {/* Multi Image Uploader */}
           <MultiImageUploader
             images={formData.images}
             onChange={handleImagesChange}
@@ -765,7 +726,6 @@ export default function ProductFormModal({
             maxImages={8}
           />
 
-          {/* JERSEY-SPECIFIC FIELDS */}
           {isJersey && (
             <div className="bg-brand-green/5 border-2 border-brand-green/30 rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-4">
@@ -897,7 +857,6 @@ export default function ProductFormModal({
             </div>
           )}
 
-          {/* BOOT-SPECIFIC FIELDS */}
           {isBoot && (
             <div className="bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-200 dark:border-blue-900/30 rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-4">
@@ -1045,7 +1004,6 @@ export default function ProductFormModal({
             </div>
           )}
 
-          {/* HIGHLIGHTS */}
           <div className="bg-gray-50 dark:bg-brand-dark rounded-2xl p-4 border border-gray-200 dark:border-brand-border">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-bold dark:text-white">
@@ -1091,7 +1049,6 @@ export default function ProductFormModal({
             )}
           </div>
 
-          {/* SPECIFICATIONS */}
           <div className="bg-gray-50 dark:bg-brand-dark rounded-2xl p-4 border border-gray-200 dark:border-brand-border">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-bold dark:text-white">
@@ -1146,7 +1103,6 @@ export default function ProductFormModal({
             )}
           </div>
 
-          {/* CUSTOM FIELDS */}
           <div className="bg-gray-50 dark:bg-brand-dark rounded-2xl p-4 border border-gray-200 dark:border-brand-border">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-bold dark:text-white">
@@ -1201,7 +1157,6 @@ export default function ProductFormModal({
             )}
           </div>
 
-          {/* COLOR OPTIONS — OPTIONAL */}
           <div className="bg-gray-50 dark:bg-brand-dark rounded-2xl p-4 border border-gray-200 dark:border-brand-border">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -1311,7 +1266,6 @@ export default function ProductFormModal({
             )}
           </div>
 
-          {/* Sizes */}
           <div>
             <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
               Sizes (comma separated)
@@ -1345,7 +1299,6 @@ export default function ProductFormModal({
             </div>
           </div>
 
-          {/* Description */}
           <div>
             <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
               Description *
@@ -1362,7 +1315,6 @@ export default function ProductFormModal({
           </div>
         </form>
 
-        {/* Footer */}
         <div className="p-5 border-t border-gray-100 dark:border-brand-border bg-gray-50 dark:bg-brand-dark flex items-center justify-end gap-3 flex-shrink-0">
           <button
             type="button"
