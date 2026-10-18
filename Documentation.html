@@ -318,15 +318,6 @@
     section h2 { font-size: 22px; }
     .container { padding: 24px 16px; }
   }
-  
-  /* Print styles */
-  @media print {
-    header { background: white; color: black; padding: 20px; }
-    header h1 { color: black; }
-    header h1 span { color: #5B8C00; }
-    section { page-break-inside: avoid; border: 1px solid #ccc; }
-    pre { background: #f5f5f5; color: #000; border: 1px solid #ddd; }
-  }
 </style>
 </head>
 <body>
@@ -334,7 +325,7 @@
 <header>
   <h1>Goal<span>Wear</span></h1>
   <p>Complete Setup &amp; Customization Documentation</p>
-  <div class="badge">Version 1.0.0</div>
+  <div class="badge">Version 1.1.0</div>
   <div class="author-info">
     By <strong>MD NUR ISLAM</strong> •
     <a href="https://themes-store.vercel.app">themes-store.vercel.app</a> •
@@ -358,6 +349,7 @@
       <li><a href="#running">Running the Theme</a></li>
       <li><a href="#admin">Admin Access</a></li>
       <li><a href="#products">Adding Products</a></li>
+      <li><a href="#brands">Adding Brands & Logos</a></li>
       <li><a href="#customize">Customization</a></li>
       <li><a href="#deploy">Deployment</a></li>
       <li><a href="#troubleshoot">Troubleshooting</a></li>
@@ -368,17 +360,22 @@
   <!-- 1. Introduction -->
   <section id="intro">
     <h2>1. Introduction</h2>
-    <p>Welcome to <strong>GoalWear</strong> — a premium football gear e-commerce theme built with modern web technologies. This theme is production-ready and includes everything you need to launch a professional online store.</p>
+    <p>Welcome to <strong>GoalWear</strong> — a premium, feature-rich football gear e-commerce theme built with modern web technologies. This theme is production-ready and includes everything you need to launch a professional online store.</p>
     
     <h3>What's Included</h3>
     <ul>
       <li>Full Next.js 16 + React 19 source code</li>
       <li>Supabase database &amp; authentication integration</li>
-      <li>Stripe payment gateway</li>
-      <li>Complete admin panel with 12 sections</li>
-      <li>User account system</li>
+      <li>Stripe payment gateway &amp; Cash on Delivery</li>
+      <li>Complete admin panel with 13 sections</li>
+      <li>User account system with profile editing</li>
       <li>Product variants (Home/Away/Third/Goalkeeper)</li>
-      <li>Order management system</li>
+      <li><strong>Brand logos &amp; brand filter system</strong></li>
+      <li><strong>Real product reviews with image upload support</strong></li>
+      <li><strong>Dynamic delivery time estimates</strong></li>
+      <li><strong>Automatic stock reduction on order</strong></li>
+      <li>New Arrivals manual selection</li>
+      <li>Order management system with tracking</li>
       <li>Coupon &amp; discount system</li>
       <li>SEO optimized (sitemap, robots, metadata)</li>
       <li>Mobile-first responsive design</li>
@@ -550,220 +547,12 @@ NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3000</code></pre>
   <!-- 7. Database -->
   <section id="database">
     <h2>7. Database Setup</h2>
-    <p>In Supabase Dashboard, go to <strong>SQL Editor → New query</strong>, then paste and run this SQL:</p>
+    <p>In Supabase Dashboard, go to <strong>SQL Editor → New query</strong>, then paste and run the complete SQL schema provided in <code>database-schema.sql</code> (included in the theme files).</p>
 
-    <pre><code>-- ============================================
--- GOALWEAR DATABASE SCHEMA
--- ============================================
-
--- 1. PRODUCTS TABLE
-CREATE TABLE IF NOT EXISTS products (
-  id BIGINT PRIMARY KEY,
-  name TEXT NOT NULL,
-  category TEXT NOT NULL,
-  sub_category TEXT,
-  brand TEXT,
-  team TEXT,
-  type TEXT,
-  price NUMERIC(10, 2) NOT NULL,
-  image_url TEXT,
-  images JSONB DEFAULT '[]'::jsonb,
-  rating NUMERIC(2, 1) DEFAULT 0,
-  reviews_count INTEGER DEFAULT 0,
-  description TEXT,
-  sizes JSONB DEFAULT '[]'::jsonb,
-  reviews JSONB DEFAULT '[]'::jsonb,
-  stock INTEGER DEFAULT 0,
-  colors JSONB DEFAULT '[]'::jsonb,
-  season TEXT,
-  highlights JSONB DEFAULT '[]'::jsonb,
-  specifications JSONB DEFAULT '[]'::jsonb,
-  custom_fields JSONB DEFAULT '[]'::jsonb,
-  kit_type TEXT,
-  player_name TEXT,
-  player_number INTEGER,
-  is_player_edition BOOLEAN DEFAULT FALSE,
-  sleeve_type TEXT,
-  collar_type TEXT,
-  fit_type TEXT,
-  sponsor TEXT,
-  surface TEXT,
-  play_style TEXT,
-  boot_height TEXT,
-  weight_grams INTEGER,
-  upper_material TEXT,
-  soleplate TEXT,
-  stud_type TEXT,
-  closure_type TEXT,
-  collection TEXT,
-  release_year INTEGER,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 2. ORDERS TABLE
-CREATE TABLE IF NOT EXISTS orders (
-  id TEXT PRIMARY KEY,
-  user_id TEXT,
-  items JSONB NOT NULL,
-  total NUMERIC(10, 2) NOT NULL,
-  status TEXT DEFAULT 'Processing',
-  customer_info JSONB NOT NULL,
-  payment_method TEXT,
-  stripe_session_id TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 3. ADDRESSES TABLE
-CREATE TABLE IF NOT EXISTS addresses (
-  id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL,
-  label TEXT NOT NULL,
-  name TEXT NOT NULL,
-  phone TEXT NOT NULL,
-  address TEXT NOT NULL,
-  city TEXT NOT NULL,
-  is_default BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 4. COUPONS TABLE
-CREATE TABLE IF NOT EXISTS coupons (
-  id BIGINT PRIMARY KEY,
-  code TEXT UNIQUE NOT NULL,
-  type TEXT NOT NULL,
-  value NUMERIC(10, 2) DEFAULT 0,
-  description TEXT,
-  is_active BOOLEAN DEFAULT TRUE,
-  expires_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- 5. SITE CONFIG TABLE
-CREATE TABLE IF NOT EXISTS site_config (
-  id INTEGER PRIMARY KEY DEFAULT 1,
-  config JSONB NOT NULL DEFAULT '{}'::jsonb,
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-  CONSTRAINT single_row CHECK (id = 1)
-);
-
-INSERT INTO site_config (id, config)
-VALUES (1, '{}'::jsonb)
-ON CONFLICT (id) DO NOTHING;
-
--- 6. HERO SLIDES
-CREATE TABLE IF NOT EXISTS hero_slides (
-  id BIGINT PRIMARY KEY,
-  badge TEXT,
-  title TEXT,
-  highlight TEXT,
-  player TEXT,
-  quote TEXT,
-  description TEXT,
-  image TEXT,
-  cta TEXT,
-  sort_order INTEGER DEFAULT 0
-);
-
--- 7. OFFERS
-CREATE TABLE IF NOT EXISTS offers (
-  id BIGINT PRIMARY KEY,
-  badge TEXT,
-  title TEXT,
-  highlight TEXT,
-  discount_text TEXT,
-  description TEXT,
-  coupon_code TEXT,
-  image TEXT,
-  cta TEXT,
-  end_date TIMESTAMPTZ,
-  is_active BOOLEAN DEFAULT TRUE
-);
-
--- 8. FEATURES
-CREATE TABLE IF NOT EXISTS features (
-  id BIGINT PRIMARY KEY,
-  title TEXT NOT NULL,
-  description TEXT,
-  icon TEXT,
-  sort_order INTEGER DEFAULT 0
-);
-
--- 9. CATEGORIES
-CREATE TABLE IF NOT EXISTS categories (
-  id BIGINT PRIMARY KEY,
-  name TEXT NOT NULL,
-  slug TEXT UNIQUE NOT NULL,
-  description TEXT,
-  image TEXT,
-  sort_order INTEGER DEFAULT 0
-);
-
--- 10. BRANDS
-CREATE TABLE IF NOT EXISTS brands (
-  id BIGINT PRIMARY KEY,
-  name TEXT NOT NULL,
-  slug TEXT UNIQUE NOT NULL,
-  tagline TEXT,
-  sort_order INTEGER DEFAULT 0
-);
-
--- 11. TEAMS
-CREATE TABLE IF NOT EXISTS teams (
-  id BIGINT PRIMARY KEY,
-  name TEXT NOT NULL,
-  logo TEXT,
-  bg_color TEXT,
-  sort_order INTEGER DEFAULT 0
-);
-
--- 12. TESTIMONIALS
-CREATE TABLE IF NOT EXISTS testimonials (
-  id BIGINT PRIMARY KEY,
-  name TEXT NOT NULL,
-  role TEXT,
-  avatar TEXT,
-  text TEXT NOT NULL,
-  rating INTEGER DEFAULT 5,
-  sort_order INTEGER DEFAULT 0
-);
-
--- 13. INSTAGRAM IMAGES
-CREATE TABLE IF NOT EXISTS instagram_images (
-  id BIGINT PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY,
-  image_url TEXT NOT NULL,
-  sort_order INTEGER DEFAULT 0
-);
-
--- ============================================
--- RLS POLICIES — Public Read Access
--- ============================================
-ALTER TABLE products ENABLE ROW LEVEL SECURITY;
-ALTER TABLE hero_slides ENABLE ROW LEVEL SECURITY;
-ALTER TABLE offers ENABLE ROW LEVEL SECURITY;
-ALTER TABLE features ENABLE ROW LEVEL SECURITY;
-ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
-ALTER TABLE brands ENABLE ROW LEVEL SECURITY;
-ALTER TABLE teams ENABLE ROW LEVEL SECURITY;
-ALTER TABLE testimonials ENABLE ROW LEVEL SECURITY;
-ALTER TABLE instagram_images ENABLE ROW LEVEL SECURITY;
-ALTER TABLE coupons ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Public read access" ON products FOR SELECT USING (true);
-CREATE POLICY "Public read access" ON hero_slides FOR SELECT USING (true);
-CREATE POLICY "Public read access" ON offers FOR SELECT USING (true);
-CREATE POLICY "Public read access" ON features FOR SELECT USING (true);
-CREATE POLICY "Public read access" ON categories FOR SELECT USING (true);
-CREATE POLICY "Public read access" ON brands FOR SELECT USING (true);
-CREATE POLICY "Public read access" ON teams FOR SELECT USING (true);
-CREATE POLICY "Public read access" ON testimonials FOR SELECT USING (true);
-CREATE POLICY "Public read access" ON instagram_images FOR SELECT USING (true);
-CREATE POLICY "Public read access" ON coupons FOR SELECT USING (true);
-
--- Reload schema cache
-NOTIFY pgrst, 'reload schema';</code></pre>
-
+    <div class="info">
+      💡 This creates all required tables: products, orders, addresses, coupons, site_config, hero_slides, offers, features, categories, brands, teams, testimonials, instagram_images, and reviews.
+    </div>
+    
     <div class="success">
       ✅ After running, verify with:<br>
       <code>SELECT COUNT(*) FROM products;</code>
@@ -801,17 +590,18 @@ npm start</code></pre>
     <table>
       <tr><th>Section</th><th>Purpose</th></tr>
       <tr><td>Dashboard</td><td>Revenue, orders, top products</td></tr>
-      <tr><td>Products</td><td>Add/edit/delete products</td></tr>
+      <tr><td>Products</td><td>Add/edit/delete products (with Delivery Time)</td></tr>
       <tr><td>Orders</td><td>Manage customer orders</td></tr>
-      <tr><td>Hero Slider</td><td>Homepage carousel</td></tr>
+      <tr><td>Reviews</td><td>Moderate customer reviews</td></tr>
+      <tr><td>Hero Slider</td><td>Homepage carousel with image upload</td></tr>
       <tr><td>Offers</td><td>Flash sales with countdown</td></tr>
       <tr><td>Categories</td><td>Product categories</td></tr>
-      <tr><td>Brands</td><td>Brand management</td></tr>
+      <tr><td>Brands</td><td>Brand management with logo upload</td></tr>
       <tr><td>Teams</td><td>Popular teams section</td></tr>
       <tr><td>Testimonials</td><td>Customer reviews</td></tr>
       <tr><td>Features</td><td>Feature badges</td></tr>
       <tr><td>Coupons</td><td>Discount codes</td></tr>
-      <tr><td>Site Settings</td><td>Name, logo, contact, social</td></tr>
+      <tr><td>Site Settings</td><td>Name, logo, contact, social, New Arrivals</td></tr>
     </table>
 
     <div class="success">
@@ -833,38 +623,39 @@ npm start</code></pre>
           <li><strong>Product Name</strong> — e.g., "Real Madrid Home Jersey 2026/27"</li>
           <li><strong>Category</strong> — Jerseys / Football Shoes</li>
           <li><strong>Sub Category</strong> — Club / Country / Boot</li>
-          <li><strong>Brand</strong> — Adidas / Nike / Puma, etc.</li>
-          <li><strong>Team</strong> — Real Madrid, Barcelona, etc.</li>
-          <li><strong>Type</strong> — Home / Away / Boot</li>
+          <li><strong>Brand</strong> — Choose from your brand list</li>
           <li><strong>Season</strong> — e.g., "2026/27"</li>
+          <li><strong>Delivery Time</strong> — e.g., "3-5 Business Days"</li>
           <li><strong>Price</strong>, <strong>Stock</strong>, <strong>Rating</strong></li>
-          <li><strong>Images</strong> — URLs or file uploads</li>
         </ul>
       </li>
       <li>For <strong>Jerseys</strong>: fill Kit Type, Sponsor, Player Edition, Sleeve, Collar, Fit</li>
       <li>For <strong>Boots</strong>: fill Surface, Play Style, Boot Height, Weight, etc.</li>
       <li>Add <strong>Highlights</strong> and <strong>Specifications</strong></li>
-      <li>Add <strong>Colors</strong> and <strong>Sizes</strong></li>
+      <li>Add <strong>Colors</strong> (optional) and <strong>Sizes</strong></li>
       <li>Click <strong>Save</strong></li>
     </ol>
+  </section>
 
-    <h3>Product Variants (Home/Away/Third/GK)</h3>
-    <p>To show a kit selector on the product page, add multiple products with:</p>
-    <ul>
-      <li><strong>Same Team</strong> — e.g., "Real Madrid"</li>
-      <li><strong>Same Season</strong> — e.g., "2026/27"</li>
-      <li><strong>Same Sub Category</strong> — e.g., "Club"</li>
-      <li><strong>Different Kit Type</strong> — Home, Away, Third, Goalkeeper</li>
-    </ul>
-
+  <!-- 11. Brands -->
+  <section id="brands">
+    <h2>11. Adding Brands &amp; Logos</h2>
+    <p>To make your store look premium, add brand logos:</p>
+    <ol>
+      <li>Go to <strong>Admin → Brands</strong></li>
+      <li>Click <strong>"Add Brand"</strong> or Edit an existing one</li>
+      <li>Fill in Name, Slug (e.g., <code>nike</code>), Tagline</li>
+      <li><strong>Upload the Logo</strong> (PNG or SVG with transparent background recommended)</li>
+      <li>Save</li>
+    </ol>
     <div class="info">
-      💡 The system automatically groups them and shows a kit selector.
+      💡 Logos will automatically show in the homepage Brand Section, Product Cards, and Product Detail pages.
     </div>
   </section>
 
-  <!-- 11. Customize -->
+  <!-- 12. Customize -->
   <section id="customize">
-    <h2>11. Customization</h2>
+    <h2>12. Customization</h2>
 
     <h3>Change Colors</h3>
     <p>Edit <code>src/app/globals.css</code>:</p>
@@ -879,21 +670,11 @@ npm start</code></pre>
 
     <h3>Change Logo</h3>
     <p>Admin panel → Site Settings → Upload logo (max 2MB).</p>
-
-    <h3>Change Hero Slides</h3>
-    <p>Admin panel → Hero Slider → Edit slides.</p>
-
-    <h3>Change Contact Email</h3>
-    <p>Edit these files:</p>
-    <ul>
-      <li><code>src/components/Newsletter.tsx</code></li>
-      <li><code>src/app/contact/page.tsx</code></li>
-    </ul>
   </section>
 
-  <!-- 12. Deploy -->
+  <!-- 13. Deploy -->
   <section id="deploy">
-    <h2>12. Deployment</h2>
+    <h2>13. Deployment</h2>
 
     <h3>Deploy to Vercel (Recommended)</h3>
     <ol>
@@ -901,19 +682,7 @@ npm start</code></pre>
       <li>Go to <a href="https://vercel.com">vercel.com</a></li>
       <li>Click <strong>"Add New Project"</strong></li>
       <li>Import your GitHub repository</li>
-      <li>Add these <strong>Environment Variables</strong>:
-        <ul>
-          <li><code>NEXT_PUBLIC_SUPABASE_URL</code></li>
-          <li><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></li>
-          <li><code>SUPABASE_SERVICE_ROLE_KEY</code></li>
-          <li><code>STRIPE_SECRET_KEY</code></li>
-          <li><code>NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code></li>
-          <li><code>ADMIN_EMAIL</code></li>
-          <li><code>ADMIN_PASSWORD</code></li>
-          <li><code>ADMIN_SESSION_SECRET</code></li>
-          <li><code>NEXT_PUBLIC_SITE_URL</code> (e.g., <code>https://your-app.vercel.app</code>)</li>
-        </ul>
-      </li>
+      <li>Add all <strong>Environment Variables</strong> from Section 6</li>
       <li>Click <strong>Deploy</strong></li>
     </ol>
 
@@ -928,15 +697,11 @@ npm start</code></pre>
       </li>
       <li>Test all features</li>
     </ol>
-
-    <div class="info">
-      💡 <strong>Custom Domain:</strong> Add in Vercel → Settings → Domains.
-    </div>
   </section>
 
-  <!-- 13. Troubleshooting -->
+  <!-- 14. Troubleshooting -->
   <section id="troubleshoot">
-    <h2>13. Troubleshooting</h2>
+    <h2>14. Troubleshooting</h2>
 
     <h3>"Invalid API key" Error</h3>
     <p><strong>Cause:</strong> Wrong Supabase anon key.</p>
@@ -944,25 +709,16 @@ npm start</code></pre>
 
     <h3>Products Not Loading</h3>
     <p><strong>Cause:</strong> Empty Supabase tables or missing env vars.</p>
-    <p><strong>Fix:</strong></p>
-    <ol>
-      <li>Verify <code>.env.local</code> has correct Supabase keys</li>
-      <li>Add products from Admin Panel</li>
-      <li>Check RLS policies exist (see SQL in Section 7)</li>
-    </ol>
+    <p><strong>Fix:</strong> Verify <code>.env.local</code>, add products, check RLS policies.</p>
 
     <h3>Admin Login Fails</h3>
     <p><strong>Cause:</strong> Wrong <code>ADMIN_EMAIL</code> or <code>ADMIN_PASSWORD</code>.</p>
     <p><strong>Fix:</strong> Verify <code>.env.local</code> values and restart server.</p>
-
-    <h3>Vercel Deployment Issues</h3>
-    <p><strong>Cause:</strong> Missing env vars in Vercel.</p>
-    <p><strong>Fix:</strong> Add all 9 environment variables in Vercel Settings.</p>
   </section>
 
-  <!-- 14. Support -->
+  <!-- 15. Support -->
   <section id="support">
-    <h2>14. Support</h2>
+    <h2>15. Support</h2>
 
     <p>For support, license questions, or feature requests:</p>
 
@@ -996,7 +752,7 @@ npm start</code></pre>
 
 <footer>
   <div class="author">
-    <strong>GoalWear v1.0.0</strong> — Premium Football E-commerce Theme
+    <strong>GoalWear v1.1.0</strong> — Premium Football E-commerce Theme
   </div>
   <div>By <strong>MD NUR ISLAM</strong></div>
   <div style="margin-top: 12px;">

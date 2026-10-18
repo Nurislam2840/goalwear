@@ -10,11 +10,7 @@ import {
   ReactNode,
 } from "react";
 import { supabase } from "@/lib/supabase";
-import {
-  Product,
-  Review,
-  ColorOption,
-} from "@/data/products";
+import { Product, Review, ColorOption } from "@/data/products";
 
 export type { Product, Review, ColorOption };
 
@@ -232,30 +228,10 @@ const defaultOffers: Offer[] = [
 ];
 
 const defaultFeatures: Feature[] = [
-  {
-    id: 1,
-    title: "Fast Delivery",
-    desc: "Worldwide shipping",
-    icon: "Truck",
-  },
-  {
-    id: 2,
-    title: "Secure Payment",
-    desc: "100% protected",
-    icon: "ShieldCheck",
-  },
-  {
-    id: 3,
-    title: "Premium Quality",
-    desc: "Original products",
-    icon: "Award",
-  },
-  {
-    id: 4,
-    title: "24/7 Support",
-    desc: "Always here to help",
-    icon: "Headphones",
-  },
+  { id: 1, title: "Fast Delivery", desc: "Worldwide shipping", icon: "Truck" },
+  { id: 2, title: "Secure Payment", desc: "100% protected", icon: "ShieldCheck" },
+  { id: 3, title: "Premium Quality", desc: "Original products", icon: "Award" },
+  { id: 4, title: "24/7 Support", desc: "Always here to help", icon: "Headphones" },
 ];
 
 const defaultCategories: Category[] = [
@@ -271,6 +247,13 @@ const defaultCategories: Category[] = [
     name: "Football Shoes",
     slug: "shoes",
     desc: "Boots & Cleats",
+    image: "",
+  },
+  {
+    id: 3,
+    name: "Cricket Jersey",
+    slug: "cricket-jersey",
+    desc: "National & League Cricket Kits",
     image: "",
   },
 ];
@@ -299,8 +282,7 @@ const defaultTeams: Team[] = [
     id: 2,
     name: "Barcelona",
     logo: "https://upload.wikimedia.org/wikipedia/sco/4/47/FC_Barcelona_%28crest%29.svg",
-    bgColor:
-      "from-red-50 to-blue-50 dark:from-red-900/20 dark:to-blue-900/20",
+    bgColor: "from-red-50 to-blue-50 dark:from-red-900/20 dark:to-blue-900/20",
   },
   {
     id: 3,
@@ -346,34 +328,10 @@ const defaultTestimonials: Testimonial[] = [
 const defaultInstagramImages: string[] = [];
 
 const defaultCoupons: CouponData[] = [
-  {
-    id: 1,
-    code: "GOAL10",
-    type: "percent",
-    value: 10,
-    description: "10% off your order",
-  },
-  {
-    id: 2,
-    code: "WELCOME20",
-    type: "percent",
-    value: 20,
-    description: "20% off for new customers",
-  },
-  {
-    id: 3,
-    code: "FLAT15",
-    type: "fixed",
-    value: 15,
-    description: "$15 off your order",
-  },
-  {
-    id: 4,
-    code: "FREESHIP",
-    type: "shipping",
-    value: 0,
-    description: "Free shipping",
-  },
+  { id: 1, code: "GOAL10", type: "percent", value: 10, description: "10% off your order" },
+  { id: 2, code: "WELCOME20", type: "percent", value: 20, description: "20% off for new customers" },
+  { id: 3, code: "FLAT15", type: "fixed", value: 15, description: "$15 off your order" },
+  { id: 4, code: "FREESHIP", type: "shipping", value: 0, description: "Free shipping" },
 ];
 
 // ============ Type Converters ============
@@ -386,159 +344,65 @@ function normalizeProducts(products: any[]): Product[] {
 
 function dbToProduct(row: any): Product {
   return {
-    id: row.id,
-    name: row.name,
-    category: row.category,
-    subCategory: row.sub_category,
-    brand: row.brand,
-    team: row.team,
-    type: row.type,
-    price: Number(row.price),
-    image_url: row.image_url,
-    images: row.images || [],
-    rating: Number(row.rating) || 0,
-    reviews_count: row.reviews_count || 0,
-    description: row.description,
-    sizes: row.sizes || [],
-    reviews: row.reviews || [],
-    stock: row.stock || 0,
-    colors: Array.isArray(row.colors) ? row.colors : [],
-    season: row.season || "",
-    highlights: row.highlights || [],
-    specifications: row.specifications || [],
-    customFields: row.custom_fields || [],
-    deliveryTime: row.delivery_time || "",
-    kitType: row.kit_type || undefined,
-    playerName: row.player_name || "",
-    playerNumber: row.player_number || undefined,
-    isPlayerEdition: row.is_player_edition || false,
-    sleeveType: row.sleeve_type || undefined,
-    collarType: row.collar_type || undefined,
-    fitType: row.fit_type || undefined,
-    sponsor: row.sponsor || "",
-    surface: row.surface || undefined,
-    playStyle: row.play_style || undefined,
-    bootHeight: row.boot_height || undefined,
-    weightGrams: row.weight_grams || undefined,
-    upperMaterial: row.upper_material || "",
-    soleplate: row.soleplate || "",
-    studType: row.stud_type || "",
-    closureType: row.closure_type || undefined,
-    collection: row.collection || "",
-    releaseYear: row.release_year || undefined,
+    id: row.id, name: row.name, category: row.category, subCategory: row.sub_category,
+    brand: row.brand, team: row.team, type: row.type, price: Number(row.price),
+    image_url: row.image_url, images: row.images || [], rating: Number(row.rating) || 0,
+    reviews_count: row.reviews_count || 0, description: row.description,
+    sizes: row.sizes || [], reviews: row.reviews || [], stock: row.stock || 0,
+    colors: Array.isArray(row.colors) ? row.colors : [], season: row.season || "",
+    highlights: row.highlights || [], specifications: row.specifications || [],
+    customFields: row.custom_fields || [], deliveryTime: row.delivery_time || "",
+    kitType: row.kit_type || undefined, playerName: row.player_name || "",
+    playerNumber: row.player_number || undefined, isPlayerEdition: row.is_player_edition || false,
+    sleeveType: row.sleeve_type || undefined, collarType: row.collar_type || undefined,
+    fitType: row.fit_type || undefined, sponsor: row.sponsor || "",
+    surface: row.surface || undefined, playStyle: row.play_style || undefined,
+    bootHeight: row.boot_height || undefined, weightGrams: row.weight_grams || undefined,
+    upperMaterial: row.upper_material || "", soleplate: row.soleplate || "",
+    studType: row.stud_type || "", closureType: row.closure_type || undefined,
+    collection: row.collection || "", releaseYear: row.release_year || undefined,
   };
 }
 
 function dbToHeroSlide(row: any): HeroSlide {
-  return {
-    id: row.id,
-    badge: row.badge,
-    title: row.title,
-    highlight: row.highlight,
-    player: row.player,
-    quote: row.quote,
-    description: row.description,
-    image: row.image,
-    cta: row.cta,
-  };
+  return { id: row.id, badge: row.badge, title: row.title, highlight: row.highlight, player: row.player, quote: row.quote, description: row.description, image: row.image, cta: row.cta };
 }
-
 function dbToOffer(row: any): Offer {
-  return {
-    id: row.id,
-    badge: row.badge,
-    title: row.title,
-    highlight: row.highlight,
-    discountText: row.discount_text,
-    description: row.description,
-    couponCode: row.coupon_code,
-    image: row.image,
-    cta: row.cta,
-    endDate: row.end_date,
-    isActive: row.is_active,
-  };
+  return { id: row.id, badge: row.badge, title: row.title, highlight: row.highlight, discountText: row.discount_text, description: row.description, couponCode: row.coupon_code, image: row.image, cta: row.cta, endDate: row.end_date, isActive: row.is_active };
 }
-
 function dbToFeature(row: any): Feature {
-  return {
-    id: row.id,
-    title: row.title,
-    desc: row.description,
-    icon: row.icon,
-  };
+  return { id: row.id, title: row.title, desc: row.description, icon: row.icon };
 }
-
 function dbToCategory(row: any): Category {
-  return {
-    id: row.id,
-    name: row.name,
-    slug: row.slug,
-    desc: row.description,
-    image: row.image,
-  };
+  return { id: row.id, name: row.name, slug: row.slug, desc: row.description, image: row.image };
 }
-
 function dbToBrand(row: any): Brand {
-  return {
-    id: row.id,
-    name: row.name,
-    slug: row.slug,
-    tagline: row.tagline,
-    logo: row.logo || "",
-  };
+  return { id: row.id, name: row.name, slug: row.slug, tagline: row.tagline, logo: row.logo || "" };
 }
-
 function dbToTeam(row: any): Team {
-  return {
-    id: row.id,
-    name: row.name,
-    logo: row.logo,
-    bgColor: row.bg_color,
-  };
+  return { id: row.id, name: row.name, logo: row.logo, bgColor: row.bg_color };
 }
-
 function dbToTestimonial(row: any): Testimonial {
-  return {
-    id: row.id,
-    name: row.name,
-    role: row.role,
-    avatar: row.avatar,
-    text: row.text,
-    rating: row.rating,
-  };
+  return { id: row.id, name: row.name, role: row.role, avatar: row.avatar, text: row.text, rating: row.rating };
 }
-
 function dbToCoupon(row: any): CouponData {
-  return {
-    id: row.id,
-    code: row.code,
-    type: row.type,
-    value: Number(row.value),
-    description: row.description,
-  };
+  return { id: row.id, code: row.code, type: row.type, value: Number(row.value), description: row.description };
 }
 
 // ============ Context ============
-const SiteDataContext = createContext<SiteDataContextType | undefined>(
-  undefined
-);
+const SiteDataContext = createContext<SiteDataContextType | undefined>(undefined);
 
 export function SiteDataProvider({ children }: { children: ReactNode }) {
-  const [siteConfig, setSiteConfig] =
-    useState<SiteConfigData>(defaultSiteConfig);
-  const [heroSlides, setHeroSlides] =
-    useState<HeroSlide[]>(defaultHeroSlides);
+  const [siteConfig, setSiteConfig] = useState<SiteConfigData>(defaultSiteConfig);
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>(defaultHeroSlides);
   const [offers, setOffers] = useState<Offer[]>(defaultOffers);
   const [features, setFeatures] = useState<Feature[]>(defaultFeatures);
-  const [categories, setCategories] =
-    useState<Category[]>(defaultCategories);
+  const [categories, setCategories] = useState<Category[]>(defaultCategories);
   const [brands, setBrands] = useState<Brand[]>(defaultBrands);
   const [products, setProducts] = useState<Product[]>([]);
   const [teams, setTeams] = useState<Team[]>(defaultTeams);
-  const [testimonials, setTestimonials] =
-    useState<Testimonial[]>(defaultTestimonials);
-  const [instagramImages, setInstagramImages] =
-    useState<string[]>(defaultInstagramImages);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(defaultTestimonials);
+  const [instagramImages, setInstagramImages] = useState<string[]>(defaultInstagramImages);
   const [coupons, setCoupons] = useState<CouponData[]>(defaultCoupons);
   const [isHydrated, setIsHydrated] = useState(false);
   const hasLoadedRef = useRef(false);
@@ -549,21 +413,10 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
 
     async function loadAllData() {
       try {
-        console.log("🔄 Loading data from Supabase...");
-
         const [
-          productsRes,
-          heroSlidesRes,
-          offersRes,
-          featuresRes,
-          categoriesRes,
-          brandsRes,
-          teamsRes,
-          testimonialsRes,
-          instagramRes,
-          couponsRes,
-          siteConfigRes,
-          reviewsRes,
+          productsRes, heroSlidesRes, offersRes, featuresRes, categoriesRes,
+          brandsRes, teamsRes, testimonialsRes, instagramRes, couponsRes,
+          siteConfigRes, reviewsRes,
         ] = await Promise.all([
           supabase.from("products").select("*").order("id"),
           supabase.from("hero_slides").select("*").order("sort_order"),
@@ -580,91 +433,47 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
         ]);
 
         const allReviews = reviewsRes.data || [];
-        
         if (productsRes.data && productsRes.data.length > 0) {
           const formattedProducts = productsRes.data.map((row) => {
             const product = dbToProduct(row);
             const productReviews = allReviews
               .filter((r: any) => r.product_id === product.id)
               .map((r: any) => ({
-                name: r.user_name,
-                rating: r.rating,
-                comment: r.comment,
-                date: new Date(r.created_at).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                }),
+                name: r.user_name, rating: r.rating, comment: r.comment,
+                date: new Date(r.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
                 image_url: r.image_url || "",
               }));
-            
             const legacyReviews = product.reviews || [];
             const combinedReviews = [...productReviews, ...legacyReviews];
-
             let finalRating = product.rating;
             let finalCount = product.reviews_count;
             if (combinedReviews.length > 0) {
               finalCount = combinedReviews.length;
-              finalRating = Number(
-                (
-                  combinedReviews.reduce((sum, r) => sum + r.rating, 0) /
-                  finalCount
-                ).toFixed(1)
-              );
+              finalRating = Number((combinedReviews.reduce((sum, r) => sum + r.rating, 0) / finalCount).toFixed(1));
             }
-
-            return {
-              ...product,
-              reviews: combinedReviews,
-              reviews_count: finalCount,
-              rating: finalRating,
-            };
+            return { ...product, reviews: combinedReviews, reviews_count: finalCount, rating: finalRating };
           });
-
           setProducts(normalizeProducts(formattedProducts));
-          console.log(`✅ Loaded ${productsRes.data.length} products & ${allReviews.length} reviews`);
         } else {
           setProducts([]);
         }
 
-        if (heroSlidesRes.data && heroSlidesRes.data.length > 0) {
-          setHeroSlides(heroSlidesRes.data.map(dbToHeroSlide));
-        }
-        if (offersRes.data && offersRes.data.length > 0) {
-          setOffers(offersRes.data.map(dbToOffer));
-        }
-        if (featuresRes.data && featuresRes.data.length > 0) {
-          setFeatures(featuresRes.data.map(dbToFeature));
-        }
-        if (categoriesRes.data && categoriesRes.data.length > 0) {
-          setCategories(categoriesRes.data.map(dbToCategory));
-        }
-        if (brandsRes.data && brandsRes.data.length > 0) {
-          setBrands(brandsRes.data.map(dbToBrand));
-        }
-        if (teamsRes.data && teamsRes.data.length > 0) {
-          setTeams(teamsRes.data.map(dbToTeam));
-        }
-        if (testimonialsRes.data && testimonialsRes.data.length > 0) {
-          setTestimonials(testimonialsRes.data.map(dbToTestimonial));
-        }
-        if (instagramRes.data && instagramRes.data.length > 0) {
-          setInstagramImages(instagramRes.data.map((r: any) => r.image_url));
-        }
-        if (couponsRes.data && couponsRes.data.length > 0) {
-          setCoupons(couponsRes.data.map(dbToCoupon));
-        }
+        if (heroSlidesRes.data && heroSlidesRes.data.length > 0) setHeroSlides(heroSlidesRes.data.map(dbToHeroSlide));
+        if (offersRes.data && offersRes.data.length > 0) setOffers(offersRes.data.map(dbToOffer));
+        if (featuresRes.data && featuresRes.data.length > 0) setFeatures(featuresRes.data.map(dbToFeature));
+        if (categoriesRes.data && categoriesRes.data.length > 0) setCategories(categoriesRes.data.map(dbToCategory));
+        if (brandsRes.data && brandsRes.data.length > 0) setBrands(brandsRes.data.map(dbToBrand));
+        if (teamsRes.data && teamsRes.data.length > 0) setTeams(teamsRes.data.map(dbToTeam));
+        if (testimonialsRes.data && testimonialsRes.data.length > 0) setTestimonials(testimonialsRes.data.map(dbToTestimonial));
+        if (instagramRes.data && instagramRes.data.length > 0) setInstagramImages(instagramRes.data.map((r: any) => r.image_url));
+        if (couponsRes.data && couponsRes.data.length > 0) setCoupons(couponsRes.data.map(dbToCoupon));
         if (siteConfigRes.data && siteConfigRes.data.config) {
           setSiteConfig({
             ...defaultSiteConfig,
             ...siteConfigRes.data.config,
-            newArrivalIds: Array.isArray(siteConfigRes.data.config.newArrivalIds)
-              ? siteConfigRes.data.config.newArrivalIds
-              : [],
+            newArrivalIds: Array.isArray(siteConfigRes.data.config.newArrivalIds) ? siteConfigRes.data.config.newArrivalIds : [],
           });
         }
-
-        console.log("🎉 All data loaded from Supabase");
       } catch (err) {
         console.error("❌ Failed to load data:", err);
         setProducts([]);
@@ -672,29 +481,18 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
         setIsHydrated(true);
       }
     }
-
     loadAllData();
   }, []);
 
   async function saveToServer(table: string, data: any) {
     try {
       const res = await fetch("/api/admin/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include",
         body: JSON.stringify({ table, data }),
       });
-
-      const responseText = await res.text();
-      let responseData: any;
-      try {
-        responseData = JSON.parse(responseText);
-      } catch {
-        responseData = { raw: responseText };
-      }
-
       if (!res.ok) {
-        throw new Error(responseData.error || `HTTP ${res.status}`);
+        const err = await res.json();
+        throw new Error(err.error || `HTTP ${res.status}`);
       }
       return true;
     } catch (err: any) {
@@ -703,320 +501,90 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const updateSiteConfig = async (config: Partial<SiteConfigData>) => {
-    const newConfig = { ...siteConfig, ...config };
-    setSiteConfig(newConfig);
-    await saveToServer("site_config", { id: 1, config: newConfig });
-  };
-
-  const updateHeroSlides = async (slides: HeroSlide[]) => {
-    setHeroSlides(slides);
-    await saveToServer(
-      "hero_slides",
-      slides.map((s, i) => ({
-        id: s.id,
-        badge: s.badge,
-        title: s.title,
-        highlight: s.highlight,
-        player: s.player,
-        quote: s.quote,
-        description: s.description,
-        image: s.image,
-        cta: s.cta,
-        sort_order: i,
-      }))
-    );
-  };
-
-  const updateOffers = async (offers: Offer[]) => {
-    setOffers(offers);
-    await saveToServer(
-      "offers",
-      offers.map((o) => ({
-        id: o.id,
-        badge: o.badge,
-        title: o.title,
-        highlight: o.highlight,
-        discount_text: o.discountText,
-        description: o.description,
-        coupon_code: o.couponCode,
-        image: o.image,
-        cta: o.cta,
-        end_date: o.endDate,
-        is_active: o.isActive,
-      }))
-    );
-  };
-
-  const updateFeatures = async (features: Feature[]) => {
-    setFeatures(features);
-    await saveToServer(
-      "features",
-      features.map((f, i) => ({
-        id: f.id,
-        title: f.title,
-        description: f.desc,
-        icon: f.icon,
-        sort_order: i,
-      }))
-    );
-  };
-
-  const updateCategories = async (categories: Category[]) => {
-    setCategories(categories);
-    await saveToServer(
-      "categories",
-      categories.map((c, i) => ({
-        id: c.id,
-        name: c.name,
-        slug: c.slug,
-        description: c.desc,
-        image: c.image,
-        sort_order: i,
-      }))
-    );
-  };
-
-  const updateBrands = async (brands: Brand[]) => {
-    setBrands(brands);
-    await saveToServer(
-      "brands",
-      brands.map((b, i) => ({
-        id: b.id,
-        name: b.name,
-        slug: b.slug,
-        tagline: b.tagline,
-        logo: b.logo || null,
-        sort_order: i,
-      }))
-    );
-  };
-
+  const updateSiteConfig = async (config: Partial<SiteConfigData>) => { const newConfig = { ...siteConfig, ...config }; setSiteConfig(newConfig); await saveToServer("site_config", { id: 1, config: newConfig }); };
+  const updateHeroSlides = async (slides: HeroSlide[]) => { setHeroSlides(slides); await saveToServer("hero_slides", slides.map((s, i) => ({ id: s.id, badge: s.badge, title: s.title, highlight: s.highlight, player: s.player, quote: s.quote, description: s.description, image: s.image, cta: s.cta, sort_order: i }))); };
+  const updateOffers = async (offers: Offer[]) => { setOffers(offers); await saveToServer("offers", offers.map((o) => ({ id: o.id, badge: o.badge, title: o.title, highlight: o.highlight, discount_text: o.discountText, description: o.description, coupon_code: o.couponCode, image: o.image, cta: o.cta, end_date: o.endDate, is_active: o.isActive }))); };
+  const updateFeatures = async (features: Feature[]) => { setFeatures(features); await saveToServer("features", features.map((f, i) => ({ id: f.id, title: f.title, description: f.desc, icon: f.icon, sort_order: i }))); };
+  const updateCategories = async (categories: Category[]) => { setCategories(categories); await saveToServer("categories", categories.map((c, i) => ({ id: c.id, name: c.name, slug: c.slug, description: c.desc, image: c.image, sort_order: i }))); };
+  const updateBrands = async (brands: Brand[]) => { setBrands(brands); await saveToServer("brands", brands.map((b, i) => ({ id: b.id, name: b.name, slug: b.slug, tagline: b.tagline, logo: b.logo || null, sort_order: i }))); };
   const updateProducts = async (products: Product[]) => {
     setProducts(products);
-    await saveToServer(
-      "products",
-      products.map((p) => ({
-        id: p.id,
-        name: p.name,
-        category: p.category,
-        sub_category: p.subCategory,
-        brand: p.brand,
-        team: p.team,
-        type: p.type,
-        price: p.price,
-        image_url: p.image_url,
-        images: p.images || [],
-        rating: p.rating || 0,
-        reviews_count: p.reviews_count || 0,
-        description: p.description,
-        sizes: p.sizes || [],
-        reviews: p.reviews || [],
-        stock: p.stock || 0,
-        colors: p.colors || [],
-        season: p.season || null,
-        highlights: p.highlights || [],
-        specifications: p.specifications || [],
-        custom_fields: p.customFields || [],
-        delivery_time: p.deliveryTime || null,
-        kit_type: p.kitType || null,
-        player_name: p.playerName || null,
-        player_number: p.playerNumber || null,
-        is_player_edition: p.isPlayerEdition || false,
-        sleeve_type: p.sleeveType || null,
-        collar_type: p.collarType || null,
-        fit_type: p.fitType || null,
-        sponsor: p.sponsor || null,
-        surface: p.surface || null,
-        play_style: p.playStyle || null,
-        boot_height: p.bootHeight || null,
-        weight_grams: p.weightGrams || null,
-        upper_material: p.upperMaterial || null,
-        soleplate: p.soleplate || null,
-        stud_type: p.studType || null,
-        closure_type: p.closureType || null,
-        collection: p.collection || null,
-        release_year: p.releaseYear || null,
-      }))
-    );
+    await saveToServer("products", products.map((p) => ({
+      id: p.id, name: p.name, category: p.category, sub_category: p.subCategory,
+      brand: p.brand, team: p.team, type: p.type, price: p.price,
+      image_url: p.image_url, images: p.images || [], rating: p.rating || 0,
+      reviews_count: p.reviews_count || 0, description: p.description,
+      sizes: p.sizes || [], reviews: p.reviews || [], stock: p.stock || 0,
+      colors: p.colors || [], season: p.season || null, highlights: p.highlights || [],
+      specifications: p.specifications || [], custom_fields: p.customFields || [],
+      delivery_time: p.deliveryTime || null, kit_type: p.kitType || null,
+      player_name: p.playerName || null, player_number: p.playerNumber || null,
+      is_player_edition: p.isPlayerEdition || false, sleeve_type: p.sleeveType || null,
+      collar_type: p.collarType || null, fit_type: p.fitType || null, sponsor: p.sponsor || null,
+      surface: p.surface || null, play_style: p.playStyle || null,
+      boot_height: p.bootHeight || null, weight_grams: p.weightGrams || null,
+      upper_material: p.upperMaterial || null, soleplate: p.soleplate || null,
+      stud_type: p.studType || null, closure_type: p.closureType || null,
+      collection: p.collection || null, release_year: p.releaseYear || null,
+    })));
   };
-
-  const updateTeams = async (teams: Team[]) => {
-    setTeams(teams);
-    await saveToServer(
-      "teams",
-      teams.map((t, i) => ({
-        id: t.id,
-        name: t.name,
-        logo: t.logo,
-        bg_color: t.bgColor,
-        sort_order: i,
-      }))
-    );
-  };
-
-  const updateTestimonials = async (testimonials: Testimonial[]) => {
-    setTestimonials(testimonials);
-    await saveToServer(
-      "testimonials",
-      testimonials.map((t, i) => ({
-        id: t.id,
-        name: t.name,
-        role: t.role,
-        avatar: t.avatar,
-        text: t.text,
-        rating: t.rating,
-        sort_order: i,
-      }))
-    );
-  };
-
-  const updateInstagramImages = async (images: string[]) => {
-    setInstagramImages(images);
-    await saveToServer(
-      "instagram_images",
-      images.map((url, i) => ({
-        image_url: url,
-        sort_order: i,
-      }))
-    );
-  };
-
-  const updateCoupons = async (coupons: CouponData[]) => {
-    setCoupons(coupons);
-    await saveToServer(
-      "coupons",
-      coupons.map((c) => ({
-        id: c.id,
-        code: c.code,
-        type: c.type,
-        value: c.value,
-        description: c.description,
-        is_active: true,
-      }))
-    );
-  };
-
+  const updateTeams = async (teams: Team[]) => { setTeams(teams); await saveToServer("teams", teams.map((t, i) => ({ id: t.id, name: t.name, logo: t.logo, bg_color: t.bgColor, sort_order: i }))); };
+  const updateTestimonials = async (testimonials: Testimonial[]) => { setTestimonials(testimonials); await saveToServer("testimonials", testimonials.map((t, i) => ({ id: t.id, name: t.name, role: t.role, avatar: t.avatar, text: t.text, rating: t.rating, sort_order: i }))); };
+  const updateInstagramImages = async (images: string[]) => { setInstagramImages(images); await saveToServer("instagram_images", images.map((url, i) => ({ image_url: url, sort_order: i }))); };
+  const updateCoupons = async (coupons: CouponData[]) => { setCoupons(coupons); await saveToServer("coupons", coupons.map((c) => ({ id: c.id, code: c.code, type: c.type, value: c.value, description: c.description, is_active: true }))); };
   const addProductReview = async (productId: number, review: Review) => {
     try {
       const { error: reviewError } = await supabase.from("reviews").insert({
-        product_id: productId,
-        user_name: review.name,
-        rating: review.rating,
-        comment: review.comment,
-        image_url: review.image_url || null,
+        product_id: productId, user_name: review.name, rating: review.rating, comment: review.comment, image_url: review.image_url || null,
       });
-
       if (reviewError) throw new Error(reviewError.message);
-
       setProducts((prev) =>
         prev.map((p) => {
           if (p.id !== productId) return p;
           const newReviews = [review, ...(p.reviews || [])];
-          const avgRating =
-            newReviews.reduce((sum, r) => sum + r.rating, 0) /
-            newReviews.length;
-          const updatedProduct = {
-            ...p,
-            reviews: newReviews,
-            reviews_count: newReviews.length,
-            rating: Number(avgRating.toFixed(1)),
-          };
-
-          supabase
-            .from("products")
-            .update({
-              rating: updatedProduct.rating,
-              reviews_count: updatedProduct.reviews_count,
-            })
-            .eq("id", productId)
-            .then(({ error }) => {
-              if (error) console.error("Failed to update aggregate:", error.message);
-            });
-
+          const avgRating = newReviews.reduce((sum, r) => sum + r.rating, 0) / newReviews.length;
+          const updatedProduct = { ...p, reviews: newReviews, reviews_count: newReviews.length, rating: Number(avgRating.toFixed(1)) };
+          supabase.from("products").update({ rating: updatedProduct.rating, reviews_count: updatedProduct.reviews_count }).eq("id", productId).then(({ error }) => { if (error) console.error(error.message); });
           return updatedProduct;
         })
       );
-    } catch (err: any) {
-      console.error("Failed to add review:", err);
-      throw err;
-    }
+    } catch (err: any) { console.error("Failed to add review:", err); throw err; }
   };
-
-  // 👇 নতুন ফাংশন: অর্ডার হলে স্টক কমানো
   const reduceStock = async (items: { id: number; quantity: number }[]) => {
     try {
       for (const item of items) {
         const product = products.find((p) => p.id === item.id);
         if (product) {
           const newStock = Math.max(0, (product.stock || 0) - item.quantity);
-          await supabase
-            .from("products")
-            .update({ stock: newStock })
-            .eq("id", item.id);
+          await supabase.from("products").update({ stock: newStock }).eq("id", item.id);
         }
       }
-
       setProducts((prev) =>
         prev.map((p) => {
           const orderedItem = items.find((i) => i.id === p.id);
-          if (orderedItem) {
-            return {
-              ...p,
-              stock: Math.max(0, (p.stock || 0) - orderedItem.quantity),
-            };
-          }
+          if (orderedItem) return { ...p, stock: Math.max(0, (p.stock || 0) - orderedItem.quantity) };
           return p;
         })
       );
-    } catch (err) {
-      console.error("Failed to reduce stock:", err);
-    }
+    } catch (err) { console.error("Failed to reduce stock:", err); }
   };
 
   const resetAll = async () => {
-    setSiteConfig(defaultSiteConfig);
-    setHeroSlides(defaultHeroSlides);
-    setOffers(defaultOffers);
-    setFeatures(defaultFeatures);
-    setCategories(defaultCategories);
-    setBrands(defaultBrands);
-    setProducts([]);
-    setTeams(defaultTeams);
-    setTestimonials(defaultTestimonials);
-    setInstagramImages(defaultInstagramImages);
-    setCoupons(defaultCoupons);
+    setSiteConfig(defaultSiteConfig); setHeroSlides(defaultHeroSlides); setOffers(defaultOffers);
+    setFeatures(defaultFeatures); setCategories(defaultCategories); setBrands(defaultBrands);
+    setProducts([]); setTeams(defaultTeams); setTestimonials(defaultTestimonials);
+    setInstagramImages(defaultInstagramImages); setCoupons(defaultCoupons);
   };
 
   return (
     <SiteDataContext.Provider
       value={{
-        siteConfig,
-        heroSlides,
-        offers,
-        features,
-        categories,
-        brands,
-        products,
-        teams,
-        testimonials,
-        instagramImages,
-        coupons,
-        updateSiteConfig,
-        updateHeroSlides,
-        updateOffers,
-        updateFeatures,
-        updateCategories,
-        updateBrands,
-        updateProducts,
-        updateTeams,
-        updateTestimonials,
-        updateInstagramImages,
-        updateCoupons,
-        addProductReview,
-        reduceStock,
-        resetAll,
-        isHydrated,
+        siteConfig, heroSlides, offers, features, categories, brands,
+        products, teams, testimonials, instagramImages, coupons,
+        updateSiteConfig, updateHeroSlides, updateOffers, updateFeatures,
+        updateCategories, updateBrands, updateProducts, updateTeams,
+        updateTestimonials, updateInstagramImages, updateCoupons,
+        addProductReview, reduceStock, resetAll, isHydrated,
       }}
     >
       {children}
@@ -1026,8 +594,6 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
 
 export function useSiteData() {
   const context = useContext(SiteDataContext);
-  if (!context) {
-    throw new Error("useSiteData must be used within SiteDataProvider");
-  }
+  if (!context) throw new Error("useSiteData must be used within SiteDataProvider");
   return context;
 }

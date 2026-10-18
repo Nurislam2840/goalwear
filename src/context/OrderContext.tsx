@@ -32,6 +32,7 @@ export interface Order {
     city: string;
   };
   paymentMethod: string;
+  shippingMethod?: string; // 👈 নতুন যুক্ত হলো
 }
 
 interface OrderContextType {
@@ -40,6 +41,7 @@ interface OrderContextType {
     order: Omit<Order, "id" | "date" | "status">
   ) => Promise<string>;
   updateOrderStatus: (id: string, status: Order["status"]) => Promise<void>;
+  updateShippingMethod: (id: string, method: string) => Promise<void>; // 👈 নতুন
   deleteOrder: (id: string) => Promise<void>;
   clearAllOrders: () => Promise<void>;
   getOrder: (id: string) => Order | undefined;
@@ -66,7 +68,7 @@ export function OrderProvider({ children }: { children: ReactNode }) {
       const res = await fetch("/api/orders", {
         method: "GET",
         headers: {
-          "x-user-id": user.id, // 👈 Send user ID in header
+          "x-user-id": user.id,
         },
         credentials: "include",
         cache: "no-store",
@@ -116,7 +118,7 @@ export function OrderProvider({ children }: { children: ReactNode }) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-user-id": user.id, // 👈 Send user ID in header
+          "x-user-id": user.id,
         },
         credentials: "include",
         body: JSON.stringify(orderData),
@@ -168,6 +170,34 @@ export function OrderProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // ============ Update Shipping Method (admin) ============
+  const updateShippingMethod = async (
+    id: string,
+    method: string
+  ): Promise<void> => {
+    setOrders((prev) =>
+      prev.map((o) => (o.id === id ? { ...o, shippingMethod: method } : o))
+    );
+
+    try {
+      const res = await fetch(`/api/admin/orders?id=${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ shipping_method: method }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to update shipping method");
+      }
+    } catch (err: any) {
+      console.error("[OrderContext] updateShippingMethod error:", err.message);
+      if (user?.id) await fetchOrders();
+      throw err;
+    }
+  };
+
   // ============ Delete Order (admin) ============
   const deleteOrder = async (id: string): Promise<void> => {
     setOrders((prev) => prev.filter((o) => o.id !== id));
@@ -205,6 +235,7 @@ export function OrderProvider({ children }: { children: ReactNode }) {
         orders,
         addOrder,
         updateOrderStatus,
+        updateShippingMethod,
         deleteOrder,
         clearAllOrders,
         getOrder,

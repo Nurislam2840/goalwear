@@ -140,8 +140,7 @@ export default function AdminCategoriesPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {categories.map((c) => (
-            <div
-              key={c.id}
+            <div              key={c.id}
               className="bg-white dark:bg-brand-card rounded-2xl border border-gray-100 dark:border-brand-border overflow-hidden"
             >
               <div className="relative h-40 bg-gray-100 dark:bg-brand-dark">
@@ -281,19 +280,6 @@ export default function AdminCategoriesPage() {
                 placeholder="https://images.unsplash.com/..."
                 previewHeight="h-32"
               />
-
-              <div className="bg-brand-green/10 border border-brand-green/30 rounded-xl p-4">
-                <p className="text-xs font-bold text-black dark:text-brand-green mb-2">
-                  💡 Image Tips:
-                </p>
-                <ul className="text-xs text-gray-600 dark:text-gray-300 space-y-1 list-disc pl-4">
-                  <li>
-                    Recommended size: <span className="font-bold">800 × 800 px</span>
-                  </li>
-                  <li>Transparent PNG or solid background works best</li>
-                  <li>Place subject in center or bottom-right for best look</li>
-                </ul>
-              </div>
             </form>
 
             <div className="p-5 border-t border-gray-100 dark:border-brand-border flex justify-end gap-3">

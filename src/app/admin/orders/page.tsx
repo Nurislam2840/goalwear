@@ -8,14 +8,14 @@ import ThemedSelect from "@/components/ThemedSelect";
 import {
   ShoppingCart, Search, X, ChevronDown, ChevronUp,
   Clock, CheckCircle2, Truck, XCircle, Trash2,
-  User, Mail, Phone, MapPin, DollarSign
+  User, Mail, Phone, MapPin, DollarSign, Plane, Ship
 } from "lucide-react";
 import Image from "next/image";
 
 const STATUS_OPTIONS: Order["status"][] = ["Processing", "Shipped", "Delivered", "Cancelled"];
 
 export default function AdminOrdersPage() {
-  const { orders, updateOrderStatus, deleteOrder } = useOrders();
+  const { orders, updateOrderStatus, deleteOrder, updateShippingMethod } = useOrders();
   const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"All" | Order["status"]>("All");
@@ -47,6 +47,12 @@ export default function AdminOrdersPage() {
   const handleStatusChange = (orderId: string, newStatus: Order["status"]) => {
     updateOrderStatus(orderId, newStatus);
     showToast(`Order ${orderId} → ${newStatus}`, "success");
+    if (newStatus === "Shipped") setExpandedOrder(orderId); // Auto-expand to choose shipping method
+  };
+
+  const handleShippingMethodChange = (orderId: string, method: string) => {
+    updateShippingMethod(orderId, method);
+    showToast(`Shipping method updated to ${method.toUpperCase()}`, "success");
   };
 
   const handleDeleteOrder = (order: Order) => {
@@ -184,6 +190,8 @@ export default function AdminOrdersPage() {
         <div className="space-y-3">
           {filteredOrders.map((order) => {
             const isExpanded = expandedOrder === order.id;
+            const currentShipping = order.shippingMethod || "truck";
+            
             return (
               <div
                 key={order.id}
@@ -202,7 +210,6 @@ export default function AdminOrdersPage() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      {/* 👇 ThemedSelect for Status */}
                       <div className="min-w-[140px]">
                         <ThemedSelect
                           value={order.status}
@@ -259,6 +266,36 @@ export default function AdminOrdersPage() {
                       </div>
                     </div>
                   </div>
+
+                  {/* শিপিং মেথড সিলেক্টর (শুধু Shipped হলে দেখাবে) */}
+                  {order.status === "Shipped" && (
+                    <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <Truck className="w-4 h-4 text-blue-500" />
+                        <p className="text-xs font-bold dark:text-white">How is this shipping?</p>
+                      </div>
+                      <div className="flex gap-2">
+                        {[
+                          { id: "truck", icon: Truck, label: "Truck" },
+                          { id: "plane", icon: Plane, label: "Plane" },
+                          { id: "ship", icon: Ship, label: "Ship" },
+                        ].map((m) => (
+                          <button
+                            key={m.id}
+                            onClick={() => handleShippingMethodChange(order.id, m.id)}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                              currentShipping === m.id
+                                ? "bg-blue-500 text-white shadow-md"
+                                : "bg-white dark:bg-brand-dark text-gray-600 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/40"
+                            }`}
+                          >
+                            <m.icon className="w-3.5 h-3.5" />
+                            {m.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <button
                     onClick={() => setExpandedOrder(isExpanded ? null : order.id)}

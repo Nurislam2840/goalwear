@@ -29,6 +29,7 @@ export async function GET() {
       status: row.status,
       customerInfo: row.customer_info || {},
       paymentMethod: row.payment_method || "Unknown",
+      shippingMethod: row.shipping_method || "truck",
     }));
 
     return NextResponse.json({ orders });
@@ -37,7 +38,7 @@ export async function GET() {
   }
 }
 
-// ============ PATCH — Update order status ============
+// ============ PATCH — Update order status or shipping method ============
 export async function PATCH(req: NextRequest) {
   try {
     const isAdmin = await isAdminAuthenticated();
@@ -53,16 +54,23 @@ export async function PATCH(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { status } = body;
+    const updateData: any = { updated_at: new Date().toISOString() };
 
-    const validStatuses = ["Processing", "Shipped", "Delivered", "Cancelled"];
-    if (!status || !validStatuses.includes(status)) {
-      return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+    if (body.status) {
+      const validStatuses = ["Processing", "Shipped", "Delivered", "Cancelled"];
+      if (!validStatuses.includes(body.status)) {
+        return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+      }
+      updateData.status = body.status;
+    }
+
+    if (body.shipping_method) {
+      updateData.shipping_method = body.shipping_method;
     }
 
     const { error } = await supabaseAdmin
       .from("orders")
-      .update({ status, updated_at: new Date().toISOString() })
+      .update(updateData)
       .eq("id", id);
 
     if (error) {

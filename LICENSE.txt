@@ -1,6 +1,6 @@
 ================================================================
 GOALWEAR THEME — COMMERCIAL LICENSE
-Version 1.0
+Version 1.1
 ================================================================
 
 Copyright (c) 2026 MD NUR ISLAM
@@ -19,7 +19,7 @@ PRODUCT
 ----------------------------------------------------------------
 
 Product Name:  GoalWear — Premium Football E-commerce Theme
-Version:       1.0
+Version:       1.1.0
 Platform:      Next.js 16 + Supabase + Stripe
 License Type:  Commercial (Single / Extended)
 
@@ -34,8 +34,8 @@ BEFORE USING THE GOALWEAR THEME.
 1. DEFINITIONS
 ----------------------------------------------------------------
 
-"Software" refers to the GoalWear theme, including all source
-code, documentation, images, and accompanying files.
+"Software" refers to the GoalWear theme (Version 1.1.0), including all 
+source code, documentation, images, design assets, and accompanying files.
 
 "Licensee" refers to the individual or entity that has purchased
 this Software.
@@ -65,18 +65,31 @@ Extended License:
 - Modify the source code for personal or client use
 
 ----------------------------------------------------------------
-3. PERMITTED USES
+3. NEW FEATURES INCLUDED IN V1.1.0
+----------------------------------------------------------------
+
+This version includes additional features, which are covered under
+this license:
+- Brand Logo Management & Display System
+- Product Delivery Time Estimation
+- Real Customer Reviews with Image Upload Support
+- Automatic Inventory (Stock) Reduction on Order
+- Manual "New Arrivals" Product Selection
+- Dedicated Admin Reviews Management Panel
+
+----------------------------------------------------------------
+4. PERMITTED USES
 ----------------------------------------------------------------
 
 The Licensee MAY:
-- Use the Software for commercial purposes
+- Use the Software for commercial purposes (e-commerce store)
 - Modify, adapt, and extend the source code
 - Integrate with third-party services (Supabase, Stripe, etc.)
 - Deploy on the Licensee's servers (Vercel, AWS, etc.)
 - Create derivative works for personal use
 
 ----------------------------------------------------------------
-4. RESTRICTIONS
+5. RESTRICTIONS
 ----------------------------------------------------------------
 
 The Licensee MAY NOT:
@@ -88,7 +101,7 @@ The Licensee MAY NOT:
 - Transfer the license to another party without written consent
 
 ----------------------------------------------------------------
-5. THIRD-PARTY SERVICES
+6. THIRD-PARTY SERVICES
 ----------------------------------------------------------------
 
 The Software integrates with:
@@ -103,7 +116,7 @@ The Licensee is responsible for:
 - Paying any applicable service fees
 
 ----------------------------------------------------------------
-6. INTELLECTUAL PROPERTY
+7. INTELLECTUAL PROPERTY
 ----------------------------------------------------------------
 
 The Software, including all code, design, and documentation,
@@ -112,7 +125,7 @@ is the intellectual property of MD NUR ISLAM.
 The Licensee is granted use rights only — not ownership.
 
 ----------------------------------------------------------------
-7. DISCLAIMER OF WARRANTY
+8. DISCLAIMER OF WARRANTY
 ----------------------------------------------------------------
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
@@ -126,7 +139,7 @@ THE LICENSOR DOES NOT WARRANT THAT:
 - All bugs will be corrected
 
 ----------------------------------------------------------------
-8. LIMITATION OF LIABILITY
+9. LIMITATION OF LIABILITY
 ----------------------------------------------------------------
 
 IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY CLAIM,
@@ -138,7 +151,7 @@ Maximum liability is limited to the purchase price of the
 Software.
 
 ----------------------------------------------------------------
-9. SUPPORT & UPDATES
+10. SUPPORT & UPDATES
 ----------------------------------------------------------------
 
 Single License:
@@ -160,7 +173,7 @@ Support Contact:
 🌐 Website: https://themes-store.vercel.app
 
 ----------------------------------------------------------------
-10. REFUND POLICY
+11. REFUND POLICY
 ----------------------------------------------------------------
 
 Refunds are available within 14 days of purchase IF:
@@ -173,7 +186,7 @@ Refunds are NOT available for:
 - Lack of technical skills
 
 ----------------------------------------------------------------
-11. TERMINATION
+12. TERMINATION
 ----------------------------------------------------------------
 
 This license is effective until terminated. It will terminate
@@ -184,14 +197,14 @@ Upon termination, the Licensee must:
 - Delete all copies from their systems
 
 ----------------------------------------------------------------
-12. GOVERNING LAW
+13. GOVERNING LAW
 ----------------------------------------------------------------
 
 This license shall be governed by the laws of Bangladesh,
 without regard to conflict of law provisions.
 
 ----------------------------------------------------------------
-13. CONTACT
+14. CONTACT
 ----------------------------------------------------------------
 
 For license inquiries, support, or questions:
@@ -200,4 +213,4 @@ Author:   MD NUR ISLAM
 Website:  https://themes-store.vercel.app
 Email:    imdnur284@gmail.com
 
-===============================================
+================================================================

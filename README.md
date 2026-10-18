@@ -1,6 +1,6 @@
 # GoalWear — Premium Football E-commerce Theme
 
-A production-ready e-commerce theme for football gear, built with Next.js 16, Supabase, and Stripe.
+A production-ready, feature-rich e-commerce theme for football gear, built with Next.js 16, Supabase, and Stripe.
 
 ![GoalWear](https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1200&auto=format&fit=crop)
 
@@ -17,42 +17,46 @@ A production-ready e-commerce theme for football gear, built with Next.js 16, Su
 ### 🛍️ Storefront
 - Modern, mobile-first responsive design
 - Dark & Light mode
-- Hero slider with countdown offers
-- Product search with suggestions
+- Hero slider with dynamic countdown offers
+- **Brand logos & dedicated brand sections**
+- Product search with smart suggestions
 - Advanced filters (price, brand, category)
 - **Product variants** (Home / Away / Third / Goalkeeper)
 - Quick view modal
 - Wishlist
-- Cart with quantity controls
+- Cart with quantity controls & live stock updates
 - Coupon system (percent / fixed / shipping)
 - Stripe card payments + Cash on Delivery
-- Order tracking
+- Order tracking with status timeline
 - User accounts (Supabase Auth)
-- Product reviews & ratings
+- **Real product reviews with image upload support**
+- **Dynamic delivery time estimates per product**
 - Recently viewed products
 - Instagram gallery
 - Newsletter signup
 - WhatsApp floating button
 
-### 🎛️ Admin Panel (12 Sections)
+### 🎛️ Admin Panel (13 Sections)
 - **Dashboard** with revenue chart & top products
-- **Products** — full CRUD with advanced fields
+- **Products** — full CRUD with advanced fields (including Delivery Time)
 - **Orders** — status management
-- **Hero Slider** — homepage carousel
+- **Reviews** — moderate customer reviews & delete inappropriate ones
+- **Hero Slider** — homepage carousel with image upload
 - **Offers** — flash sales with countdown
-- **Categories** — product categories
-- **Brands** — brand management
+- **Categories** — product categories with images
+- **Brands** — brand management with logo upload
 - **Teams** — popular teams
 - **Testimonials** — customer reviews
 - **Features** — feature badges
 - **Coupons** — discount codes
-- **Site Settings** — name, logo, contact, social
+- **Site Settings** — name, logo, contact, social, **New Arrivals selector**
 
 ### 🔒 Security
-- Cookie-based admin session (HttpOnly)
+- Cookie-based admin session (HttpOnly, Secure)
 - Rate limiting on login (5 attempts / 15 min)
-- Server-side price verification
-- IDOR protection on orders
+- Server-side price verification on checkout
+- **Automatic stock reduction upon successful order**
+- IDOR protection on orders (no header spoofing)
 - Supabase Auth (bcrypt password hashing)
 - Environment-based credentials (no hardcoded secrets)
 
