@@ -43,10 +43,11 @@ export default function MobileDrawer({ isOpen, onClose }: MobileDrawerProps) {
 
   if (!isOpen) return null;
 
+  // 👇 ক্যাটাগরি ডাইনামিক করা হলো
   const navItems = [
     { href: "/", label: "Home", icon: Home },
     { href: "/shop", label: "Shop All", icon: ShoppingBag },
-    ...categories.slice(0, 4).map((cat) => ({
+    ...categories.map((cat) => ({
       href: `/category/${cat.slug}`,
       label: cat.name,
       icon: ShoppingBag,

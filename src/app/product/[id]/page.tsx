@@ -88,6 +88,7 @@ export default function ProductDetailsPage() {
   const stock = product.stock ?? 999;
   const isOutOfStock = stock <= 0;
 
+  // 👇 নো ডিফল্ট কালার
   const productColors =
     product.colors && product.colors.length > 0 ? product.colors : [];
 
@@ -142,12 +143,12 @@ export default function ProductDetailsPage() {
     product.subCategory === "Club" || product.subCategory === "Country";
   const isBoot = product.subCategory === "Boot";
 
-  // 👇 Find brand from admin brands list (matches by name)
+  // ব্র্যান্ড লোগো লুকআপ
   const brandData = brands.find(
     (b) => b.name.toLowerCase() === (product.brand || "").toLowerCase()
   );
 
-  // Sibling variants (same team + season)
+  // সিবলিং ভ্যারিয়েন্টস (একই টিম + সিজন)
   const siblingVariants = product.team
     ? products.filter(
         (p) =>
@@ -298,7 +299,7 @@ export default function ProductDetailsPage() {
           />
 
           <div className="flex flex-col">
-            {/* 👇 BRAND LOGO + NAME (top) */}
+            {/* BRAND LOGO */}
             {brandData && (
               <Link
                 href={`/shop?brand=${brandData.slug}`}
@@ -366,11 +367,12 @@ export default function ProductDetailsPage() {
               </p>
             )}
 
+            {/* 👇 Rating ফিক্স করা হলো .toFixed(1) দিয়ে */}
             <div className="flex items-center gap-2 mt-3">
               <div className="flex items-center">
                 <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                 <span className="text-sm font-bold dark:text-white ml-1">
-                  {product.rating}
+                  {Number(product.rating || 0).toFixed(1)}
                 </span>
               </div>
               <span className="text-sm text-gray-500">
@@ -403,45 +405,36 @@ export default function ProductDetailsPage() {
               </div>
             )}
 
+            {/* DELIVERY TIME */}
+            <div className="mt-5 flex items-start gap-3 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/30 rounded-2xl p-4 w-full">
+              <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Truck className="w-5 h-5 text-white" strokeWidth={2.5} />
+              </div>
+              <div className="flex-1">
+                <p className="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider mb-1">
+                  Estimated Delivery Time
+                </p>
+                <p className="text-sm font-semibold dark:text-gray-200 leading-relaxed">
+                  {product.deliveryTime || "3-5 Business Days"}
+                </p>
+              </div>
+            </div>
+
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-4 leading-relaxed">
               {product.description}
             </p>
-            
-            {/* 👇 Delivery Time Badge */}
-            <div className="mt-4 flex items-center gap-3 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900/30 rounded-xl p-3 w-fit">
-            	<div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-            		<Truck className="w-4 h-4 text-white" strokeWidth={2.5} />
-            	</div>
-            	<div>
-            	<p className="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider">
-            		Estimated Delivery
-            	</p>
-            	<p className="text-sm font-bold dark:text-white">
-            		{product.deliveryTime || "3-5 Business Days"}
-            	</p>
-            	</div>
-            </div>
 
             {/* HIGHLIGHTS */}
             {product.highlights && product.highlights.length > 0 && (
               <div className="mt-5 bg-brand-green/5 dark:bg-brand-green/5 border border-brand-green/20 rounded-2xl p-4">
                 <h3 className="text-sm font-bold dark:text-white mb-3 flex items-center gap-2">
-                  <Sparkles
-                    className="w-4 h-4 text-brand-green"
-                    strokeWidth={2.5}
-                  />
+                  <Sparkles className="w-4 h-4 text-brand-green" strokeWidth={2.5} />
                   Highlights
                 </h3>
                 <ul className="space-y-2">
                   {product.highlights.map((highlight, idx) => (
-                    <li
-                      key={idx}
-                      className="flex items-start gap-2 text-sm dark:text-gray-300"
-                    >
-                      <Check
-                        className="w-4 h-4 text-brand-green flex-shrink-0 mt-0.5"
-                        strokeWidth={3}
-                      />
+                    <li key={idx} className="flex items-start gap-2 text-sm dark:text-gray-300">
+                      <Check className="w-4 h-4 text-brand-green flex-shrink-0 mt-0.5" strokeWidth={3} />
                       <span>{highlight}</span>
                     </li>
                   ))}
@@ -453,61 +446,38 @@ export default function ProductDetailsPage() {
             {isJersey && (
               <div className="mt-5 bg-gray-50 dark:bg-brand-card rounded-2xl p-4 border border-gray-100 dark:border-brand-border">
                 <h3 className="text-sm font-bold dark:text-white mb-3 flex items-center gap-2">
-                  <Award
-                    className="w-4 h-4 text-brand-green"
-                    strokeWidth={2.5}
-                  />
+                  <Award className="w-4 h-4 text-brand-green" strokeWidth={2.5} />
                   Jersey Details
                 </h3>
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   {product.kitType && (
                     <div>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Kit Type
-                      </p>
-                      <p className="font-semibold dark:text-white">
-                        {product.kitType}
-                      </p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kit Type</p>
+                      <p className="font-semibold dark:text-white">{product.kitType}</p>
                     </div>
                   )}
                   {product.sleeveType && (
                     <div>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Sleeve
-                      </p>
-                      <p className="font-semibold dark:text-white">
-                        {product.sleeveType}
-                      </p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sleeve</p>
+                      <p className="font-semibold dark:text-white">{product.sleeveType}</p>
                     </div>
                   )}
                   {product.collarType && (
                     <div>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Collar
-                      </p>
-                      <p className="font-semibold dark:text-white">
-                        {product.collarType}
-                      </p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Collar</p>
+                      <p className="font-semibold dark:text-white">{product.collarType}</p>
                     </div>
                   )}
                   {product.fitType && (
                     <div>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Fit
-                      </p>
-                      <p className="font-semibold dark:text-white">
-                        {product.fitType}
-                      </p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fit</p>
+                      <p className="font-semibold dark:text-white">{product.fitType}</p>
                     </div>
                   )}
                   {product.sponsor && (
                     <div>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Sponsor
-                      </p>
-                      <p className="font-semibold dark:text-white">
-                        {product.sponsor}
-                      </p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sponsor</p>
+                      <p className="font-semibold dark:text-white">{product.sponsor}</p>
                     </div>
                   )}
                 </div>
@@ -524,62 +494,38 @@ export default function ProductDetailsPage() {
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   {product.surface && (
                     <div>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Surface
-                      </p>
-                      <p className="font-semibold dark:text-white">
-                        {product.surface}
-                      </p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Surface</p>
+                      <p className="font-semibold dark:text-white">{product.surface}</p>
                     </div>
                   )}
                   {product.playStyle && (
                     <div>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Play Style
-                      </p>
-                      <p className="font-semibold dark:text-white">
-                        {product.playStyle}
-                      </p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Play Style</p>
+                      <p className="font-semibold dark:text-white">{product.playStyle}</p>
                     </div>
                   )}
                   {product.bootHeight && (
                     <div>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Height
-                      </p>
-                      <p className="font-semibold dark:text-white">
-                        {product.bootHeight}
-                      </p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Height</p>
+                      <p className="font-semibold dark:text-white">{product.bootHeight}</p>
                     </div>
                   )}
                   {product.closureType && (
                     <div>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Closure
-                      </p>
-                      <p className="font-semibold dark:text-white">
-                        {product.closureType}
-                      </p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Closure</p>
+                      <p className="font-semibold dark:text-white">{product.closureType}</p>
                     </div>
                   )}
                   {product.weightGrams && (
                     <div>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Weight
-                      </p>
-                      <p className="font-semibold dark:text-white">
-                        {product.weightGrams}g
-                      </p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Weight</p>
+                      <p className="font-semibold dark:text-white">{product.weightGrams}g</p>
                     </div>
                   )}
                   {product.upperMaterial && (
                     <div>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Upper
-                      </p>
-                      <p className="font-semibold dark:text-white">
-                        {product.upperMaterial}
-                      </p>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider">Upper</p>
+                      <p className="font-semibold dark:text-white">{product.upperMaterial}</p>
                     </div>
                   )}
                 </div>
@@ -589,21 +535,12 @@ export default function ProductDetailsPage() {
             {/* SPECIFICATIONS */}
             {product.specifications && product.specifications.length > 0 && (
               <div className="mt-5 bg-gray-50 dark:bg-brand-card rounded-2xl p-4 border border-gray-100 dark:border-brand-border">
-                <h3 className="text-sm font-bold dark:text-white mb-3">
-                  Specifications
-                </h3>
+                <h3 className="text-sm font-bold dark:text-white mb-3">Specifications</h3>
                 <div className="space-y-2">
                   {product.specifications.map((spec, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-start justify-between gap-4 text-sm py-2 border-b border-gray-100 dark:border-brand-border last:border-0"
-                    >
-                      <span className="text-gray-500 dark:text-gray-400 font-medium">
-                        {spec.label}
-                      </span>
-                      <span className="dark:text-white font-semibold text-right">
-                        {spec.value}
-                      </span>
+                    <div key={idx} className="flex items-start justify-between gap-4 text-sm py-2 border-b border-gray-100 dark:border-brand-border last:border-0">
+                      <span className="text-gray-500 dark:text-gray-400 font-medium">{spec.label}</span>
+                      <span className="dark:text-white font-semibold text-right">{spec.value}</span>
                     </div>
                   ))}
                 </div>
@@ -613,33 +550,22 @@ export default function ProductDetailsPage() {
             {/* CUSTOM FIELDS */}
             {product.customFields && product.customFields.length > 0 && (
               <div className="mt-4 bg-white dark:bg-brand-card rounded-2xl p-4 border border-gray-100 dark:border-brand-border">
-                <h3 className="text-sm font-bold dark:text-white mb-3">
-                  Additional Information
-                </h3>
+                <h3 className="text-sm font-bold dark:text-white mb-3">Additional Information</h3>
                 <div className="space-y-2">
                   {product.customFields.map((cf, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-start justify-between gap-4 text-sm"
-                    >
-                      <span className="text-gray-500 dark:text-gray-400">
-                        {cf.label}
-                      </span>
-                      <span className="dark:text-white font-medium text-right">
-                        {cf.value}
-                      </span>
+                    <div key={idx} className="flex items-start justify-between gap-4 text-sm">
+                      <span className="text-gray-500 dark:text-gray-400">{cf.label}</span>
+                      <span className="dark:text-white font-medium text-right">{cf.value}</span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Color Picker — only if colors exist */}
+            {/* COLOR PICKER */}
             {productColors.length > 0 && (
               <div className="mt-6">
-                <h3 className="text-sm font-bold dark:text-white mb-3">
-                  Select Color
-                </h3>
+                <h3 className="text-sm font-bold dark:text-white mb-3">Select Color</h3>
                 <div className="flex items-center gap-3 flex-wrap">
                   {productColors.map((color, idx) => (
                     <button
@@ -657,10 +583,7 @@ export default function ProductDetailsPage() {
                   ))}
                 </div>
                 <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-2">
-                  Selected:{" "}
-                  <span className="font-bold dark:text-white">
-                    {productColors[selectedColor]?.name || "Default"}
-                  </span>
+                  Selected: <span className="font-bold dark:text-white">{productColors[selectedColor]?.name || "Default"}</span>
                 </p>
               </div>
             )}
@@ -668,9 +591,7 @@ export default function ProductDetailsPage() {
             {/* SIZE SELECTOR */}
             <div className="mt-6">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-bold dark:text-white">
-                  Select Size
-                </h3>
+                <h3 className="text-sm font-bold dark:text-white">Select Size</h3>
                 <button
                   onClick={() => setShowSizeGuide(true)}
                   className="inline-flex items-center gap-1.5 bg-brand-green text-black text-[10px] font-bold px-3 py-1.5 rounded-full hover:opacity-90 transition-opacity"
@@ -700,9 +621,7 @@ export default function ProductDetailsPage() {
 
             {/* QUANTITY */}
             <div className="mt-5">
-              <h3 className="text-sm font-bold dark:text-white mb-3">
-                Quantity
-              </h3>
+              <h3 className="text-sm font-bold dark:text-white mb-3">Quantity</h3>
               <div className="inline-flex items-center bg-gray-100 dark:bg-brand-card rounded-full">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -711,9 +630,7 @@ export default function ProductDetailsPage() {
                 >
                   −
                 </button>
-                <span className="w-10 text-center font-bold dark:text-white">
-                  {quantity}
-                </span>
+                <span className="w-10 text-center font-bold dark:text-white">{quantity}</span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
                   disabled={isOutOfStock}
@@ -748,31 +665,19 @@ export default function ProductDetailsPage() {
                 <div className="w-10 h-10 bg-brand-green rounded-full flex items-center justify-center mx-auto mb-1.5">
                   <Truck className="w-5 h-5 text-black" strokeWidth={2.5} />
                 </div>
-                <p className="text-[10px] font-bold dark:text-white">
-                  Free Shipping
-                </p>
+                <p className="text-[10px] font-bold dark:text-white">Free Shipping</p>
               </div>
               <div className="text-center">
                 <div className="w-10 h-10 bg-brand-green rounded-full flex items-center justify-center mx-auto mb-1.5">
-                  <ShieldCheck
-                    className="w-5 h-5 text-black"
-                    strokeWidth={2.5}
-                  />
+                  <ShieldCheck className="w-5 h-5 text-black" strokeWidth={2.5} />
                 </div>
-                <p className="text-[10px] font-bold dark:text-white">
-                  Secure Payment
-                </p>
+                <p className="text-[10px] font-bold dark:text-white">Secure Payment</p>
               </div>
               <div className="text-center">
                 <div className="w-10 h-10 bg-brand-green rounded-full flex items-center justify-center mx-auto mb-1.5">
-                  <RotateCcw
-                    className="w-5 h-5 text-black"
-                    strokeWidth={2.5}
-                  />
+                  <RotateCcw className="w-5 h-5 text-black" strokeWidth={2.5} />
                 </div>
-                <p className="text-[10px] font-bold dark:text-white">
-                  30-Day Returns
-                </p>
+                <p className="text-[10px] font-bold dark:text-white">30-Day Returns</p>
               </div>
             </div>
           </div>

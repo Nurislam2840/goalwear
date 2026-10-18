@@ -9,6 +9,7 @@ import {
   ReactNode,
 } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useSiteData } from "@/context/SiteDataContext"; // 👈 নতুন ইম্পোর্ট
 
 export interface OrderItem {
   id: number;
@@ -32,7 +33,7 @@ export interface Order {
     city: string;
   };
   paymentMethod: string;
-  shippingMethod?: string; // 👈 নতুন যুক্ত হলো
+  shippingMethod?: string;
 }
 
 interface OrderContextType {
@@ -41,7 +42,7 @@ interface OrderContextType {
     order: Omit<Order, "id" | "date" | "status">
   ) => Promise<string>;
   updateOrderStatus: (id: string, status: Order["status"]) => Promise<void>;
-  updateShippingMethod: (id: string, method: string) => Promise<void>; // 👈 নতুন
+  updateShippingMethod: (id: string, method: string) => Promise<void>;
   deleteOrder: (id: string) => Promise<void>;
   clearAllOrders: () => Promise<void>;
   getOrder: (id: string) => Order | undefined;
@@ -53,13 +54,12 @@ const OrderContext = createContext<OrderContextType | undefined>(undefined);
 
 export function OrderProvider({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isHydrated: authHydrated } = useAuth();
+  const { products, updateProducts } = useSiteData(); // 👈 স্টক আপডেটের জন্য
   const [orders, setOrders] = useState<Order[]>([]);
   const [isHydrated, setIsHydrated] = useState(false);
 
-  // ============ Fetch orders from Supabase ============
   async function fetchOrders() {
     if (!user?.id) {
-      console.log("[OrderContext] No user ID, skipping fetch");
       setOrders([]);
       return;
     }
@@ -67,33 +67,23 @@ export function OrderProvider({ children }: { children: ReactNode }) {
     try {
       const res = await fetch("/api/orders", {
         method: "GET",
-        headers: {
-          "x-user-id": user.id,
-        },
         credentials: "include",
         cache: "no-store",
       });
 
-      if (!res.ok) {
-        const errText = await res.text();
-        console.warn("[OrderContext] Fetch failed:", res.status, errText);
-        return;
-      }
+      if (!res.ok) return;
 
       const data = await res.json();
       if (data.orders && Array.isArray(data.orders)) {
         setOrders(data.orders);
-        console.log(`✅ Loaded ${data.orders.length} orders`);
       }
     } catch (err) {
       console.error("[OrderContext] Fetch error:", err);
     }
   }
 
-  // Load on mount + when user changes
   useEffect(() => {
     if (!authHydrated) return;
-
     if (isAuthenticated && user?.id) {
       fetchOrders().finally(() => setIsHydrated(true));
     } else {
@@ -103,7 +93,6 @@ export function OrderProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authHydrated, isAuthenticated, user?.id]);
 
-  // ============ Add Order (server-side) ============
   const addOrder = async (
     orderData: Omit<Order, "id" | "date" | "status">
   ): Promise<string> => {
@@ -112,14 +101,9 @@ export function OrderProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      console.log("[OrderContext] 🛒 Placing order...");
-
       const res = await fetch("/api/orders", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-user-id": user.id,
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(orderData),
       });
@@ -127,26 +111,36 @@ export function OrderProvider({ children }: { children: ReactNode }) {
       const data = await res.json();
 
       if (!res.ok) {
-        console.error("[OrderContext] ❌ Order failed:", data.error);
         throw new Error(data.error || "Failed to create order");
       }
 
       const newOrder: Order = data.order;
-      console.log("[OrderContext] ✅ Order placed:", newOrder.id);
-
       setOrders((prev) => [newOrder, ...prev]);
       return newOrder.id;
     } catch (err: any) {
-      console.error("[OrderContext] addOrder error:", err.message);
       throw err;
     }
   };
 
-  // ============ Update Order Status (admin) ============
   const updateOrderStatus = async (
     id: string,
     status: Order["status"]
   ): Promise<void> => {
+    // 👇 স্টক ফেরত আনার লজিক (যদি Cancelled করা হয়)
+    if (status === "Cancelled") {
+      const orderToCancel = orders.find((o) => o.id === id);
+      if (orderToCancel && orderToCancel.status !== "Cancelled") {
+        const updatedProducts = products.map((p) => {
+          const orderedItem = orderToCancel.items.find((i) => i.id === p.id);
+          if (orderedItem) {
+            return { ...p, stock: (p.stock || 0) + orderedItem.quantity };
+          }
+          return p;
+        });
+        await updateProducts(updatedProducts); // ডাটাবেসে স্টক আপডেট
+      }
+    }
+
     setOrders((prev) =>
       prev.map((o) => (o.id === id ? { ...o, status } : o))
     );
@@ -160,21 +154,15 @@ export function OrderProvider({ children }: { children: ReactNode }) {
       });
 
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to update order");
+        throw new Error("Failed to update order");
       }
     } catch (err: any) {
-      console.error("[OrderContext] updateOrderStatus error:", err.message);
       if (user?.id) await fetchOrders();
       throw err;
     }
   };
 
-  // ============ Update Shipping Method (admin) ============
-  const updateShippingMethod = async (
-    id: string,
-    method: string
-  ): Promise<void> => {
+  const updateShippingMethod = async (id: string, method: string): Promise<void> => {
     setOrders((prev) =>
       prev.map((o) => (o.id === id ? { ...o, shippingMethod: method } : o))
     );
@@ -187,18 +175,13 @@ export function OrderProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ shipping_method: method }),
       });
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to update shipping method");
-      }
+      if (!res.ok) throw new Error("Failed to update shipping method");
     } catch (err: any) {
-      console.error("[OrderContext] updateShippingMethod error:", err.message);
       if (user?.id) await fetchOrders();
       throw err;
     }
   };
 
-  // ============ Delete Order (admin) ============
   const deleteOrder = async (id: string): Promise<void> => {
     setOrders((prev) => prev.filter((o) => o.id !== id));
 
@@ -208,39 +191,22 @@ export function OrderProvider({ children }: { children: ReactNode }) {
         credentials: "include",
       });
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Failed to delete order");
-      }
+      if (!res.ok) throw new Error("Failed to delete order");
     } catch (err: any) {
-      console.error("[OrderContext] deleteOrder error:", err.message);
       if (user?.id) await fetchOrders();
       throw err;
     }
   };
 
-  const clearAllOrders = async (): Promise<void> => {
-    setOrders([]);
-  };
-
+  const clearAllOrders = async (): Promise<void> => { setOrders([]); };
   const getOrder = (id: string) => orders.find((o) => o.id === id);
-
-  const refreshOrders = async () => {
-    await fetchOrders();
-  };
+  const refreshOrders = async () => { await fetchOrders(); };
 
   return (
     <OrderContext.Provider
       value={{
-        orders,
-        addOrder,
-        updateOrderStatus,
-        updateShippingMethod,
-        deleteOrder,
-        clearAllOrders,
-        getOrder,
-        refreshOrders,
-        isHydrated,
+        orders, addOrder, updateOrderStatus, updateShippingMethod, deleteOrder,
+        clearAllOrders, getOrder, refreshOrders, isHydrated,
       }}
     >
       {children}
@@ -250,8 +216,6 @@ export function OrderProvider({ children }: { children: ReactNode }) {
 
 export function useOrders() {
   const context = useContext(OrderContext);
-  if (!context) {
-    throw new Error("useOrders must be used within OrderProvider");
-  }
+  if (!context) throw new Error("useOrders must be used within OrderProvider");
   return context;
 }

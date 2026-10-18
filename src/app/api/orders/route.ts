@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { cookies } from "next/headers";
 
-// Helper: get user id from secure cookie ONLY (no header spoofing)
+// 👇 শুধুমাত্র সিকিউর কুকি থেকে ইউজার আইডি নেওয়া হবে (হেডার স্পুফিং বন্ধ)
 async function getUserId(_req: NextRequest): Promise<string | null> {
   const cookieStore = await cookies();
   const userCookie = cookieStore.get("goalwear-user")?.value;
@@ -16,7 +16,7 @@ async function getUserId(_req: NextRequest): Promise<string | null> {
       return parsed.id;
     }
   } catch {
-    // ignore malformed cookie
+    // ignore
   }
 
   return null;
@@ -28,10 +28,7 @@ export async function GET(req: NextRequest) {
     const userId = await getUserId(req);
 
     if (!userId) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
     const { data, error } = await supabaseAdmin
@@ -41,7 +38,6 @@ export async function GET(req: NextRequest) {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("[GET orders]", error.message);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
@@ -53,11 +49,11 @@ export async function GET(req: NextRequest) {
       status: row.status,
       customerInfo: row.customer_info || {},
       paymentMethod: row.payment_method || "Unknown",
+      shippingMethod: row.shipping_method || "truck",
     }));
 
     return NextResponse.json({ orders });
   } catch (err: any) {
-    console.error("[GET orders] Error:", err.message);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
@@ -68,10 +64,7 @@ export async function POST(req: NextRequest) {
     const userId = await getUserId(req);
 
     if (!userId) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
     const body = await req.json();
@@ -82,44 +75,39 @@ export async function POST(req: NextRequest) {
     }
 
     if (!customerInfo || !customerInfo.email) {
-      return NextResponse.json(
-        { error: "Customer info required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Customer info required" }, { status: 400 });
     }
 
-    // 🔒 Recompute total server-side from DB prices (prevents price manipulation)
+    // 🔒 স্টক ও দাম সার্ভার থেকে ভেরিফাই করা
     const productIds = items
       .map((i: any) => Number(i.id))
       .filter((n: number) => Number.isFinite(n) && n > 0);
 
     const { data: dbProducts, error: dbError } = await supabaseAdmin
       .from("products")
-      .select("id, price")
+      .select("id, price, stock")
       .in("id", productIds);
 
     if (dbError) {
-      return NextResponse.json(
-        { error: "Failed to verify products" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Failed to verify products" }, { status: 500 });
     }
 
     let verifiedTotal = 0;
     const verifiedItems: any[] = [];
 
     for (const item of items) {
-      const product = (dbProducts || []).find(
-        (p) => p.id === Number(item.id)
-      );
+      const product = (dbProducts || []).find((p) => p.id === Number(item.id));
       if (!product) {
-        return NextResponse.json(
-          { error: `Product ${item.id} not found` },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: `Product ${item.id} not found` }, { status: 400 });
       }
 
       const qty = Math.max(1, Math.min(Number(item.quantity) || 1, 10));
+      
+      // স্টক চেক
+      if (product.stock < qty) {
+         return NextResponse.json({ error: `Insufficient stock for ${item.name}` }, { status: 400 });
+      }
+
       const price = Number(product.price);
 
       verifiedTotal += price * qty;
@@ -133,7 +121,6 @@ export async function POST(req: NextRequest) {
     }
 
     verifiedTotal = Math.round(verifiedTotal * 100) / 100;
-
     const orderId = `GW-${Date.now().toString().slice(-8)}`;
 
     const { data, error } = await supabaseAdmin
@@ -151,7 +138,6 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (error) {
-      console.error("[POST orders]", error.message);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
@@ -168,7 +154,6 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err: any) {
-    console.error("[POST orders] Error:", err.message);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
