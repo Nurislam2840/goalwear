@@ -30,7 +30,8 @@ export default function CategorySection() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+      {/* 👇 গ্রিড সিস্টেম ৩টি ক্যাটাগরির জন্য আপডেট করা হলো */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {categories.map((cat) => (
           <Link
             key={cat.id}
@@ -41,25 +42,29 @@ export default function CategorySection() {
               <div className="inline-flex items-center bg-brand-green text-black text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3">
                 Category
               </div>
-              <h3 className="text-2xl md:text-3xl font-bold dark:text-white">
+              <h3 className="text-2xl md:text-3xl font-bold dark:text-white line-clamp-2 max-w-[150px]">
                 {cat.name}
               </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2 max-w-[150px]">
                 {cat.desc}
               </p>
               <div className="mt-4 inline-flex items-center gap-1.5 bg-brand-green text-black text-xs font-bold px-4 py-2 rounded-full group-hover:scale-105 transition-transform">
                 Shop Now <ArrowRight className="w-3.5 h-3.5" />
               </div>
             </div>
-            <div className="absolute right-0 bottom-0 w-40 h-40 md:w-56 md:h-56 opacity-90">
-              <Image
-                src={cat.image}
-                alt={cat.name}
-                fill
-                sizes="(max-width: 768px) 160px, 224px"
-                loading="eager"
-                className="object-cover rounded-tl-full mix-blend-multiply dark:mix-blend-normal"
-              />
+            <div className="absolute right-0 bottom-0 w-32 h-32 md:w-48 md:h-48 opacity-90">
+              {cat.image ? (
+                <Image
+                  src={cat.image}
+                  alt={cat.name}
+                  fill
+                  sizes="(max-width: 768px) 128px, 192px"
+                  loading="eager"
+                  className="object-cover rounded-tl-full mix-blend-multiply dark:mix-blend-normal"
+                />
+              ) : (
+                 <div className="w-full h-full bg-brand-green/20 rounded-tl-full"></div>
+              )}
             </div>
           </Link>
         ))}
