@@ -176,22 +176,22 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
     async function loadAllData() {
       try {
         const [
-          productsRes, heroSlidesRes, offersRes, featuresRes, categoriesRes,
-          brandsRes, teamsRes, testimonialsRes, instagramRes, couponsRes,
-          siteConfigRes, reviewsRes,
+        	productsRes, heroSlidesRes, offersRes, featuresRes, categoriesRes,
+        	brandsRes, teamsRes, testimonialsRes, instagramRes, couponsRes,
+        	siteConfigRes, reviewsRes,
         ] = await Promise.all([
-          supabase.from("products").select("*").order("id"),
-          supabase.from("hero_slides").select("*").order("sort_order"),
-          supabase.from("offers").select("*").order("id"),
-          supabase.from("features").select("*").order("sort_order"),
-          supabase.from("categories").select("*").order("sort_order"),
-          supabase.from("brands").select("*").order("sort_order"),
-          supabase.from("teams").select("*").order("sort_order"),
-          supabase.from("testimonials").select("*").order("sort_order"),
-          supabase.from("instagram_images").select("*").order("sort_order"),
-          supabase.from("coupons").select("*").order("id"),
-          supabase.from("site_config").select("*").eq("id", 1).maybeSingle(),
-          supabase.from("reviews").select("*").eq("approved", true).order("created_at", { ascending: false }), // 👈 শুধু approved
+        	supabase.from("products").select("id, name, category, sub_category, brand, team, type, price, image_url, images, rating, reviews_count, description, sizes, stock, colors, season, highlights, specifications, custom_fields, delivery_time, kit_type, player_name, player_number, is_player_edition, sleeve_type, collar_type, fit_type, sponsor, surface, play_style, boot_height, weight_grams, upper_material, soleplate, stud_type, closure_type, collection, release_year").order("id"), // specific columns
+        	supabase.from("hero_slides").select("*").order("sort_order"),
+        	supabase.from("offers").select("*").order("id"),
+        	supabase.from("features").select("*").order("sort_order"),
+        	supabase.from("categories").select("*").order("sort_order"),
+        	supabase.from("brands").select("*").order("sort_order"),
+        	supabase.from("teams").select("*").order("sort_order"),
+        	supabase.from("testimonials").select("*").order("sort_order"),
+        	supabase.from("instagram_images").select("*").order("sort_order"),
+        	supabase.from("coupons").select("*").order("id"),
+        	supabase.from("site_config").select("*").eq("id", 1).maybeSingle(),
+        	supabase.from("reviews").select("id, product_id, user_name, rating, comment, image_url, created_at").eq("approved", true).order("created_at", { ascending: false }),
         ]);
 
         const allReviews = reviewsRes.data || [];
