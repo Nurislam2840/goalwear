@@ -61,7 +61,6 @@ export async function POST(req: NextRequest) {
           product_data: {
             name: product.name,
             images: product.image_url ? [product.image_url] : [],
-            // 👇 Webhook-এর জন্য product id পাঠানো হচ্ছে
             metadata: { product_id: String(product.id) },
           },
           unit_amount: Math.round(serverPrice * 100),
@@ -70,7 +69,6 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Coupon যাচাই
     let discounts: any[] = [];
     let appliedCouponCode = "";
 
@@ -110,7 +108,6 @@ export async function POST(req: NextRequest) {
 
     const truncate = (s: string, n = 480) => (s || "").slice(0, n);
 
-    // 👇 success URL থেকে user_id বাদ দেওয়া হলো (সিকিউরিটির জন্য)
     const successUrl = `${BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`;
 
     const session = await stripe.checkout.sessions.create({
@@ -132,6 +129,12 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: session.url, sessionId: session.id });
   } catch (error: any) {
-    return NextResponse.json({ error: "Payment processing failed. Please try again." }, { status: 500 });
+    // 👇 এখানে আসল এরর মেসেজটি ফ্রন্টএন্ডে পাঠানো হচ্ছে
+    console.error("[checkout] Stripe Error Details:", error.message);
+    
+    return NextResponse.json(
+      { error: `Payment processing failed: ${error.message}` }, 
+      { status: 500 }
+    );
   }
 }
