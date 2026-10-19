@@ -70,12 +70,14 @@ Extended License:
 
 This version includes additional features, which are covered under
 this license:
+- 3D Animated Order Tracking System (Truck/Plane/Ship)
 - Brand Logo Management & Display System
 - Product Delivery Time Estimation
 - Real Customer Reviews with Image Upload Support
-- Automatic Inventory (Stock) Reduction on Order
+- Automatic Inventory (Stock) Reduction & Reversal on Cancel
 - Manual "New Arrivals" Product Selection
 - Dedicated Admin Reviews Management Panel
+- Cricket Jersey Category Integration
 
 ----------------------------------------------------------------
 4. PERMITTED USES

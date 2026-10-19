@@ -9,7 +9,7 @@ import {
   useRef,
   ReactNode,
 } from "react";
-import { supabase } from "@/lib/supabase";
+import { createBrowserClient } from "@supabase/ssr";
 
 export interface User {
   id: string;
@@ -50,30 +50,11 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// ============================================
-// Cookie helper — with Secure flag for HTTPS
-// ============================================
-function setUserCookie(user: User | null) {
-  if (typeof document === "undefined") return;
-
-  const isSecure =
-    typeof window !== "undefined" && window.location.protocol === "https:"
-      ? "; Secure"
-      : "";
-
-  if (user) {
-    const maxAge = 7 * 24 * 60 * 60;
-    document.cookie = `goalwear-user=${encodeURIComponent(
-      JSON.stringify({
-        id: user.id,
-        email: user.email,
-        name: user.name,
-      })
-    )}; path=/; max-age=${maxAge}; SameSite=Lax${isSecure}`;
-  } else {
-    document.cookie = `goalwear-user=; path=/; max-age=0; SameSite=Lax${isSecure}`;
-  }
-}
+// 👇 Supabase Browser Client (Cookie-based session for SSR)
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 // ============================================
 // Extract user from Supabase session
@@ -111,9 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const {
           data: { session },
         } = await supabase.auth.getSession();
-        const currentUser = sessionToUser(session);
-        setUser(currentUser);
-        setUserCookie(currentUser);
+        setUser(sessionToUser(session));
       } catch (err) {
         console.error("Auth init error:", err);
       } finally {
@@ -123,11 +102,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     initAuth();
 
+    // Listen for auth changes
     const { data: listener } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        const currentUser = sessionToUser(session);
-        setUser(currentUser);
-        setUserCookie(currentUser);
+        setUser(sessionToUser(session));
       }
     );
 
@@ -191,7 +169,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       await supabase.auth.signOut();
-      setUserCookie(null);
       setUser(null);
     } catch (err) {
       console.error("Logout error:", err);
@@ -221,7 +198,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // UPDATE PASSWORD (after reset)
+  // UPDATE PASSWORD
   const updatePassword = async (newPassword: string) => {
     try {
       const { error } = await supabase.auth.updateUser({
@@ -261,7 +238,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // CHANGE PASSWORD — simplified, no re-authentication needed
+  // CHANGE PASSWORD
   const changePassword = async (
     _currentPassword: string,
     newPassword: string

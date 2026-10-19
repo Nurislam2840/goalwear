@@ -23,7 +23,7 @@ import {
   Home,
   ShieldCheck,
   Flame,
-  Star,
+  Star, // 👈 Reviews এর জন্য নতুন যোগ করা হলো
 } from "lucide-react";
 import { useSiteData } from "@/context/SiteDataContext";
 import BrandName from "@/components/BrandName";
@@ -32,7 +32,7 @@ const menuItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
-  { href: "/admin/reviews", label: "Reviews", icon: Star },
+  { href: "/admin/reviews", label: "Reviews", icon: Star }, // 👈 নতুন মেনু
   { href: "/admin/hero", label: "Hero Slider", icon: ImageIcon },
   { href: "/admin/offers", label: "Offers", icon: Flame },
   { href: "/admin/categories", label: "Categories", icon: Tag },

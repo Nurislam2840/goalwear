@@ -1,34 +1,19 @@
 // src/app/api/orders/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-import { cookies } from "next/headers";
-
-// 👇 শুধুমাত্র সিকিউর কুকি থেকে ইউজার আইডি নেওয়া হবে (হেডার স্পুফিং বন্ধ)
-async function getUserId(_req: NextRequest): Promise<string | null> {
-  const cookieStore = await cookies();
-  const userCookie = cookieStore.get("goalwear-user")?.value;
-
-  if (!userCookie) return null;
-
-  try {
-    const parsed = JSON.parse(userCookie);
-    if (parsed && typeof parsed.id === "string" && parsed.id.length > 0) {
-      return parsed.id;
-    }
-  } catch {
-    // ignore
-  }
-
-  return null;
-}
+import { getCurrentUserId } from "@/lib/supabase-server";
+import { calculateDiscount } from "@/lib/coupon";
 
 // ============ GET — List user's orders ============
 export async function GET(req: NextRequest) {
   try {
-    const userId = await getUserId(req);
+    const userId = await getCurrentUserId();
 
     if (!userId) {
-      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
     }
 
     const { data, error } = await supabaseAdmin
@@ -38,6 +23,7 @@ export async function GET(req: NextRequest) {
       .order("created_at", { ascending: false });
 
     if (error) {
+      console.error("[GET orders]", error.message);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
@@ -54,6 +40,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ orders });
   } catch (err: any) {
+    console.error("[GET orders] Error:", err.message);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
@@ -61,24 +48,30 @@ export async function GET(req: NextRequest) {
 // ============ POST — Create new order ============
 export async function POST(req: NextRequest) {
   try {
-    const userId = await getUserId(req);
+    const userId = await getCurrentUserId();
 
     if (!userId) {
-      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
     }
 
     const body = await req.json();
-    const { items, total, customerInfo, paymentMethod } = body;
+    const { items, customerInfo, paymentMethod, couponCode } = body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
     }
 
     if (!customerInfo || !customerInfo.email) {
-      return NextResponse.json({ error: "Customer info required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Customer info required" },
+        { status: 400 }
+      );
     }
 
-    // 🔒 স্টক ও দাম সার্ভার থেকে ভেরিফাই করা
+    // 🔒 Fetch real prices and stock from Supabase
     const productIds = items
       .map((i: any) => Number(i.id))
       .filter((n: number) => Number.isFinite(n) && n > 0);
@@ -89,28 +82,39 @@ export async function POST(req: NextRequest) {
       .in("id", productIds);
 
     if (dbError) {
-      return NextResponse.json({ error: "Failed to verify products" }, { status: 500 });
+      console.error("[POST orders] DB fetch error:", dbError.message);
+      return NextResponse.json(
+        { error: "Failed to verify products" },
+        { status: 500 }
+      );
     }
 
-    let verifiedTotal = 0;
+    let subtotal = 0;
     const verifiedItems: any[] = [];
 
     for (const item of items) {
-      const product = (dbProducts || []).find((p) => p.id === Number(item.id));
+      const product = (dbProducts || []).find(
+        (p) => p.id === Number(item.id)
+      );
       if (!product) {
-        return NextResponse.json({ error: `Product ${item.id} not found` }, { status: 400 });
+        return NextResponse.json(
+          { error: `Product ${item.id} not found` },
+          { status: 400 }
+        );
       }
 
       const qty = Math.max(1, Math.min(Number(item.quantity) || 1, 10));
-      
-      // স্টক চেক
-      if (product.stock < qty) {
-         return NextResponse.json({ error: `Insufficient stock for ${item.name}` }, { status: 400 });
+
+      // 👇 স্টক চেক (০ বা তার কম হলে ব্লক)
+      if (Number(product.stock ?? 0) < qty) {
+        return NextResponse.json(
+          { error: `Insufficient stock for "${item.name}"` },
+          { status: 400 }
+        );
       }
 
       const price = Number(product.price);
-
-      verifiedTotal += price * qty;
+      subtotal += price * qty;
       verifiedItems.push({
         id: product.id,
         name: item.name,
@@ -120,8 +124,18 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    verifiedTotal = Math.round(verifiedTotal * 100) / 100;
+    // 👇 সার্ভার সাইডে কুপন ক্যালকুলেশন (ক্লায়েন্টের টোটাল বিশ্বাস না করে)
+    const { discount, couponCode: verifiedCouponCode } = await calculateDiscount(
+      couponCode || "",
+      subtotal
+    );
+
+    const finalTotal = Math.round((subtotal - discount) * 100) / 100;
     const orderId = `GW-${Date.now().toString().slice(-8)}`;
+
+    const finalPaymentMethod = verifiedCouponCode
+      ? `${paymentMethod || "Cash on Delivery"} (Coupon: ${verifiedCouponCode})`
+      : paymentMethod || "Cash on Delivery";
 
     const { data, error } = await supabaseAdmin
       .from("orders")
@@ -129,16 +143,25 @@ export async function POST(req: NextRequest) {
         id: orderId,
         user_id: userId,
         items: verifiedItems,
-        total: verifiedTotal,
+        total: finalTotal,
         status: "Processing",
         customer_info: customerInfo,
-        payment_method: paymentMethod || "Cash on Delivery",
+        payment_method: finalPaymentMethod,
       })
       .select()
       .single();
 
     if (error) {
+      console.error("[POST orders]", error.message);
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // 👇 Atomic স্টক কমানো (ডাটাবেস ফাংশন দিয়ে)
+    for (const item of verifiedItems) {
+      await supabaseAdmin.rpc("decrement_stock", {
+        p_id: item.id,
+        p_qty: item.quantity,
+      });
     }
 
     return NextResponse.json({
@@ -154,6 +177,7 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err: any) {
+    console.error("[POST orders] Error:", err.message);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

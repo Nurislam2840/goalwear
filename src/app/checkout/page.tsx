@@ -9,7 +9,6 @@ import { useCoupon } from "@/context/CouponContext";
 import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
 import { useAddresses, Address } from "@/context/AddressContext";
-import { useSiteData } from "@/context/SiteDataContext";
 import {
   ArrowLeft,
   Loader2,
@@ -33,7 +32,6 @@ const LABEL_ICONS: Record<string, any> = {
 export default function CheckoutPage() {
   const { cart, cartTotal, clearCart } = useCart();
   const { addOrder } = useOrders();
-  const { reduceStock } = useSiteData();
   const { appliedCoupon, calculateDiscount } = useCoupon();
   const { user, isAuthenticated, isHydrated: authHydrated } = useAuth();
   const { addresses, isHydrated: addrHydrated } = useAddresses();
@@ -117,17 +115,16 @@ export default function CheckoutPage() {
           quantity: item.quantity,
         }));
 
+        // 👇 addOrder কল (সার্ভার নিজেই কুপন ও টোটাল ক্যালকুলেট করবে)
         const orderId = await addOrder({
           items: orderItems,
-          total: finalTotal,
+          total: finalTotal, // সার্ভার এটি উপেক্ষা করবে, নিজে হিসাব করবে
           customerInfo: formData,
-          paymentMethod: appliedCoupon
-            ? `Cash on Delivery (Coupon: ${appliedCoupon.code})`
-            : "Cash on Delivery",
-        });
+          paymentMethod: "Cash on Delivery",
+          couponCode: appliedCoupon?.code || "", // 👈 কুপন কোড পাঠানো হচ্ছে
+        } as any);
 
-        // 👇 অর্ডার সফল হলে স্টক কমানো
-        await reduceStock(cart.map((item) => ({ id: item.id, quantity: item.quantity })));
+        // 👇 reduceStock আর ক্লায়েন্ট থেকে কল হবে না, সার্ভারে হবে
 
         clearCart();
 
@@ -136,6 +133,9 @@ export default function CheckoutPage() {
         return;
       }
 
+      // ============================================
+      // CARD — Server-side Stripe (SECURE)
+      // ============================================
       const cartItemsForServer = cart.map((item) => ({
         id: item.id,
         quantity: item.quantity,

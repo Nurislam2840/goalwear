@@ -4,7 +4,7 @@ A production-ready, feature-rich e-commerce theme for football gear, built with 
 
 ![GoalWear](https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=1200&auto=format&fit=crop)
 
-[![Version](https://img.shields.io/badge/version-1.0.0-CCFF00?style=flat-square)](https://themes-store.vercel.app)
+[![Version](https://img.shields.io/badge/version-1.1.0-CCFF00?style=flat-square)](https://themes-store.vercel.app)
 [![Next.js](https://img.shields.io/badge/Next.js-16.4-black?style=flat-square&logo=next.js)](https://nextjs.org)
 [![React](https://img.shields.io/badge/React-19.3-61DAFB?style=flat-square&logo=react)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
@@ -17,7 +17,7 @@ A production-ready, feature-rich e-commerce theme for football gear, built with 
 ### 🛍️ Storefront
 - Modern, mobile-first responsive design
 - Dark & Light mode
-- Hero slider with dynamic countdown offers
+- Dynamic Hero slider with countdown offers
 - **Brand logos & dedicated brand sections**
 - Product search with smart suggestions
 - Advanced filters (price, brand, category)
@@ -27,7 +27,7 @@ A production-ready, feature-rich e-commerce theme for football gear, built with 
 - Cart with quantity controls & live stock updates
 - Coupon system (percent / fixed / shipping)
 - Stripe card payments + Cash on Delivery
-- Order tracking with status timeline
+- **3D Animated Order Tracking System** (Truck, Plane, Ship)
 - User accounts (Supabase Auth)
 - **Real product reviews with image upload support**
 - **Dynamic delivery time estimates per product**
@@ -39,11 +39,11 @@ A production-ready, feature-rich e-commerce theme for football gear, built with 
 ### 🎛️ Admin Panel (13 Sections)
 - **Dashboard** with revenue chart & top products
 - **Products** — full CRUD with advanced fields (including Delivery Time)
-- **Orders** — status management
+- **Orders** — status management & shipping method selection (Truck/Plane/Ship)
 - **Reviews** — moderate customer reviews & delete inappropriate ones
 - **Hero Slider** — homepage carousel with image upload
 - **Offers** — flash sales with countdown
-- **Categories** — product categories with images
+- **Categories** — product categories with images (Includes Cricket Jersey)
 - **Brands** — brand management with logo upload
 - **Teams** — popular teams
 - **Testimonials** — customer reviews
@@ -55,7 +55,7 @@ A production-ready, feature-rich e-commerce theme for football gear, built with 
 - Cookie-based admin session (HttpOnly, Secure)
 - Rate limiting on login (5 attempts / 15 min)
 - Server-side price verification on checkout
-- **Automatic stock reduction upon successful order**
+- **Automatic stock reduction upon successful order & reversal on cancellation**
 - IDOR protection on orders (no header spoofing)
 - Supabase Auth (bcrypt password hashing)
 - Environment-based credentials (no hardcoded secrets)
