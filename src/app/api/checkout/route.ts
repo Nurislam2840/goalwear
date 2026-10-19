@@ -2,7 +2,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+// 👇 Base URL ক্লিন করা হচ্ছে (শেষে স্ল্যাশ থাকলে রিমুভ করবে)
+const RAW_BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const BASE_URL = RAW_BASE_URL.replace(/\/+$/, ""); // শেষের সব স্ল্যাশ মুছে ফেলবে
 
 export async function POST(req: NextRequest) {
   try {
@@ -108,7 +110,9 @@ export async function POST(req: NextRequest) {
 
     const truncate = (s: string, n = 480) => (s || "").slice(0, n);
 
+    // 👇 successUrl এবং cancelUrl ডাবল স্ল্যাশ ছাড়া তৈরি হচ্ছে
     const successUrl = `${BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${BASE_URL}/cart`;
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -124,16 +128,21 @@ export async function POST(req: NextRequest) {
         userId: userId || "",
       },
       success_url: successUrl,
-      cancel_url: `${BASE_URL}/cart`,
+      cancel_url: cancelUrl,
     });
 
     return NextResponse.json({ url: session.url, sessionId: session.id });
   } catch (error: any) {
-    // 👇 এখানে আসল এরর মেসেজটি ফ্রন্টএন্ডে পাঠানো হচ্ছে
     console.error("[checkout] Stripe Error Details:", error.message);
     
+    // 👇 এরর মেসেজে যদি Stripe-এর Raw URL থাকে, সেটাকে ছোট করা হচ্ছে
+    let errorMessage = error.message || "Unknown error";
+    if (errorMessage.length > 200) {
+      errorMessage = errorMessage.substring(0, 200) + "...";
+    }
+
     return NextResponse.json(
-      { error: `Payment processing failed: ${error.message}` }, 
+      { error: `Payment processing failed: ${errorMessage}` }, 
       { status: 500 }
     );
   }
