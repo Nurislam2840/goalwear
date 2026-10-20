@@ -26,10 +26,12 @@ A production-ready, feature-rich e-commerce theme for football gear, built with 
 - Wishlist
 - Cart with quantity controls & live stock updates
 - Coupon system (percent / fixed / shipping)
-- Stripe card payments + Cash on Delivery
+- **Stripe Card Payments + Cash on Delivery (COD)**
+- **Secure Stripe Webhook integration**
 - **3D Animated Order Tracking System** (Truck, Plane, Ship)
-- User accounts (Supabase Auth)
+- User accounts (Supabase Auth with Cookie-based sessions)
 - **Real product reviews with image upload support**
+- **Admin Review Moderation** (Approve/Delete)
 - **Dynamic delivery time estimates per product**
 - Recently viewed products
 - Instagram gallery
@@ -39,11 +41,11 @@ A production-ready, feature-rich e-commerce theme for football gear, built with 
 ### 🎛️ Admin Panel (13 Sections)
 - **Dashboard** with revenue chart & top products
 - **Products** — full CRUD with advanced fields (including Delivery Time)
-- **Orders** — status management & shipping method selection (Truck/Plane/Ship)
-- **Reviews** — moderate customer reviews & delete inappropriate ones
+- **Orders** — status management & shipping method selection
+- **Reviews** — moderate customer reviews (Approve/Pending)
 - **Hero Slider** — homepage carousel with image upload
 - **Offers** — flash sales with countdown
-- **Categories** — product categories with images (Includes Cricket Jersey)
+- **Categories** — product categories (Includes Cricket Jersey)
 - **Brands** — brand management with logo upload
 - **Teams** — popular teams
 - **Testimonials** — customer reviews
@@ -51,23 +53,25 @@ A production-ready, feature-rich e-commerce theme for football gear, built with 
 - **Coupons** — discount codes
 - **Site Settings** — name, logo, contact, social, **New Arrivals selector**
 
-### 🔒 Security
-- Cookie-based admin session (HttpOnly, Secure)
-- Rate limiting on login (5 attempts / 15 min)
-- Server-side price verification on checkout
-- **Automatic stock reduction upon successful order & reversal on cancellation**
-- IDOR protection on orders (no header spoofing)
-- Supabase Auth (bcrypt password hashing)
-- Environment-based credentials (no hardcoded secrets)
+### 🔒 Security & Performance
+- **Supabase Row Level Security (RLS)** enabled on all tables
+- **Secure Cookie-based Admin Session** (HttpOnly, Secure)
+- **Rate limiting** on admin login
+- **Server-side price & stock verification** on checkout
+- **Atomic Stock Reduction** via PostgreSQL Functions
+- **IDOR protection** on orders (no header spoofing)
+- **Timing-safe password comparison**
+- **Supabase Storage** integration for image uploads (replaces Base64)
+- Optimized database indexing for fast data fetching
+- IPv4-first DNS (mobile network support)
 
-### ⚙️ Technical
+### ⚙️ Technical Stack
 - Next.js 16 (App Router + Turbopack)
 - React 19
 - TypeScript 5 (strict mode)
 - Tailwind CSS v4
-- Supabase (PostgreSQL + Auth)
-- Stripe (Checkout + Coupons)
-- IPv4-first DNS (mobile network support)
+- Supabase (PostgreSQL + Auth + Storage)
+- Stripe (Checkout + Webhooks)
 - SEO optimized (sitemap, robots, OpenGraph)
 - Vercel-ready
 

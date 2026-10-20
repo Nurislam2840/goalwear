@@ -74,10 +74,12 @@ this license:
 - Brand Logo Management & Display System
 - Product Delivery Time Estimation
 - Real Customer Reviews with Image Upload Support
+- Admin Review Moderation System
 - Automatic Inventory (Stock) Reduction & Reversal on Cancel
 - Manual "New Arrivals" Product Selection
-- Dedicated Admin Reviews Management Panel
 - Cricket Jersey Category Integration
+- Supabase Row Level Security (RLS) & Storage Integration
+- Stripe Webhook Integration for Reliable Card Payments
 
 ----------------------------------------------------------------
 4. PERMITTED USES
@@ -107,8 +109,8 @@ The Licensee MAY NOT:
 ----------------------------------------------------------------
 
 The Software integrates with:
-- Supabase (PostgreSQL database, authentication)
-- Stripe (payment processing)
+- Supabase (PostgreSQL database, authentication, storage)
+- Stripe (payment processing, webhooks)
 
 These services are governed by their own terms of service.
 The Licensee is responsible for:

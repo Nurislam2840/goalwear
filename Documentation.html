@@ -343,14 +343,13 @@
       <li><a href="#requirements">Requirements</a></li>
       <li><a href="#install">Installation</a></li>
       <li><a href="#supabase">Supabase Setup</a></li>
-      <li><a href="#stripe">Stripe Setup</a></li>
+      <li><a href="#stripe">Stripe Setup & Webhooks</a></li>
       <li><a href="#env">Environment Variables</a></li>
       <li><a href="#database">Database Setup</a></li>
+      <li><a href="#storage">Supabase Storage Setup</a></li>
       <li><a href="#running">Running the Theme</a></li>
       <li><a href="#admin">Admin Access</a></li>
       <li><a href="#products">Adding Products</a></li>
-      <li><a href="#brands">Adding Brands & Logos</a></li>
-      <li><a href="#customize">Customization</a></li>
       <li><a href="#deploy">Deployment</a></li>
       <li><a href="#troubleshoot">Troubleshooting</a></li>
       <li><a href="#support">Support</a></li>
@@ -365,8 +364,8 @@
     <h3>What's Included</h3>
     <ul>
       <li>Full Next.js 16 + React 19 source code</li>
-      <li>Supabase database &amp; authentication integration</li>
-      <li>Stripe payment gateway &amp; Cash on Delivery</li>
+      <li>Supabase database, authentication & storage integration</li>
+      <li>Stripe payment gateway (Card) + Cash on Delivery (COD)</li>
       <li>Complete admin panel with 13 sections</li>
       <li>User account system with profile editing</li>
       <li>Product variants (Home/Away/Third/Goalkeeper)</li>
@@ -375,6 +374,7 @@
       <li><strong>3D Animated Order Tracking Map (Truck/Plane/Ship)</strong></li>
       <li><strong>Dynamic delivery time estimates per product</strong></li>
       <li><strong>Automatic stock reduction &amp; reversal on cancellation</strong></li>
+      <li><strong>Secure Stripe Webhook integration</strong></li>
       <li>New Arrivals manual selection (Admin)</li>
       <li>Order management system with tracking</li>
       <li>Coupon &amp; discount system</li>
@@ -485,7 +485,7 @@ cd goalwear</code></pre>
 
   <!-- 5. Stripe -->
   <section id="stripe">
-    <h2>5. Stripe Setup</h2>
+    <h2>5. Stripe Setup &amp; Webhooks</h2>
 
     <h3>5.1 Create Account</h3>
     <ol>
@@ -505,12 +505,18 @@ cd goalwear</code></pre>
       <tr><td>Secret key</td><td><code>sk_test_...</code> (click Reveal)</td></tr>
     </table>
 
-    <h3>5.3 Enable Payment Methods</h3>
+    <h3>5.3 Setup Webhook (Crucial for Card Payments)</h3>
     <ol>
-      <li>Go to <strong>Settings → Payment methods</strong></li>
-      <li>Enable <strong>Cards</strong> (required)</li>
-      <li>Click Save</li>
+      <li>Go to <strong>Developers → Webhooks</strong></li>
+      <li>Click <strong>"Add endpoint"</strong></li>
+      <li>Endpoint URL: <code>https://your-domain.com/api/stripe/webhook</code></li>
+      <li>Select Event: <code>checkout.session.completed</code></li>
+      <li>Click <strong>"Add endpoint"</strong></li>
+      <li>Copy the <strong>Signing Secret</strong> (<code>whsec_...</code>)</li>
     </ol>
+    <div class="warning">
+      ⚠️ The Webhook is responsible for creating the order in your database after a successful card payment. Without it, orders will not appear.
+    </div>
   </section>
 
   <!-- 6. Environment -->
@@ -526,6 +532,7 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...
 # ---------- Stripe ----------
 STRIPE_SECRET_KEY=sk_test_...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 
 # ---------- Admin ----------
 ADMIN_EMAIL=admin@yourstore.com
@@ -539,20 +546,12 @@ NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3000</code></pre>
     <p>Run this in your terminal:</p>
     <pre><code>node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"</code></pre>
     <p>Copy the 64-character output to <code>ADMIN_SESSION_SECRET</code>.</p>
-
-    <div class="warning">
-      ⚠️ Choose a <strong>strong password</strong> for <code>ADMIN_PASSWORD</code>. This is your admin panel login.
-    </div>
   </section>
 
   <!-- 7. Database -->
   <section id="database">
     <h2>7. Database Setup</h2>
-    <p>In Supabase Dashboard, go to <strong>SQL Editor → New query</strong>, then paste and run the complete SQL schema provided in <code>database-schema.sql</code> (included in the theme files).</p>
-
-    <div class="info">
-      💡 This creates all required tables: products, orders, addresses, coupons, site_config, hero_slides, offers, features, categories, brands, teams, testimonials, instagram_images, and reviews.
-    </div>
+    <p>In Supabase Dashboard, go to <strong>SQL Editor → New query</strong>, then paste and run the complete SQL schema provided in <code>database-schema.sql</code> (included in the theme files). This includes tables, RLS policies, and stock functions.</p>
     
     <div class="success">
       ✅ After running, verify with:<br>
@@ -560,26 +559,38 @@ NEXT_PUBLIC_SITE_URL=http://127.0.0.1:3000</code></pre>
     </div>
   </section>
 
-  <!-- 8. Running -->
+  <!-- 8. Storage -->
+  <section id="storage">
+    <h2>8. Supabase Storage Setup</h2>
+    <p>The theme uses Supabase Storage for uploading product images, brand logos, and review images.</p>
+    <ol>
+      <li>Go to <strong>Storage</strong> in your Supabase Dashboard</li>
+      <li>Click <strong>"New bucket"</strong></li>
+      <li>Name: <code>uploads</code> (must be exactly this)</li>
+      <li>Toggle <strong>Public bucket</strong> to ON</li>
+      <li>Click <strong>Save</strong></li>
+    </ol>
+    <div class="warning">
+      ⚠️ If the bucket is not named <code>uploads</code> or is not public, image uploads from the admin panel will fail.
+    </div>
+  </section>
+
+  <!-- 9. Running -->
   <section id="running">
-    <h2>8. Running the Theme</h2>
+    <h2>9. Running the Theme</h2>
 
     <h3>Development Mode</h3>
     <pre><code>npm run dev</code></pre>
     <p>Open in browser: <a href="http://127.0.0.1:3000">http://127.0.0.1:3000</a></p>
-
-    <div class="warning">
-      ⚠️ Use <code>127.0.0.1</code>, not <code>localhost</code>. The theme uses IPv4-first DNS for mobile network compatibility.
-    </div>
 
     <h3>Production Build</h3>
     <pre><code>npm run build
 npm start</code></pre>
   </section>
 
-  <!-- 9. Admin -->
+  <!-- 10. Admin -->
   <section id="admin">
-    <h2>9. Admin Access</h2>
+    <h2>10. Admin Access</h2>
 
     <h3>URL</h3>
     <pre><code>http://127.0.0.1:3000/admin/login</code></pre>
@@ -592,9 +603,9 @@ npm start</code></pre>
       <tr><th>Section</th><th>Purpose</th></tr>
       <tr><td>Dashboard</td><td>Revenue, orders, top products</td></tr>
       <tr><td>Products</td><td>Add/edit/delete products (with Delivery Time)</td></tr>
-      <tr><td>Orders</td><td>Manage orders & set Shipping Method (Truck/Plane/Ship)</td></tr>
-      <tr><td>Reviews</td><td>Moderate customer reviews</td></tr>
-      <tr><td>Hero Slider</td><td>Homepage carousel with image upload</td></tr>
+      <tr><td>Orders</td><td>Manage orders & set Shipping Method</td></tr>
+      <tr><td>Reviews</td><td>Moderate customer reviews (Approve/Delete)</td></tr>
+      <tr><td>Hero Slider</td><td>Homepage carousel</td></tr>
       <tr><td>Offers</td><td>Flash sales with countdown</td></tr>
       <tr><td>Categories</td><td>Product categories (Includes Cricket Jersey)</td></tr>
       <tr><td>Brands</td><td>Brand management with logo upload</td></tr>
@@ -604,122 +615,62 @@ npm start</code></pre>
       <tr><td>Coupons</td><td>Discount codes</td></tr>
       <tr><td>Site Settings</td><td>Name, logo, contact, social, New Arrivals</td></tr>
     </table>
-
-    <div class="success">
-      ✅ All changes save instantly to Supabase and reflect on the site immediately.
-    </div>
   </section>
 
-  <!-- 10. Products -->
+  <!-- 11. Products -->
   <section id="products">
-    <h2>10. Adding Products</h2>
-
-    <h3>Step-by-Step</h3>
+    <h2>11. Adding Products</h2>
     <ol>
       <li>Login to admin panel</li>
-      <li>Go to <strong>Products</strong></li>
-      <li>Click <strong>"Add New Product"</strong></li>
-      <li>Fill in the form:
-        <ul>
-          <li><strong>Product Name</strong> — e.g., "Real Madrid Home Jersey 2026/27"</li>
-          <li><strong>Category</strong> — Jerseys / Football Shoes / Cricket Jersey</li>
-          <li><strong>Sub Category</strong> — Club / Country / Boot</li>
-          <li><strong>Brand</strong> — Choose from your brand list</li>
-          <li><strong>Season</strong> — e.g., "2026/27"</li>
-          <li><strong>Delivery Time</strong> — e.g., "3-5 Business Days"</li>
-          <li><strong>Price</strong>, <strong>Stock</strong>, <strong>Rating</strong></li>
-        </ul>
-      </li>
+      <li>Go to <strong>Products</strong> → <strong>"Add New Product"</strong></li>
+      <li>Fill in the form (Name, Category, Brand, Season, Delivery Time, Price, Stock)</li>
+      <li>Upload images using the <strong>Upload File</strong> button (Supabase Storage)</li>
       <li>For <strong>Jerseys</strong>: fill Kit Type, Sponsor, Player Edition, Sleeve, Collar, Fit</li>
       <li>For <strong>Boots</strong>: fill Surface, Play Style, Boot Height, Weight, etc.</li>
-      <li>Add <strong>Highlights</strong> and <strong>Specifications</strong></li>
-      <li>Add <strong>Colors</strong> (optional) and <strong>Sizes</strong></li>
       <li>Click <strong>Save</strong></li>
     </ol>
   </section>
 
-  <!-- 11. Brands -->
-  <section id="brands">
-    <h2>11. Adding Brands &amp; Logos</h2>
-    <p>To make your store look premium, add brand logos:</p>
-    <ol>
-      <li>Go to <strong>Admin → Brands</strong></li>
-      <li>Click <strong>"Add Brand"</strong> or Edit an existing one</li>
-      <li>Fill in Name, Slug (e.g., <code>nike</code>), Tagline</li>
-      <li><strong>Upload the Logo</strong> (PNG or SVG with transparent background recommended)</li>
-      <li>Save</li>
-    </ol>
-    <div class="info">
-      💡 Logos will automatically show in the homepage Brand Section, Product Cards, and Product Detail pages.
-    </div>
-  </section>
-
-  <!-- 12. Customize -->
-  <section id="customize">
-    <h2>12. Customization</h2>
-
-    <h3>Change Colors</h3>
-    <p>Edit <code>src/app/globals.css</code>:</p>
-    <pre><code>@theme {
-  --color-brand-green: #CCFF00;  /* Change to your brand color */
-  --color-brand-dark: #0A0A0A;
-  --color-brand-card: #161616;
-}</code></pre>
-
-    <h3>Change Store Name &amp; Info</h3>
-    <p><strong>Easiest way:</strong> Go to <code>/admin/settings</code> in your browser.</p>
-
-    <h3>Change Logo</h3>
-    <p>Admin panel → Site Settings → Upload logo (max 2MB).</p>
-  </section>
-
-  <!-- 13. Deploy -->
+  <!-- 12. Deploy -->
   <section id="deploy">
-    <h2>13. Deployment</h2>
+    <h2>12. Deployment</h2>
 
     <h3>Deploy to Vercel (Recommended)</h3>
     <ol>
       <li>Push code to GitHub</li>
-      <li>Go to <a href="https://vercel.com">vercel.com</a></li>
-      <li>Click <strong>"Add New Project"</strong></li>
-      <li>Import your GitHub repository</li>
-      <li>Add all <strong>Environment Variables</strong> from Section 6</li>
+      <li>Go to <a href="https://vercel.com">vercel.com</a> and import your repository</li>
+      <li>Add <strong>ALL Environment Variables</strong> from Section 6</li>
       <li>Click <strong>Deploy</strong></li>
     </ol>
 
     <h3>After Deployment</h3>
     <ol>
-      <li>Update Supabase URLs:
-        <ul>
-          <li>Authentication → URL Configuration</li>
-          <li>Site URL: <code>https://your-domain.com</code></li>
-          <li>Redirect URLs: <code>https://your-domain.com/**</code></li>
-        </ul>
-      </li>
-      <li>Test all features</li>
+      <li>Update Supabase URLs (Authentication → URL Configuration) to your live domain.</li>
+      <li>Update Stripe Webhook Endpoint URL to your live domain.</li>
+      <li>Test all features.</li>
     </ol>
   </section>
 
-  <!-- 14. Troubleshooting -->
+  <!-- 13. Troubleshooting -->
   <section id="troubleshoot">
-    <h2>14. Troubleshooting</h2>
+    <h2>13. Troubleshooting</h2>
 
-    <h3>"Invalid API key" Error</h3>
-    <p><strong>Cause:</strong> Wrong Supabase anon key.</p>
-    <p><strong>Fix:</strong> Copy the <code>anon</code> key again from Supabase Dashboard → Settings → API.</p>
+    <h3>Card Payment Succeeds but No Order Created</h3>
+    <p><strong>Cause:</strong> Stripe Webhook is failing.</p>
+    <p><strong>Fix:</strong> Check Stripe Dashboard → Webhooks → Events. Ensure the endpoint is correct and <code>STRIPE_WEBHOOK_SECRET</code> is set in Vercel.</p>
+
+    <h3>"Bucket not found" Error on Image Upload</h3>
+    <p><strong>Cause:</strong> Supabase Storage bucket is missing.</p>
+    <p><strong>Fix:</strong> Create a public bucket named <code>uploads</code> (see Section 8).</p>
 
     <h3>Products Not Loading</h3>
-    <p><strong>Cause:</strong> Empty Supabase tables or missing env vars.</p>
-    <p><strong>Fix:</strong> Verify <code>.env.local</code>, add products, check RLS policies.</p>
-
-    <h3>Admin Login Fails</h3>
-    <p><strong>Cause:</strong> Wrong <code>ADMIN_EMAIL</code> or <code>ADMIN_PASSWORD</code>.</p>
-    <p><strong>Fix:</strong> Verify <code>.env.local</code> values and restart server.</p>
+    <p><strong>Cause:</strong> Missing env vars or RLS policies.</p>
+    <p><strong>Fix:</strong> Verify <code>.env.local</code> and run the SQL schema from Section 7.</p>
   </section>
 
-  <!-- 15. Support -->
+  <!-- 14. Support -->
   <section id="support">
-    <h2>15. Support</h2>
+    <h2>14. Support</h2>
 
     <p>For support, license questions, or feature requests:</p>
 
@@ -729,20 +680,6 @@ npm start</code></pre>
       <tr><td>Website</td><td><a href="https://themes-store.vercel.app">themes-store.vercel.app</a></td></tr>
       <tr><td>Email</td><td><a href="mailto:imdnur284@gmail.com">imdnur284@gmail.com</a></td></tr>
     </table>
-
-    <h3>Support Includes</h3>
-    <ul>
-      <li>Email support (6 months for Single License)</li>
-      <li>Free minor updates (1.x.x)</li>
-      <li>Bug fixes</li>
-    </ul>
-
-    <h3>Support Does Not Include</h3>
-    <ul>
-      <li>Custom development</li>
-      <li>Third-party service issues (Supabase, Stripe)</li>
-      <li>Server/hosting issues</li>
-    </ul>
 
     <div class="success">
       🎉 <strong>Setup Complete!</strong> Enjoy your GoalWear theme.
