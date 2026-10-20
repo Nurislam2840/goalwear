@@ -350,6 +350,7 @@
       <li><a href="#running">Running the Theme</a></li>
       <li><a href="#admin">Admin Access</a></li>
       <li><a href="#products">Adding Products</a></li>
+      <li><a href="#important">⚠️ Important: Before Going Live</a></li>
       <li><a href="#deploy">Deployment</a></li>
       <li><a href="#troubleshoot">Troubleshooting</a></li>
       <li><a href="#support">Support</a></li>
@@ -631,9 +632,90 @@ npm start</code></pre>
     </ol>
   </section>
 
-  <!-- 12. Deploy -->
+  <!-- 12. IMPORTANT: Before Going Live -->
+  <section id="important" style="border: 2px solid #EF4444; background: #FEF2F2;">
+    <h2 style="border-color: #EF4444; color: #991B1B;">12. ⚠️ Important: Before Going Live</h2>
+    
+    <p><strong>This theme comes with default demo data (Brands, Categories, Hero Slides, etc.). You MUST change them before launching your live store.</strong></p>
+
+    <h3>1. Change Default Brands</h3>
+    <p>The theme comes with pre-loaded brands like <strong>Nike, Adidas, Puma, Reebok, New Balance, Under Armour, Mizuno, Asics, Umbro, Diadora</strong>. If you don't change them, your store will show these brands by default.</p>
+    
+    <div class="step">
+      <strong>STEP 1</strong> Login to Admin Panel
+    </div>
+    <pre><code>https://your-domain.com/admin/login</code></pre>
+
+    <div class="step">
+      <strong>STEP 2</strong> Go to <strong>Admin → Brands</strong>
+    </div>
+    <p>Here you will see all 10 default brands. You can either:</p>
+    <ul>
+      <li><strong>Edit</strong> existing brands (change name, slug, tagline, logo)</li>
+      <li><strong>Delete</strong> brands you don't sell</li>
+      <li><strong>Add</strong> new brands your store carries</li>
+    </ul>
+
+    <div class="step">
+      <strong>STEP 3</strong> Update Brand Logos
+    </div>
+    <p>Click the <strong>Edit</strong> button on each brand and upload the actual logo via <strong>Upload File</strong> or <strong>Image URL</strong>.</p>
+
+    <div class="warning">
+      ⚠️ <strong>If you don't change brands:</strong> Your product form dropdown will show Nike, Adidas, etc. Your homepage Brand Section will display these default brands. Customers will see a store selling random brands instead of yours.
+    </div>
+
+    <h3>2. Change Default Categories</h3>
+    <p>The theme comes with <strong>Jerseys, Football Shoes, and Cricket Jersey</strong>. You should:</p>
+    <ul>
+      <li>Edit category names, slugs, and descriptions</li>
+      <li>Delete categories you don't sell</li>
+      <li>Add new categories via <strong>Admin → Categories</strong></li>
+    </ul>
+
+    <h3>3. Change Hero Slider Images</h3>
+    <p>Go to <strong>Admin → Hero Slider</strong> and replace the default demo slides with your own high-quality images and text.</p>
+
+    <h3>4. Change Site Settings</h3>
+    <p>Go to <strong>Admin → Site Settings</strong> and update:</p>
+    <ul>
+      <li><strong>Store Name</strong> — Replace "GoalWear" with your brand name</li>
+      <li><strong>Logo</strong> — Upload your own logo</li>
+      <li><strong>Contact Info</strong> — Email, phone, address</li>
+      <li><strong>Social Media Links</strong> — Facebook, Instagram, Twitter, YouTube, WhatsApp</li>
+      <li><strong>New Arrivals</strong> — Manually select which products appear in the "New Arrivals" section</li>
+    </ul>
+
+    <h3>5. Change Default Offers</h3>
+    <p>Go to <strong>Admin → Offers</strong> and update the default "Flash Sale" offer with your own discount, coupon code, and image.</p>
+
+    <h3>6. Change Default Coupons</h3>
+    <p>Go to <strong>Admin → Coupons</strong> and update:</p>
+    <ul>
+      <li><code>GOAL10</code></li>
+      <li><code>WELCOME20</code></li>
+      <li><code>FLAT15</code></li>
+      <li><code>FREESHIP</code></li>
+    </ul>
+    <p>Replace them with your own coupon codes.</p>
+
+    <h3>7. Change Default Testimonials</h3>
+    <p>Go to <strong>Admin → Testimonials</strong> and replace the demo testimonials (James Anderson, Sofia Martinez, Rahim Khan) with real customer reviews.</p>
+
+    <h3>8. Change Default Teams</h3>
+    <p>Go to <strong>Admin → Teams</strong> and update the default teams (Real Madrid, Barcelona, Man United, Liverpool) with your actual teams.</p>
+
+    <h3>9. Change Default Features</h3>
+    <p>Go to <strong>Admin → Features</strong> and update the default feature badges (Fast Delivery, Secure Payment, etc.) with your own messaging.</p>
+
+    <div class="success">
+      ✅ <strong>After completing these steps:</strong> Your store will no longer have any demo data. You're ready to go live!
+    </div>
+  </section>
+
+  <!-- 13. Deploy -->
   <section id="deploy">
-    <h2>12. Deployment</h2>
+    <h2>13. Deployment</h2>
 
     <h3>Deploy to Vercel (Recommended)</h3>
     <ol>
@@ -651,9 +733,9 @@ npm start</code></pre>
     </ol>
   </section>
 
-  <!-- 13. Troubleshooting -->
+  <!-- 14. Troubleshooting -->
   <section id="troubleshoot">
-    <h2>13. Troubleshooting</h2>
+    <h2>14. Troubleshooting</h2>
 
     <h3>Card Payment Succeeds but No Order Created</h3>
     <p><strong>Cause:</strong> Stripe Webhook is failing.</p>
@@ -668,9 +750,9 @@ npm start</code></pre>
     <p><strong>Fix:</strong> Verify <code>.env.local</code> and run the SQL schema from Section 7.</p>
   </section>
 
-  <!-- 14. Support -->
+  <!-- 15. Support -->
   <section id="support">
-    <h2>14. Support</h2>
+    <h2>15. Support</h2>
 
     <p>For support, license questions, or feature requests:</p>
 

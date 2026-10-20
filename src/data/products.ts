@@ -2,61 +2,18 @@
 
 // ============ Color Name → Hex Map ============
 export const COLOR_NAME_MAP: Record<string, string> = {
-  // Basic
-  black: "#0A0A0A",
-  white: "#FFFFFF",
-  gray: "#6B7280",
-  grey: "#6B7280",
-  silver: "#C0C0C0",
-  // Warm
-  red: "#EF4444",
-  crimson: "#DC2626",
-  maroon: "#7F1D1D",
-  orange: "#F97316",
-  coral: "#FB7185",
-  salmon: "#FA8072",
-  peach: "#FFCBA4",
-  brown: "#92400E",
-  tan: "#D2B48C",
-  gold: "#FFD700",
-  yellow: "#EAB308",
-  amber: "#F59E0B",
-  cream: "#FFFDD0",
-  beige: "#F5F5DC",
-  // Cool
-  green: "#22C55E",
-  lime: "#84CC16",
-  mint: "#98FF98",
-  olive: "#808000",
-  teal: "#14B8A6",
-  turquoise: "#40E0D0",
-  cyan: "#06B6D4",
-  aqua: "#00FFFF",
-  // Blue
-  blue: "#3B82F6",
-  navy: "#1E3A8A",
-  skyblue: "#87CEEB",
-  "sky blue": "#87CEEB",
-  royalblue: "#4169E1",
-  "royal blue": "#4169E1",
-  // Purple
-  purple: "#A855F7",
-  violet: "#8B5CF6",
-  indigo: "#4F46E5",
-  magenta: "#EC4899",
-  pink: "#EC4899",
-  lavender: "#E6E6FA",
-  // Sport specific
-  home: "#EF4444",
-  away: "#3B82F6",
-  third: "#0A0A0A",
-  alt: "#EAB308",
-  // Misc
-  khaki: "#C3B091",
-  chocolate: "#7B3F00",
-  charcoal: "#36454F",
-  ivory: "#FFFFF0",
-  pearl: "#F0EAD6",
+  black: "#0A0A0A", white: "#FFFFFF", gray: "#6B7280", grey: "#6B7280", silver: "#C0C0C0",
+  red: "#EF4444", crimson: "#DC2626", maroon: "#7F1D1D", orange: "#F97316", coral: "#FB7185",
+  salmon: "#FA8072", peach: "#FFCBA4", brown: "#92400E", tan: "#D2B48C", gold: "#FFD700",
+  yellow: "#EAB308", amber: "#F59E0B", cream: "#FFFDD0", beige: "#F5F5DC",
+  green: "#22C55E", lime: "#84CC16", mint: "#98FF98", olive: "#808000", teal: "#14B8A6",
+  turquoise: "#40E0D0", cyan: "#06B6D4", aqua: "#00FFFF",
+  blue: "#3B82F6", navy: "#1E3A8A", skyblue: "#87CEEB", "sky blue": "#87CEEB",
+  royalblue: "#4169E1", "royal blue": "#4169E1",
+  purple: "#A855F7", violet: "#8B5CF6", indigo: "#4F46E5", magenta: "#EC4899",
+  pink: "#EC4899", lavender: "#E6E6FA",
+  home: "#EF4444", away: "#3B82F6", third: "#0A0A0A", alt: "#EAB308",
+  khaki: "#C3B091", chocolate: "#7B3F00", charcoal: "#36454F", ivory: "#FFFFF0", pearl: "#F0EAD6",
 };
 
 export function getHexFromColorName(name: string): string | null {
@@ -70,7 +27,7 @@ export interface Review {
   rating: number;
   comment: string;
   date: string;
-  image_url?: string; // 👈 নতুন: রিভিউ ছবি
+  image_url?: string;
 }
 
 export interface ColorOption {
@@ -107,14 +64,12 @@ export interface Product {
   stock: number;
   colors: ColorOption[];
 
-  // ============ Common Advanced Fields ============
   season?: string;
   highlights?: string[];
   specifications?: Specification[];
   customFields?: CustomField[];
-  deliveryTime?: string; // 👈 নতুন: ডেলিভারি টাইম
+  deliveryTime?: string;
 
-  // ============ Jersey-specific Fields ============
   kitType?: "Home" | "Away" | "Third" | "Goalkeeper";
   playerName?: string;
   playerNumber?: number;
@@ -124,7 +79,6 @@ export interface Product {
   fitType?: "Regular" | "Slim" | "Oversized";
   sponsor?: string;
 
-  // ============ Boot-specific Fields ============
   surface?: "FG" | "SG" | "AG" | "IC" | "TF" | "MG";
   playStyle?: "Speed" | "Control" | "Power" | "Balance";
   bootHeight?: "Low" | "Mid" | "High";
@@ -211,101 +165,12 @@ export const clubs = [
   "Porto", "Benfica", "Sporting CP",
 ];
 
-// ============ Boots List ============
-export const boots = [
-  { name: "Nike Mercurial Superfly 10", brand: "Nike", price: 279.99 },
-  { name: "Nike Phantom GX 2 Elite", brand: "Nike", price: 259.99 },
-  { name: "Nike Tiempo Legend 10 Elite", brand: "Nike", price: 239.99 },
-  { name: "Nike Zoom Vapor 16 Elite", brand: "Nike", price: 269.99 },
-  { name: "Nike Phantom Luna 2", brand: "Nike", price: 249.99 },
-  { name: "Adidas Predator Elite FG", brand: "Adidas", price: 279.99 },
-  { name: "Adidas F50 Elite FG", brand: "Adidas", price: 289.99 },
-  { name: "Adidas Copa Pure 2 Elite", brand: "Adidas", price: 229.99 },
-  { name: "Adidas X Crazyfast Elite", brand: "Adidas", price: 259.99 },
-  { name: "Adidas Predator League", brand: "Adidas", price: 189.99 },
-  { name: "Puma Future 7 Ultimate", brand: "Puma", price: 249.99 },
-  { name: "Puma Ultra 5 Ultimate", brand: "Puma", price: 239.99 },
-  { name: "Puma King Ultimate", brand: "Puma", price: 219.99 },
-  { name: "Puma Future Match", brand: "Puma", price: 179.99 },
-  { name: "Mizuno Morelia Neo IV Beta", brand: "Mizuno", price: 269.99 },
-  { name: "Mizuno Alpha Elite", brand: "Mizuno", price: 229.99 },
-  { name: "New Balance Furon V7 Pro", brand: "New Balance", price: 199.99 },
-  { name: "New Balance Tekela V4 Magia", brand: "New Balance", price: 189.99 },
-  { name: "Under Armour Magnetico Pro 4", brand: "Under Armour", price: 209.99 },
-  { name: "Under Armour Shadow Elite 3", brand: "Under Armour", price: 179.99 },
-  { name: "Umbro Velocita Elixir Pro", brand: "Umbro", price: 169.99 },
-  { name: "Umbro Medusae III Pro", brand: "Umbro", price: 149.99 },
-  { name: "Diadora Brasil Italy OG", brand: "Diadora", price: 219.99 },
-  { name: "Asics DS Light X-Fly 5", brand: "Asics", price: 199.99 },
-  { name: "Kelme Precision Elite", brand: "Kelme", price: 149.99 },
-  { name: "Lotto Solista 100 IV", brand: "Lotto", price: 169.99 },
-  { name: "Joma Aguila Cup", brand: "Joma", price: 139.99 },
-  { name: "Concave Halo+ v2", brand: "Concave", price: 179.99 },
-  { name: "Hummel Concept Pro", brand: "Hummel", price: 159.99 },
-  { name: "Penalty Factor Pro", brand: "Penalty", price: 129.99 },
-];
-
-// ============ Image Sets ============
-export const jerseyImages = [
-  "https://images.unsplash.com/photo-1518091043644-c1d4457512c6?q=80&w=600&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1553778263-73a83bab9b0c?q=80&w=600&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=600&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?q=80&w=600&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?q=80&w=600&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1552346154-21d32810aba3?q=80&w=600&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1560272564-c83b66b1ad12?q=80&w=600&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1606925797300-0b35e9d1794e?q=80&w=600&auto=format&fit=crop",
-];
-
-export const bootImages = [
-  "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?q=80&w=600&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?q=80&w=600&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1552346154-21d32810aba3?q=80&w=600&auto=format&fit=crop",
-];
-
-// ============ Default Colors Per Category ============
-export function getDefaultColorsForProduct(
-  category: string,
-  subCategory: string
-): ColorOption[] {
-  if (category === "Football Shoes") {
-    return [
-      { name: "Black", hex: "#0A0A0A" },
-      { name: "White", hex: "#FFFFFF" },
-      { name: "Red", hex: "#EF4444" },
-      { name: "Blue", hex: "#3B82F6" },
-    ];
-  }
-  if (category === "Cricket Jersey") {
-    return [
-      { name: "White", hex: "#FFFFFF" },
-      { name: "Blue", hex: "#3B82F6" },
-      { name: "Green", hex: "#22C55E" },
-      { name: "Yellow", hex: "#EAB308" },
-    ];
-  }
-  return [
-    { name: "Home", hex: "#EF4444" },
-    { name: "Away", hex: "#3B82F6" },
-    { name: "Third", hex: "#0A0A0A" },
-    { name: "Alt", hex: "#EAB308" },
-  ];
-}
-
-// ================================================================
-// MOCK PRODUCTS — DISABLED
-// ================================================================
-export const mockProducts: Product[] = [];
-
 // ============ Helper Functions ============
 export const getProductsByCategory = (products: Product[], category: string) =>
   products.filter((p) => p.category === category);
 
-export const getProductsBySubCategory = (
-  products: Product[],
-  subCategory: string
-) => products.filter((p) => p.subCategory === subCategory);
+export const getProductsBySubCategory = (products: Product[], subCategory: string) =>
+  products.filter((p) => p.subCategory === subCategory);
 
 export const getProductsByBrand = (products: Product[], brand: string) =>
   products.filter((p) => p.brand === brand);
