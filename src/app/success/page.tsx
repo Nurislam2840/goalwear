@@ -1,6 +1,6 @@
 // src/app/success/page.tsx
 import Link from "next/link";
-import { CheckCircle2, Package, ArrowRight, AlertCircle } from "lucide-react";
+import { CheckCircle2, Package, ArrowRight, AlertCircle, Loader2 } from "lucide-react";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import CartClearer from "@/components/CartClearer";
 
@@ -8,39 +8,48 @@ interface PageProps {
   searchParams: Promise<{ session_id?: string; orderId?: string }>;
 }
 
+// 👇 ডাটাবেসে অর্ডার খোঁজার জন্য হেল্পার ফাংশন (Retry Logic সহ)
+async function findOrder(sessionId: string) {
+  const maxRetries = 5;
+  const delay = 1500; // ১.৫ সেকেন্ড
+
+  for (let i = 0; i < maxRetries; i++) {
+    const { data } = await supabaseAdmin
+      .from("orders")
+      .select("id")
+      .eq("stripe_session_id", sessionId)
+      .maybeSingle();
+
+    if (data) return data.id;
+    
+    // না পেলে অপেক্ষা করুন
+    await new Promise((resolve) => setTimeout(resolve, delay));
+  }
+  return null;
+}
+
 export default async function SuccessPage({ searchParams }: PageProps) {
   const { session_id, orderId } = await searchParams;
 
   let finalOrderId = orderId;
 
-  // Stripe webhook থেকে অর্ডার তৈরি হতে কিছুক্ষণ সময় লাগতে পারে
+  // স্ট্রাইপ পেমেন্টের জন্য session_id থাকলে অর্ডার খুঁজব
   if (session_id && !orderId) {
-    const { data } = await supabaseAdmin
-      .from("orders")
-      .select("id")
-      .eq("stripe_session_id", session_id)
-      .maybeSingle();
-
-    if (data) {
-      finalOrderId = data.id;
-    } else {
-      // ওয়েবহুক এখনো ডাটাবেসে আসেনি
+    finalOrderId = await findOrder(session_id);
+    
+    if (!finalOrderId) {
+      // ৫ বার চেষ্টা করেও না পেলে এরর দেখাব
       return (
         <main className="min-h-screen bg-white dark:bg-brand-dark flex items-center justify-center px-4">
           <div className="text-center max-w-md">
             <AlertCircle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold dark:text-white mb-2">Payment Processing</h1>
+            <h1 className="text-2xl font-bold dark:text-white mb-2">Order Not Found Yet</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-              Your payment was successful! We are confirming your order. Please refresh this page in a few seconds.
+              We received your payment, but your order is still processing. Please check your Orders page in a minute.
             </p>
-            <div className="flex gap-3">
-              <Link href="/orders" className="flex-1 bg-gray-100 dark:bg-brand-card text-gray-900 dark:text-white font-bold py-3 rounded-full text-center">
-                View Orders
-              </Link>
-              <Link href="/" className="flex-1 bg-brand-green text-black font-bold py-3 rounded-full text-center">
-                Continue
-              </Link>
-            </div>
+            <Link href="/orders" className="inline-block bg-brand-green text-black font-bold px-6 py-3 rounded-full">
+              Go to My Orders
+            </Link>
           </div>
         </main>
       );
@@ -64,7 +73,9 @@ export default async function SuccessPage({ searchParams }: PageProps) {
 
   return (
     <main className="min-h-screen bg-white dark:bg-brand-dark flex items-center justify-center px-4 py-12">
+      {/* 👇 কার্ট ক্লিয়ারার এখানে কল করা হলো */}
       <CartClearer />
+      
       <div className="text-center max-w-md">
         <div className="w-24 h-24 bg-brand-green rounded-full flex items-center justify-center mx-auto mb-6">
           <CheckCircle2 className="w-16 h-16 text-black" strokeWidth={2.5} />
