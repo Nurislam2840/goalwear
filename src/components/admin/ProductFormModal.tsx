@@ -31,7 +31,15 @@ interface ProductFormModalProps {
   existingIds: number[];
 }
 
-const SUB_CATEGORY_PRESETS = ["Country", "Club", "Boot"];
+// 👇 সাব ক্যাটাগরি অপশনগুলো বাড়ানো হলো
+const SUB_CATEGORY_PRESETS = [
+  "Country",
+  "Club",
+  "Boot",
+  "League",
+  "Franchise",
+  "International",
+];
 
 const FALLBACK_BRANDS = [
   "Nike",
@@ -139,7 +147,7 @@ export default function ProductFormModal({
   const [sizesInput, setSizesInput] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  // 👇 Focus & Blur Fix for 0 default issue
+  // Focus & Blur Fix for 0 default issue
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (value === "0") {

@@ -21,25 +21,37 @@ import { Search, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export default function Home() {
-  const { products, coupons } = useSiteData();
+  const { products, coupons, categories, brands } = useSiteData();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("All");
 
-  const filters = ["All", "Country Jerseys", "Club Jerseys", "Boots"];
+  // 👇 ডাইনামিক ফিল্টার লিস্ট (categories + subCategories)
+  const dynamicFilters = useMemo(() => {
+    const filters = ["All"];
+    
+    // ক্যাটাগরি লিস্ট
+    categories.forEach((c) => filters.push(c.name));
+    
+    // সাব-ক্যাটাগরি লিস্ট
+    const subCats = Array.from(new Set(products.map(p => p.subCategory).filter(Boolean)));
+    subCats.forEach((sub) => filters.push(sub));
+    
+    // ডুপ্লিকেট রিমুভ করে রিটার্ন
+    return Array.from(new Set(filters));
+  }, [categories, products]);
 
   const featuredCoupon = useMemo(() => {
     return coupons.find((c) => c.type === "percent") || coupons[0];
   }, [coupons]);
 
+  // 👇 ডাইনামিক ফিল্টারিং লজিক
   const displayedProducts = useMemo(() => {
     let filtered = products;
 
-    if (selectedFilter === "Country Jerseys") {
-      filtered = products.filter((p) => p.subCategory === "Country");
-    } else if (selectedFilter === "Club Jerseys") {
-      filtered = products.filter((p) => p.subCategory === "Club");
-    } else if (selectedFilter === "Boots") {
-      filtered = products.filter((p) => p.subCategory === "Boot");
+    if (selectedFilter !== "All") {
+      filtered = filtered.filter(
+        (p) => p.category === selectedFilter || p.subCategory === selectedFilter
+      );
     }
 
     if (searchQuery) {
@@ -94,7 +106,8 @@ export default function Home() {
           </div>
 
           <div className="flex flex-wrap gap-2 w-full">
-            {filters.map((filter) => (
+            {/* 👇 ডাইনামিক ফিল্টার বাটন */}
+            {dynamicFilters.map((filter) => (
               <button
                 key={filter}
                 onClick={() => setSelectedFilter(filter)}
