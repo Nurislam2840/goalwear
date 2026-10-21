@@ -20,16 +20,32 @@
   --animate-bounce-slow: bounceSlow 3s infinite;
 
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+	from {
+		opacity: 0;
+		}
+    to {
+    	opacity: 1;
+    	}
   }
   @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+    	opacity: 0;
+    	transform: translateY(20px);
+    	}
+    to {
+    	opacity: 1;
+    	transform: translateY(0);
+    	}
   }
   @keyframes bounceSlow {
-    0%, 100% { transform: translateY(-5%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }
-    50% { transform: translateY(5%); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+    0%, 100% {
+    	transform: translateY(-5%);
+    	animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    	}
+    50% {
+    	transform: translateY(5%);
+    	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    	}
   }
 }
 
@@ -45,29 +61,48 @@
 }
 
 @layer base {
-  * { border-color: var(--color-brand-border); }
+  * {
+  	border-color: var(--color-brand-border);
+  	}
   body {
     background: var(--background);
     color: var(--foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
-  }
-  h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.02em; }
+}
+h1, h2, h3, h4 {
+	font-family: var(--font-display);
+	letter-spacing: -0.02em;
+	}
 }
 
-/* ============ স্ক্রলবার ============ */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #888; border-radius: 3px; }
-.dark ::-webkit-scrollbar-thumb { background: #333; }
+/* ============ Scrollbar ============ */
+::-webkit-scrollbar { 
+	width: 6px; height: 6px;
+}
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+::-webkit-scrollbar-thumb {
+	background: #888; border-radius: 3px;
+}
+.dark ::-webkit-scrollbar-thumb {
+	background: #333;
+}
 
 /* ============ লাইট মোডে টেক্সট রিডেবিলিটি ============ */
-html:not(.dark) .text-brand-green { color: #5B8C00; }
+html:not(.dark) .text-brand-green {
+	color: #5B8C00;
+}
 html:not(.dark) .bg-brand-green .text-brand-green,
-html:not(.dark) .bg-brand-green.text-brand-green { color: #0A0A0A; }
-.dark .text-brand-green { color: #CCFF00; }
+html:not(.dark) .bg-brand-green.text-brand-green {
+	color: #0A0A0A;
+	}
+.dark .text-brand-green {
+	color: #CCFF00;
+}
 
-/* ============ গ্রিডিয়েন্ট টেক্সট ============ */
+/* ============ Gradient Text ============ */
 .text-gradient {
   background: linear-gradient(135deg, #CCFF00 0%, #88DD00 100%);
   -webkit-background-clip: text;
@@ -87,7 +122,7 @@ html:not(.dark) .text-gradient {
   background-clip: text;
 }
 
-/* ============ কার্ড হোভার ============ */
+/* ============ Card Hover ============ */
 .card-hover {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -100,7 +135,7 @@ html:not(.dark) .text-gradient {
 }
 
 /* ============================================
-   গ্লোবাল অ্যানিমেশন
+   Golbal Animation
    ============================================ */
 @keyframes shimmer {
   0% { background-position: -200% 0; }
@@ -117,9 +152,15 @@ html:not(.dark) .text-gradient {
 }
 
 @keyframes loading-bar {
-  0% { transform: translateX(-100%); }
-  50% { transform: translateX(0%); }
-  100% { transform: translateX(100%); }
+  0% {
+  	transform: translateX(-100%);
+  	}
+  50% {
+  	transform: translateX(0%);
+  	}
+  100% {
+  	transform: translateX(100%);
+  	}
 }
 .animate-loading-bar {
   width: 100%;
@@ -129,18 +170,32 @@ html:not(.dark) .text-gradient {
 /* ============================================
    ফ্লিপ কার্ড (লগইন / সাইনআপ)
    ============================================ */
-.flip-container { perspective: 1200px; width: 100%; max-width: 420px; min-height: 620px; position: relative; }
-.flip-inner {
-  position: relative; width: 100%; min-height: 620px;
-  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  transform-style: preserve-3d;
+.flip-container {
+	perspective: 1200px;
+	width: 100%;
+	max-width: 420px;
+	min-height: 620px;
+	position: relative;
 }
-.flip-inner.flipped { transform: rotateY(180deg); }
+.flip-inner {
+	position: relative;
+	width: 100%;
+	min-height: 620px;
+	transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+	transform-style: preserve-3d;
+}
+.flip-inner.flipped {
+	transform: rotateY(180deg);
+}
 .form-panel {
-  position: absolute; inset: 0; padding: 40px 32px; border-radius: 32px;
-  background: #ffffff; border: 1px solid #e5e7eb;
-  box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.15);
-  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+	position: absolute;
+	inset: 0;
+	padding: 40px 32px;
+	border-radius: 32px;
+	background: #ffffff;
+	border: 1px solid #e5e7eb;
+	box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.15);
+	backface-visibility: hidden; -webkit-backface-visibility: hidden;
 }
 .dark .form-panel {
   background: #161616; border-color: #262626;
@@ -149,96 +204,191 @@ html:not(.dark) .text-gradient {
 .signup-panel { transform: rotateY(180deg); }
 
 .flip-input {
-  width: 100%; padding: 14px 16px; background: #f9fafb;
-  border: 1px solid #e5e7eb; border-radius: 14px;
-  font-size: 14px; outline: none; transition: all 0.2s ease;
-  box-sizing: border-box; color: #0A0A0A;
+	width: 100%;
+	padding: 14px 16px;
+	background: #f9fafb;
+	border: 1px solid #e5e7eb;
+	border-radius: 14px;
+	font-size: 14px;
+	outline: none; transition: all 0.2s ease;
+	box-sizing: border-box;
+	color: #0A0A0A;
 }
-.dark .flip-input { background: #0A0A0A; border-color: #262626; color: #ffffff; }
-.flip-input::placeholder { color: #9ca3af; }
-.flip-input:focus { border-color: #CCFF00; box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.15); }
-.flip-input-with-icon-left { padding-left: 48px !important; }
-.flip-input-with-icon-right { padding-right: 48px !important; }
-.flip-input-with-icon-both { padding-left: 48px !important; padding-right: 48px !important; }
+.dark .flip-input {
+	background: #0A0A0A;
+	border-color: #262626;
+	color: #ffffff;
+}
+.flip-input::placeholder {
+	color: #9ca3af;
+}
+.flip-input:focus {
+	border-color: #CCFF00;
+	box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.15);
+}
+.flip-input-with-icon-left {
+	padding-left: 48px !important;
+}
+.flip-input-with-icon-right {
+	padding-right: 48px !important;
+}
+.flip-input-with-icon-both {
+	padding-left: 48px !important;
+	padding-right: 48px !important;
+}
 
 .flip-btn {
-  width: 100%; padding: 15px; border-radius: 14px;
-  font-weight: 700; font-size: 15px; background: #CCFF00; color: #000;
-  cursor: pointer; transition: all 0.2s ease; border: none;
+	width: 100%;
+	padding: 15px;
+	border-radius: 14px;
+	font-weight: 700;
+	font-size: 15px;
+	background: #CCFF00;
+	color: #000;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	border: none;
 }
-.flip-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(204, 255, 0, 0.4); }
-.flip-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.flip-btn:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 10px 25px -5px rgba(204, 255, 0, 0.4);
+}
+.flip-btn:disabled {
+	opacity: 0.6; cursor: not-allowed;
+}
 
 /* ============================================
    প্রোডাক্ট কার্ড মিনিমাল ডিজাইন
    ============================================ */
 .product-card-minimal {
-  position: relative; background: #ffffff; border-radius: 16px;
-  padding: 10px; border: 1px solid #f5f5f5;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
+	position: relative;
+	background: #ffffff;
+	border-radius: 16px;
+	padding: 10px;
+	border: 1px solid #f5f5f5;
+	transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+	overflow: hidden;
 }
-.dark .product-card-minimal { background: #141414; border-color: #1f1f1f; }
+.dark .product-card-minimal {
+	background: #141414;
+	border-color: #1f1f1f;
+}
 .product-card-minimal:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 25px 50px -20px rgba(0, 0, 0, 0.15);
-  border-color: transparent;
+	transform: translateY(-6px);
+	box-shadow: 0 25px 50px -20px rgba(0, 0, 0, 0.15);
+	border-color: transparent;
 }
 .dark .product-card-minimal:hover {
-  box-shadow: 0 25px 50px -20px rgba(0, 0, 0, 0.6);
+	box-shadow: 0 25px 50px -20px rgba(0, 0, 0, 0.6);
 }
 .product-card-minimal-image {
-  position: relative; aspect-ratio: 1 / 1; border-radius: 12px;
-  overflow: hidden; background: #f8f8f8;
-  display: flex; align-items: center; justify-content: center;
+	position: relative;
+	aspect-ratio: 1 / 1;
+	border-radius: 12px;
+	overflow: hidden;
+	background: #f8f8f8;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
-.dark .product-card-minimal-image { background: #0A0A0A; }
+.dark .product-card-minimal-image {
+	background: #0A0A0A;
+}
 .product-card-minimal-image img {
-  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+	transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .product-card-minimal:hover .product-card-minimal-image img {
-  transform: scale(1.08);
+	transform: scale(1.08);
 }
 
 .product-card-minimal-cat {
-  font-size: 9px; font-weight: 700; letter-spacing: 0.15em;
-  text-transform: uppercase; color: #a3a3a3; line-height: 1;
-  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+	font-size: 9px;
+	font-weight: 700;
+	letter-spacing: 0.15em;
+	text-transform: uppercase;
+	color: #a3a3a3;
+	line-height: 1;
+	display: -webkit-box;
+	-webkit-line-clamp: 1;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
 }
-.dark .product-card-minimal-cat { color: #737373; }
+.dark .product-card-minimal-cat {
+	color: #737373;
+}
 .product-card-minimal-title {
-  font-size: 12px; font-weight: 900; text-transform: uppercase;
-  letter-spacing: -0.01em; line-height: 1.2;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+	font-size: 12px;
+	font-weight: 900;
+	text-transform: uppercase;
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
 }
 .product-card-minimal-price {
-  font-size: 17px; font-weight: 900; letter-spacing: -0.03em;
+	font-size: 17px;
+	font-weight: 900;
+	letter-spacing: -0.03em;
 }
 .product-card-add-green {
-  background: #CCFF00; color: #000000; font-size: 9px; font-weight: 800;
-  letter-spacing: 0.06em; text-transform: uppercase;
-  padding: 7px 11px; border-radius: 7px; transition: all 0.25s ease;
-  border: none; cursor: pointer; line-height: 1;
-  box-shadow: 0 4px 12px -3px rgba(204, 255, 0, 0.4);
+	background: #CCFF00;
+	color: #000000;
+	font-size: 9px;
+	font-weight: 800;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	padding: 7px 11px;
+	border-radius: 7px;
+	transition: all 0.25s ease;
+	border: none;
+	cursor: pointer;
+	line-height: 1;
+	box-shadow: 0 4px 12px -3px rgba(204, 255, 0, 0.4);
 }
 .product-card-add-green:hover {
-  background: #B8E600; transform: translateY(-1px);
-  box-shadow: 0 8px 20px -5px rgba(204, 255, 0, 0.6);
+	background: #B8E600;
+	transform: translateY(-1px);
+	box-shadow: 0 8px 20px -5px rgba(204, 255, 0, 0.6);
 }
 .product-card-add-green:disabled {
-  background: #e5e7eb; color: #9ca3af; cursor: not-allowed;
-  box-shadow: none; transform: none;
+	background: #e5e7eb;
+	color: #9ca3af;
+	cursor: not-allowed;
+	box-shadow: none;
+	transform: none;
 }
-.dark .product-card-add-green:disabled { background: #262626; color: #6b7280; }
+.dark .product-card-add-green:disabled {
+	background: #262626;
+	color: #6b7280;
+}
 .product-card-minimal-action {
-  width: 26px; height: 26px; border-radius: 50%; background: #ffffff;
-  color: #4b5563; display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.15);
-  transition: all 0.25s ease; border: none; cursor: pointer;
+	width: 26px;
+	height: 26px;
+	border-radius: 50%;
+	background: #ffffff;
+	color: #4b5563;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.15);
+	transition: all 0.25s ease;
+	border: none;
+	cursor: pointer;
 }
-.dark .product-card-minimal-action { background: #1A1A1A; color: #d1d5db; }
-.product-card-minimal-action:hover { transform: scale(1.15); color: #0A0A0A; }
-.product-card-minimal-action.active { background: #EC4899; color: #ffffff; }
+.dark .product-card-minimal-action {
+	background: #1A1A1A;
+	color: #d1d5db;
+}
+.product-card-minimal-action:hover {
+	transform: scale(1.15);
+	color: #0A0A0A;
+}
+.product-card-minimal-action.active {
+	background: #EC4899;
+	color: #ffffff;
+}
 
 /* ============================================
    নতুন যোগ করা স্পেশাল অ্যানিমেশন
@@ -246,37 +396,57 @@ html:not(.dark) .text-gradient {
 
 /* Floating Animation for Badges */
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-6px); }
-  100% { transform: translateY(0px); }
+	0% {
+		transform: translateY(0px);
+	}
+	50% {
+		transform: translateY(-6px);
+	}
+	100% {
+		transform: translateY(0px);
+	}
 }
 .animate-float {
-  animation: float 4s ease-in-out infinite;
+	animation: float 4s ease-in-out infinite;
 }
 
 /* Fade Up Staggered Animation */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+	from {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 .animate-fade-up {
-  animation: fadeUp 0.6s ease-out forwards;
+	animation: fadeUp 0.6s ease-out forwards;
 }
 
 /* Pulse Glow for Buttons */
 @keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(204, 255, 0, 0.7); }
-  50% { box-shadow: 0 0 0 10px rgba(204, 255, 0, 0); }
+	0%, 100% {
+		box-shadow: 0 0 0 0 rgba(204, 255, 0, 0.7);
+	}
+	50% {
+		box-shadow: 0 0 0 10px rgba(204, 255, 0, 0);
+	}
 }
 .animate-pulse-glow {
-  animation: pulseGlow 2s infinite;
+	animation: pulseGlow 2s infinite;
 }
 
 /* Rotate Slow for Icons */
 @keyframes rotateSlow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
 }
 .animate-rotate-slow {
-  animation: rotateSlow 10s linear infinite;
+animation: rotateSlow 10s linear infinite;
 }
