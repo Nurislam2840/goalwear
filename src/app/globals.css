@@ -17,6 +17,7 @@
 
   --animate-fade-in: fadeIn 0.5s ease-in-out;
   --animate-slide-up: slideUp 0.5s ease-out;
+  --animate-bounce-slow: bounceSlow 3s infinite;
 
   @keyframes fadeIn {
     from { opacity: 0; }
@@ -26,6 +27,10 @@
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
   }
+  @keyframes bounceSlow {
+    0%, 100% { transform: translateY(-5%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }
+    50% { transform: translateY(5%); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+  }
 }
 
 @layer base {
@@ -33,7 +38,6 @@
     --background: #FAFAFA;
     --foreground: #0A0A0A;
   }
-
   .dark {
     --background: #0A0A0A;
     --foreground: #FAFAFA;
@@ -41,64 +45,27 @@
 }
 
 @layer base {
-  * {
-    border-color: var(--color-brand-border);
-  }
-
+  * { border-color: var(--color-brand-border); }
   body {
     background: var(--background);
     color: var(--foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
-
-  h1, h2, h3, h4 {
-    font-family: var(--font-display);
-    letter-spacing: -0.02em;
-  }
+  h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.02em; }
 }
 
-/* ============ প্রিমিয়াম স্ক্রলবার ============ */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 3px;
-}
-.dark ::-webkit-scrollbar-thumb {
-  background: #333;
-}
+/* ============ স্ক্রলবার ============ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #888; border-radius: 3px; }
+.dark ::-webkit-scrollbar-thumb { background: #333; }
 
-/* ============================================
-   LIGHT MODE — TEXT READABILITY FIX
-   ============================================
-   brand-green (#CCFF00) is bright yellow-green.
-   On white background, it's almost invisible.
-   So in LIGHT mode, we override text colors to a
-   darker green while keeping backgrounds bright.
-   ============================================ */
-
-/* Text using brand-green on light background — darker green for readability */
-html:not(.dark) .text-brand-green {
-  color: #5B8C00;
-}
-
-/* Keep bright green on elements with solid green background */
+/* ============ লাইট মোডে টেক্সট রিডেবিলিটি ============ */
+html:not(.dark) .text-brand-green { color: #5B8C00; }
 html:not(.dark) .bg-brand-green .text-brand-green,
-html:not(.dark) .bg-brand-green.text-brand-green {
-  color: #0A0A0A;
-}
-
-/* Dark mode: keep original bright green */
-.dark .text-brand-green {
-  color: #CCFF00;
-}
+html:not(.dark) .bg-brand-green.text-brand-green { color: #0A0A0A; }
+.dark .text-brand-green { color: #CCFF00; }
 
 /* ============ গ্রিডিয়েন্ট টেক্সট ============ */
 .text-gradient {
@@ -107,16 +74,12 @@ html:not(.dark) .bg-brand-green.text-brand-green {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-
-/* Light mode — darker green for readability on white */
 html:not(.dark) .text-gradient {
   background: linear-gradient(135deg, #5B8C00 0%, #4A7500 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-
-/* For on-dark backgrounds (hero, offers) — keep bright */
 .text-gradient-bright {
   background: linear-gradient(135deg, #CCFF00 0%, #88DD00 100%);
   -webkit-background-clip: text;
@@ -124,427 +87,196 @@ html:not(.dark) .text-gradient {
   background-clip: text;
 }
 
-/* ============ কার্ড হোভার এফেক্ট ============ */
+/* ============ কার্ড হোভার ============ */
 .card-hover {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .card-hover:hover {
-  transform: translateY(-4px);
+  transform: translateY(-8px);
   box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
 }
 .dark .card-hover:hover {
-  box-shadow: 0 20px 40px -10px rgba(204, 255, 0, 0.08);
+  box-shadow: 0 20px 40px -10px rgba(204, 255, 0, 0.1);
 }
 
 /* ============================================
-   FLIP CARD - LOGIN / SIGNUP FORM
+   গ্লোবাল অ্যানিমেশন
    ============================================ */
-
-.flip-container {
-  perspective: 1200px;
-  width: 100%;
-  max-width: 420px;
-  min-height: 620px;
-  position: relative;
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
-
-.flip-inner {
-  position: relative;
-  width: 100%;
-  min-height: 620px;
-  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  transform-style: preserve-3d;
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
 }
-
-.flip-inner.flipped {
-  transform: rotateY(180deg);
+.dark .skeleton-shimmer {
+  background: linear-gradient(90deg, #161616 25%, #262626 50%, #161616 75%);
+  background-size: 200% 100%;
 }
-
-.form-panel {
-  position: absolute;
-  inset: 0;
-  padding: 40px 32px;
-  border-radius: 32px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.15);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-.dark .form-panel {
-  background: #161616;
-  border-color: #262626;
-  box-shadow: 0 20px 60px -20px rgba(204, 255, 0, 0.08);
-}
-
-.signup-panel {
-  transform: rotateY(180deg);
-}
-
-.lock-icon-wrap {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: #f3f4f6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 20px;
-}
-
-.dark .lock-icon-wrap {
-  background: #0A0A0A;
-}
-
-/* ============ ইনপুট ফিল্ড বেস স্টাইল ============ */
-.flip-input {
-  width: 100%;
-  padding-top: 14px;
-  padding-bottom: 14px;
-  padding-left: 16px;
-  padding-right: 16px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  font-size: 14px;
-  outline: none;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
-  color: #0A0A0A;
-}
-
-.dark .flip-input {
-  background: #0A0A0A;
-  border-color: #262626;
-  color: #ffffff;
-}
-
-.flip-input::placeholder {
-  color: #9ca3af;
-}
-
-.flip-input:focus {
-  border-color: #CCFF00;
-  box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.15);
-}
-
-.flip-input-with-icon-left {
-  padding-left: 48px !important;
-}
-
-.flip-input-with-icon-right {
-  padding-right: 48px !important;
-}
-
-.flip-input-with-icon-both {
-  padding-left: 48px !important;
-  padding-right: 48px !important;
-}
-
-/* ============ বাটন স্টাইল ============ */
-.flip-btn {
-  width: 100%;
-  padding: 15px;
-  border-radius: 14px;
-  font-weight: 700;
-  font-size: 15px;
-  background: #CCFF00;
-  color: #000;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
-}
-
-.flip-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(204, 255, 0, 0.4);
-}
-
-.flip-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.flip-toggle-btn {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: #CCFF00;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border: none;
-  box-shadow: 0 10px 25px -5px rgba(204, 255, 0, 0.4);
-  transition: all 0.2s ease;
-}
-
-.flip-toggle-btn:hover {
-  transform: scale(1.1) rotate(180deg);
-}
-
-/* ============================================
-   LOADING ANIMATIONS
-   ============================================ */
 
 @keyframes loading-bar {
   0% { transform: translateX(-100%); }
   50% { transform: translateX(0%); }
   100% { transform: translateX(100%); }
 }
-
 .animate-loading-bar {
   width: 100%;
   animation: loading-bar 1.2s ease-in-out infinite;
 }
 
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+/* ============================================
+   ফ্লিপ কার্ড (লগইন / সাইনআপ)
+   ============================================ */
+.flip-container { perspective: 1200px; width: 100%; max-width: 420px; min-height: 620px; position: relative; }
+.flip-inner {
+  position: relative; width: 100%; min-height: 620px;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
 }
+.flip-inner.flipped { transform: rotateY(180deg); }
+.form-panel {
+  position: absolute; inset: 0; padding: 40px 32px; border-radius: 32px;
+  background: #ffffff; border: 1px solid #e5e7eb;
+  box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.15);
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+}
+.dark .form-panel {
+  background: #161616; border-color: #262626;
+  box-shadow: 0 20px 60px -20px rgba(204, 255, 0, 0.08);
+}
+.signup-panel { transform: rotateY(180deg); }
 
-.skeleton-shimmer {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+.flip-input {
+  width: 100%; padding: 14px 16px; background: #f9fafb;
+  border: 1px solid #e5e7eb; border-radius: 14px;
+  font-size: 14px; outline: none; transition: all 0.2s ease;
+  box-sizing: border-box; color: #0A0A0A;
 }
+.dark .flip-input { background: #0A0A0A; border-color: #262626; color: #ffffff; }
+.flip-input::placeholder { color: #9ca3af; }
+.flip-input:focus { border-color: #CCFF00; box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.15); }
+.flip-input-with-icon-left { padding-left: 48px !important; }
+.flip-input-with-icon-right { padding-right: 48px !important; }
+.flip-input-with-icon-both { padding-left: 48px !important; padding-right: 48px !important; }
 
-.dark .skeleton-shimmer {
-  background: linear-gradient(90deg, #161616 25%, #262626 50%, #161616 75%);
-  background-size: 200% 100%;
+.flip-btn {
+  width: 100%; padding: 15px; border-radius: 14px;
+  font-weight: 700; font-size: 15px; background: #CCFF00; color: #000;
+  cursor: pointer; transition: all 0.2s ease; border: none;
 }
+.flip-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(204, 255, 0, 0.4); }
+.flip-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* ============================================
-   GLOBAL SELECT — Themed Dropdowns
+   প্রোডাক্ট কার্ড মিনিমাল ডিজাইন
    ============================================ */
-
-select {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  background-size: 14px;
-  padding-right: 42px !important;
-  cursor: pointer;
-  color-scheme: light;
-  font-weight: 600;
-  font-family: inherit;
-  font-size: 14px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-select:focus {
-  border-color: #CCFF00 !important;
-  box-shadow: 0 0 0 3px rgba(204, 255, 0, 0.15);
-  outline: none;
-}
-
-select option {
-  background-color: #ffffff;
-  color: #0A0A0A;
-  font-weight: 500;
-  padding: 10px 14px;
-  font-size: 14px;
-}
-
-.dark select {
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  color-scheme: dark;
-}
-
-.dark select option {
-  background-color: #1A1A1A;
-  color: #ffffff;
-}
-
-/* ============================================
-   PREMIUM MINIMAL PRODUCT CARD
-   ============================================ */
-
 .product-card-minimal {
-  position: relative;
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 10px;
-  border: 1px solid #f5f5f5;
+  position: relative; background: #ffffff; border-radius: 16px;
+  padding: 10px; border: 1px solid #f5f5f5;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 }
-
-.dark .product-card-minimal {
-  background: #141414;
-  border-color: #1f1f1f;
-}
-
+.dark .product-card-minimal { background: #141414; border-color: #1f1f1f; }
 .product-card-minimal:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-6px);
+  box-shadow: 0 25px 50px -20px rgba(0, 0, 0, 0.15);
   border-color: transparent;
 }
-
 .dark .product-card-minimal:hover {
-  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 25px 50px -20px rgba(0, 0, 0, 0.6);
 }
-
-/* Image area */
 .product-card-minimal-image {
-  position: relative;
-  aspect-ratio: 1 / 1;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #f8f8f8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative; aspect-ratio: 1 / 1; border-radius: 12px;
+  overflow: hidden; background: #f8f8f8;
+  display: flex; align-items: center; justify-content: center;
 }
-
-.dark .product-card-minimal-image {
-  background: #0A0A0A;
-}
-
+.dark .product-card-minimal-image { background: #0A0A0A; }
 .product-card-minimal-image img {
   transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 .product-card-minimal:hover .product-card-minimal-image img {
-  transform: scale(1.06);
+  transform: scale(1.08);
 }
 
-/* Category small text */
 .product-card-minimal-cat {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #a3a3a3;
-  line-height: 1;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.15em;
+  text-transform: uppercase; color: #a3a3a3; line-height: 1;
+  display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
 }
-
-.dark .product-card-minimal-cat {
-  color: #737373;
-}
-
-/* Title — bold uppercase */
+.dark .product-card-minimal-cat { color: #737373; }
 .product-card-minimal-title {
-  font-size: 12px;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  font-size: 12px; font-weight: 900; text-transform: uppercase;
+  letter-spacing: -0.01em; line-height: 1.2;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
-
-/* Price */
 .product-card-minimal-price {
-  font-size: 17px;
-  font-weight: 900;
-  letter-spacing: -0.03em;
+  font-size: 17px; font-weight: 900; letter-spacing: -0.03em;
 }
-
-/* ============================================
-   ADD TO CART BUTTON — Solid Green + Black
-   ============================================ */
-
 .product-card-add-green {
-  background: #CCFF00;
-  color: #000000;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 7px 11px;
-  border-radius: 7px;
-  transition: all 0.25s ease;
-  border: none;
-  cursor: pointer;
-  line-height: 1;
+  background: #CCFF00; color: #000000; font-size: 9px; font-weight: 800;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 7px 11px; border-radius: 7px; transition: all 0.25s ease;
+  border: none; cursor: pointer; line-height: 1;
   box-shadow: 0 4px 12px -3px rgba(204, 255, 0, 0.4);
 }
-
-.dark .product-card-add-green {
-  background: #CCFF00;
-  color: #000000;
-}
-
 .product-card-add-green:hover {
-  background: #B8E600;
-  transform: translateY(-1px);
+  background: #B8E600; transform: translateY(-1px);
   box-shadow: 0 8px 20px -5px rgba(204, 255, 0, 0.6);
 }
-
-.product-card-add-green:active {
-  transform: translateY(0);
-}
-
 .product-card-add-green:disabled {
-  background: #e5e7eb;
-  color: #9ca3af;
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
+  background: #e5e7eb; color: #9ca3af; cursor: not-allowed;
+  box-shadow: none; transform: none;
 }
-
-.dark .product-card-add-green:disabled {
-  background: #262626;
-  color: #6b7280;
-}
-
-/* Floating action buttons */
+.dark .product-card-add-green:disabled { background: #262626; color: #6b7280; }
 .product-card-minimal-action {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: #ffffff;
-  color: #4b5563;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 26px; height: 26px; border-radius: 50%; background: #ffffff;
+  color: #4b5563; display: flex; align-items: center; justify-content: center;
   box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.15);
-  transition: all 0.25s ease;
-  border: none;
-  cursor: pointer;
+  transition: all 0.25s ease; border: none; cursor: pointer;
 }
-
-.dark .product-card-minimal-action {
-  background: #1A1A1A;
-  color: #d1d5db;
-}
-
-.product-card-minimal-action:hover {
-  transform: scale(1.15);
-  color: #0A0A0A;
-}
-
-.product-card-minimal-action.active {
-  background: #EC4899;
-  color: #ffffff;
-}
+.dark .product-card-minimal-action { background: #1A1A1A; color: #d1d5db; }
+.product-card-minimal-action:hover { transform: scale(1.15); color: #0A0A0A; }
+.product-card-minimal-action.active { background: #EC4899; color: #ffffff; }
 
 /* ============================================
-   CUSTOM 3D MAP ANIMATIONS
+   নতুন যোগ করা স্পেশাল অ্যানিমেশন
    ============================================ */
 
-@keyframes bounce-slow {
-  0%, 100% {
-    transform: translateY(-5%);
-    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
-  }
-  50% {
-    transform: translateY(5%);
-    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
-  }
+/* Floating Animation for Badges */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0px); }
+}
+.animate-float {
+  animation: float 4s ease-in-out infinite;
 }
 
-.animate-bounce-slow {
-  animation: bounce-slow 3s infinite;
+/* Fade Up Staggered Animation */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fadeUp 0.6s ease-out forwards;
+}
+
+/* Pulse Glow for Buttons */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(204, 255, 0, 0.7); }
+  50% { box-shadow: 0 0 0 10px rgba(204, 255, 0, 0); }
+}
+.animate-pulse-glow {
+  animation: pulseGlow 2s infinite;
+}
+
+/* Rotate Slow for Icons */
+@keyframes rotateSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-rotate-slow {
+  animation: rotateSlow 10s linear infinite;
 }

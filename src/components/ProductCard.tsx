@@ -49,10 +49,8 @@ export default function ProductCard({
   const isLowStock = stock > 0 && stock <= 5;
 
   const categoryLabel = fullProduct
-    ? fullProduct.category === "Football Shoes"
-      ? "Football Shoes"
-      : fullProduct.category === "Cricket Jersey"
-      ? "Cricket Jersey"
+    ? fullProduct.category === "Football Shoes" ? "Football Shoes"
+      : fullProduct.category === "Cricket Jersey" ? "Cricket Jersey"
       : fullProduct.category
     : "Product";
 
@@ -61,31 +59,15 @@ export default function ProductCard({
   const kitType = fullProduct?.kitType || fullProduct?.type || "";
   const showNew = isNew ?? (id > 200 && id < 210);
 
-  // 👇 Brand logo lookup (case-insensitive match by name)
   const brandData = fullProduct
-    ? brands.find(
-        (b) =>
-          b.name.toLowerCase() === (fullProduct.brand || "").toLowerCase()
-      )
+    ? brands.find((b) => b.name.toLowerCase() === (fullProduct.brand || "").toLowerCase())
     : null;
 
-  // 👇 Color list — empty if not defined (no forced defaults)
-  const productColors =
-    fullProduct?.colors && fullProduct.colors.length > 0
-      ? fullProduct.colors
-      : [];
-
-  const productImages =
-    fullProduct?.images && fullProduct.images.length > 0
-      ? fullProduct.images
-      : [image_url];
-
+  const productColors = fullProduct?.colors && fullProduct.colors.length > 0 ? fullProduct.colors : [];
+  const productImages = fullProduct?.images && fullProduct.images.length > 0 ? fullProduct.images : [image_url];
   const hasMultipleImages = productImages.length > 1;
 
-  const currentImage =
-    productImages[
-      (selectedColor + currentImageIndex) % productImages.length
-    ] || productImages[0];
+  const currentImage = productImages[(selectedColor + currentImageIndex) % productImages.length] || productImages[0];
 
   const handleMouseEnter = () => {
     if (!hasMultipleImages) return;
@@ -123,10 +105,7 @@ export default function ProductCard({
     e.preventDefault();
     e.stopPropagation();
     toggleWishlist({ id, name, price, image_url, rating, reviews_count });
-    showToast(
-      inWishlist ? "Removed from wishlist" : "Added to wishlist!",
-      "wishlist"
-    );
+    showToast(inWishlist ? "Removed from wishlist" : "Added to wishlist!", "wishlist");
   };
 
   const handleQuickView = (e: React.MouseEvent) => {
@@ -151,9 +130,7 @@ export default function ProductCard({
   const prevImage = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setCurrentImageIndex(
-      (prev) => (prev - 1 + productImages.length) % productImages.length
-    );
+    setCurrentImageIndex((prev) => (prev - 1 + productImages.length) % productImages.length);
   };
 
   return (
@@ -171,32 +148,18 @@ export default function ProductCard({
               alt={name}
               fill
               sizes="(max-width: 768px) 50vw, 25vw"
-              className={`object-contain p-4 mix-blend-multiply dark:mix-blend-normal transition-all duration-500 ${
+              className={`object-contain p-4 mix-blend-multiply dark:mix-blend-normal transition-all duration-700 ease-out ${
                 isOutOfStock ? "opacity-40 grayscale" : ""
               }`}
             />
 
             {hasMultipleImages && (
               <>
-                <button
-                  onClick={prevImage}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 bg-white/90 dark:bg-brand-card/90 rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-20"
-                  aria-label="Previous image"
-                >
-                  <ChevronLeft
-                    className="w-3 h-3 dark:text-white"
-                    strokeWidth={3}
-                  />
+                <button onClick={prevImage} className="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 bg-white/90 dark:bg-brand-card/90 rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                  <ChevronLeft className="w-3 h-3 dark:text-white" strokeWidth={3} />
                 </button>
-                <button
-                  onClick={nextImage}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 bg-white/90 dark:bg-brand-card/90 rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-20"
-                  aria-label="Next image"
-                >
-                  <ChevronRight
-                    className="w-3 h-3 dark:text-white"
-                    strokeWidth={3}
-                  />
+                <button onClick={nextImage} className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 bg-white/90 dark:bg-brand-card/90 rounded-full flex items-center justify-center shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                  <ChevronRight className="w-3 h-3 dark:text-white" strokeWidth={3} />
                 </button>
               </>
             )}
@@ -204,22 +167,15 @@ export default function ProductCard({
             {hasMultipleImages && (
               <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 z-10">
                 {productImages.slice(0, 5).map((_, idx) => (
-                  <div
-                    key={idx}
-                    className={`h-1 rounded-full transition-all ${
-                      (selectedColor + currentImageIndex) %
-                        productImages.length ===
-                      idx
-                        ? "w-4 bg-brand-green"
-                        : "w-1 bg-gray-300 dark:bg-gray-600"
-                    }`}
-                  />
+                  <div key={idx} className={`h-1 rounded-full transition-all ${
+                    (selectedColor + currentImageIndex) % productImages.length === idx ? "w-4 bg-brand-green" : "w-1 bg-gray-300 dark:bg-gray-600"
+                  }`} />
                 ))}
               </div>
             )}
 
             {showNew && !isOutOfStock && !isLowStock && (
-              <div className="absolute top-2.5 left-2.5 bg-black dark:bg-white text-white dark:text-black text-[9px] font-black uppercase tracking-[0.15em] px-2 py-0.5 rounded-full z-10">
+              <div className="absolute top-2.5 left-2.5 bg-black dark:bg-white text-white dark:text-black text-[9px] font-black uppercase tracking-[0.15em] px-2 py-0.5 rounded-full z-10 animate-pulse">
                 New
               </div>
             )}
@@ -237,25 +193,11 @@ export default function ProductCard({
             )}
 
             <div className="absolute top-2.5 right-2.5 flex flex-col gap-1.5 z-10">
-              <button
-                onClick={handleWishlist}
-                className={`product-card-minimal-action ${
-                  inWishlist ? "active" : ""
-                }`}
-                aria-label="Toggle wishlist"
-              >
-                <Heart
-                  className={`w-3 h-3 ${inWishlist ? "fill-current" : ""}`}
-                  strokeWidth={2.8}
-                />
+              <button onClick={handleWishlist} className={`product-card-minimal-action ${inWishlist ? "active" : ""}`} aria-label="Toggle wishlist">
+                <Heart className={`w-3 h-3 ${inWishlist ? "fill-current" : ""}`} strokeWidth={2.8} />
               </button>
-
               {!isOutOfStock && (
-                <button
-                  onClick={handleQuickView}
-                  className="product-card-minimal-action"
-                  aria-label="Quick view"
-                >
+                <button onClick={handleQuickView} className="product-card-minimal-action" aria-label="Quick view">
                   <Eye className="w-3 h-3" strokeWidth={2.8} />
                 </button>
               )}
@@ -264,19 +206,11 @@ export default function ProductCard({
 
           {/* ============ INFO AREA ============ */}
           <div className="mt-3">
-            {/* 👇 Brand logo + Category row */}
             <div className="flex items-center gap-1.5 min-w-0">
               {brandData?.logo && (
                 <div className="w-3.5 h-3.5 flex items-center justify-center flex-shrink-0">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={brandData.logo}
-                    alt={brandData.name}
-                    className="max-h-full max-w-full object-contain"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = "none";
-                    }}
-                  />
+                  <img src={brandData.logo} alt={brandData.name} className="max-h-full max-w-full object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                 </div>
               )}
               <p className="product-card-minimal-cat truncate">
@@ -291,77 +225,34 @@ export default function ProductCard({
 
             {(season || kitType) && (
               <div className="flex items-center gap-1 mt-1.5 flex-wrap">
-                {kitType && (
-                  <span className="bg-brand-green/20 text-black dark:text-brand-green text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">
-                    {kitType}
-                  </span>
-                )}
-                {season && (
-                  <span className="bg-gray-100 dark:bg-brand-dark text-gray-600 dark:text-gray-400 text-[9px] font-bold px-2 py-0.5 rounded-full">
-                    {season}
-                  </span>
-                )}
+                {kitType && <span className="bg-brand-green/20 text-black dark:text-brand-green text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">{kitType}</span>}
+                {season && <span className="bg-gray-100 dark:bg-brand-dark text-gray-600 dark:text-gray-400 text-[9px] font-bold px-2 py-0.5 rounded-full">{season}</span>}
               </div>
             )}
 
-            {/* Color Picker — only if colors exist */}
             {productColors.length > 0 && (
               <div className="flex items-center gap-1.5 mt-2">
                 {productColors.slice(0, 4).map((color, idx) => (
-                  <button
-                    key={`${color.name}-${idx}`}
-                    onClick={(e) => handleColorClick(e, idx)}
-                    className={`w-3.5 h-3.5 rounded-full transition-all duration-200 border-2 ${
-                      selectedColor === idx
-                        ? "ring-2 ring-offset-1 ring-black dark:ring-white dark:ring-offset-brand-card scale-110"
-                        : "hover:scale-110 opacity-70 hover:opacity-100"
-                    }`}
-                    style={{
-                      backgroundColor: color.hex,
-                      borderColor:
-                        selectedColor === idx
-                          ? "transparent"
-                          : "rgba(0,0,0,0.1)",
-                    }}
-                    aria-label={color.name}
-                    title={color.name}
-                  />
+                  <button key={`${color.name}-${idx}`} onClick={(e) => handleColorClick(e, idx)} className={`w-3.5 h-3.5 rounded-full transition-all duration-200 border-2 ${
+                    selectedColor === idx ? "ring-2 ring-offset-1 ring-black dark:ring-white dark:ring-offset-brand-card scale-110" : "hover:scale-110 opacity-70 hover:opacity-100"
+                  }`} style={{ backgroundColor: color.hex, borderColor: selectedColor === idx ? "transparent" : "rgba(0,0,0,0.1)" }} aria-label={color.name} title={color.name} />
                 ))}
-                {productColors.length > 4 && (
-                  <span className="text-[9px] font-bold text-gray-400 ml-0.5">
-                    +{productColors.length - 4}
-                  </span>
-                )}
+                {productColors.length > 4 && <span className="text-[9px] font-bold text-gray-400 ml-0.5">+{productColors.length - 4}</span>}
               </div>
             )}
 
-            {/* Rating */}
             <div className="flex items-center gap-1 mt-2">
               <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-              <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300">
-                {rating}
-              </span>
-              <span className="text-[10px] text-gray-400">
-                ({reviews_count})
-              </span>
+              <span className="text-[10px] font-bold text-gray-700 dark:text-gray-300">{Number(rating || 0).toFixed(1)}</span>
+              <span className="text-[10px] text-gray-400">({reviews_count})</span>
             </div>
 
-            {/* Price + Add */}
             <div className="flex items-end justify-between mt-2.5 gap-2">
               <div className="flex flex-col">
-                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider leading-none mb-0.5">
-                  Price
-                </p>
-                <p className="product-card-minimal-price text-gray-900 dark:text-white leading-none">
-                  ${price.toFixed(0)}
-                </p>
+                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider leading-none mb-0.5">Price</p>
+                <p className="product-card-minimal-price text-gray-900 dark:text-white leading-none">${price.toFixed(0)}</p>
               </div>
-
-              <button
-                onClick={handleAddToCart}
-                disabled={isOutOfStock}
-                className="product-card-add-green inline-flex items-center gap-1.5 whitespace-nowrap"
-              >
+              <button onClick={handleAddToCart} disabled={isOutOfStock} className="product-card-add-green inline-flex items-center gap-1.5 whitespace-nowrap">
                 <ShoppingBag className="w-3 h-3" strokeWidth={3} />
                 {isOutOfStock ? "Sold Out" : "Add to Cart"}
               </button>
@@ -371,11 +262,7 @@ export default function ProductCard({
       </Link>
 
       {!isOutOfStock && (
-        <QuickViewModal
-          product={fullProduct}
-          isOpen={showQuickView}
-          onClose={() => setShowQuickView(false)}
-        />
+        <QuickViewModal product={fullProduct} isOpen={showQuickView} onClose={() => setShowQuickView(false)} />
       )}
     </>
   );

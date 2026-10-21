@@ -30,7 +30,7 @@ export default function HeroSlider() {
     return () => clearInterval(timer);
   }, [paused, heroSlides.length]);
 
-  // 👇 লোডিং স্কেলেটন
+  // লোডিং স্কেলেটন
   if (!isHydrated || heroSlides.length === 0) {
     return (
       <section className="max-w-7xl mx-auto px-4 mt-6">
@@ -79,12 +79,12 @@ export default function HeroSlider() {
         onMouseLeave={() => setPaused(false)}
       >
         <div className="relative w-full aspect-video min-h-[400px] md:min-h-[500px]">
+          
+          {/* Background Image */}
           <div
             key={`img-${slide.id}`}
             className={`absolute inset-0 transition-all duration-[1500ms] ease-out ${
-              isTransitioning
-                ? "scale-110 opacity-0"
-                : "scale-100 opacity-100"
+              isTransitioning ? "scale-110 opacity-0" : "scale-100 opacity-100"
             }`}
           >
             <Image
@@ -97,23 +97,28 @@ export default function HeroSlider() {
             />
           </div>
 
+          {/* Dark Overlays */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/10 to-transparent"></div>
 
+          {/* Content */}
           <div className="relative h-full flex items-center">
             <div className="w-full px-6 md:px-12 lg:px-16 py-8">
               <div
+                // 👇 এখানে animate-fade-up যোগ করা হলো টেক্সট অ্যানিমেশনের জন্য
                 className={`max-w-2xl transition-all duration-700 ${
                   isTransitioning
-                    ? "opacity-0 translate-y-4"
-                    : "opacity-100 translate-y-0"
+                    ? "opacity-0 translate-y-8"
+                    : "opacity-100 translate-y-0 animate-fade-up"
                 }`}
               >
-                <div className="inline-flex items-center gap-2 bg-brand-green text-black text-[10px] md:text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider mb-4 shadow-lg shadow-brand-green/30">
+                {/* Badge */}
+                <div className="inline-flex items-center gap-2 bg-brand-green text-black text-[10px] md:text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider mb-4 shadow-lg shadow-brand-green/30 animate-float">
                   <Sparkles className="w-3 h-3" strokeWidth={2.5} />
                   {slide.badge}
                 </div>
 
+                {/* Title */}
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white leading-[1.05] tracking-tight mb-3 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
                   {slide.title}{" "}
                   <span className="text-gradient-bright drop-shadow-none">
@@ -121,8 +126,9 @@ export default function HeroSlider() {
                   </span>
                 </h1>
 
+                {/* Player */}
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 rounded-full bg-brand-green text-black flex items-center justify-center text-xs font-bold shadow-lg shadow-brand-green/30">
+                  <div className="w-8 h-8 rounded-full bg-brand-green text-black flex items-center justify-center text-xs font-bold shadow-lg shadow-brand-green/30 animate-pulse-glow">
                     {slide.player.charAt(0)}
                   </div>
                   <p className="text-sm md:text-base font-bold text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
@@ -130,18 +136,21 @@ export default function HeroSlider() {
                   </p>
                 </div>
 
+                {/* Quote */}
                 <p className="text-xs md:text-sm italic text-gray-100 mb-4 border-l-2 border-brand-green pl-3 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
                   "{slide.quote}"
                 </p>
 
+                {/* Description */}
                 <p className="text-gray-100 text-sm md:text-base mb-6 max-w-lg leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
                   {slide.description}
                 </p>
 
+                {/* CTA Buttons */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                   <Link
                     href={slide.cta || "/shop"}
-                    className="bg-brand-green text-black font-bold px-6 md:px-8 py-3 md:py-3.5 rounded-full flex items-center gap-2 hover:scale-105 transition-transform shadow-lg shadow-brand-green/40 text-sm md:text-base"
+                    className="bg-brand-green text-black font-bold px-6 md:px-8 py-3 md:py-3.5 rounded-full flex items-center gap-2 hover:scale-105 transition-transform shadow-lg shadow-brand-green/40 text-sm md:text-base animate-pulse-glow"
                   >
                     Shop Now <ArrowRight className="w-4 h-4" />
                   </Link>
@@ -156,6 +165,7 @@ export default function HeroSlider() {
             </div>
           </div>
 
+          {/* Navigation Arrows */}
           {heroSlides.length > 1 && (
             <>
               <button
@@ -175,6 +185,7 @@ export default function HeroSlider() {
             </>
           )}
 
+          {/* Slide Indicators */}
           {heroSlides.length > 1 && (
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
               {heroSlides.map((s, idx) => (
@@ -192,6 +203,7 @@ export default function HeroSlider() {
             </div>
           )}
 
+          {/* Slide Counter */}
           <div className="absolute top-6 right-6 bg-black/50 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 z-20 hidden md:block">
             <p className="text-xs font-bold text-white">
               {String(safeCurrent + 1).padStart(2, "0")} /{" "}
