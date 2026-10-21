@@ -13,7 +13,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No signature" }, { status: 400 });
   }
 
-  // Raw body নেওয়া বাধ্যতামূলক
   const raw = await req.text();
   let event: Stripe.Event;
 
@@ -34,7 +33,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
-    // Idempotency চেক
     const { data: existing } = await supabaseAdmin
       .from("orders").select("id").eq("stripe_session_id", session.id).maybeSingle();
     
@@ -48,11 +46,12 @@ export async function POST(req: NextRequest) {
         expand: ["data.price.product"],
       });
 
+      // 👇 এখানে name-কে সবসময় string-এ কনভার্ট করা হলো
       const items = lines.data.map((li) => {
         const product = li.price?.product as Stripe.Product;
         return {
           id: Number(product.metadata?.product_id),
-          name: li.description,
+          name: li.description || "Product",
           price: (li.amount_total ?? 0) / 100 / (li.quantity || 1),
           quantity: li.quantity || 1,
           image_url: product.images?.[0] || "",
@@ -68,22 +67,26 @@ export async function POST(req: NextRequest) {
       console.log(`[Webhook] ✅ Stock reduced`);
 
       // অর্ডার তৈরি
-      const { error: insertError } = await supabaseAdmin.from("orders").insert({
-        id: `GW-${crypto.randomBytes(5).toString("hex").toUpperCase()}`,
-        user_id: session.metadata?.userId || null,
-        items,
-        total: (session.amount_total ?? 0) / 100,
-        status: "Processing",
-        customer_info: {
-          name: session.metadata?.customerName || "",
-          email: session.customer_email || "",
-          phone: session.metadata?.customerPhone || "",
-          address: session.metadata?.customerAddress || "",
-          city: session.metadata?.customerCity || "",
-        },
-        payment_method: "Card (Stripe)",
-        stripe_session_id: session.id,
-      });
+      const { data: insertedOrder, error: insertError } = await supabaseAdmin
+        .from("orders")
+        .insert({
+          id: `GW-${crypto.randomBytes(5).toString("hex").toUpperCase()}`,
+          user_id: session.metadata?.userId || null,
+          items,
+          total: (session.amount_total ?? 0) / 100,
+          status: "Processing",
+          customer_info: {
+            name: session.metadata?.customerName || "",
+            email: session.customer_email || "",
+            phone: session.metadata?.customerPhone || "",
+            address: session.metadata?.customerAddress || "",
+            city: session.metadata?.customerCity || "",
+          },
+          payment_method: "Card (Stripe)",
+          stripe_session_id: session.id,
+        })
+        .select()
+        .single();
 
       if (insertError) {
         console.error(`[Webhook] ❌ Failed to insert order: ${insertError.message}`);
@@ -91,6 +94,21 @@ export async function POST(req: NextRequest) {
       }
       
       console.log(`[Webhook] 🎉 Order created successfully for session: ${session.id}`);
+
+      // 👇 কনফার্মেশন ইমেইল পাঠানো
+      const { sendOrderConfirmationEmail } = await import("@/lib/email");
+      await sendOrderConfirmationEmail({
+        to: session.customer_email || session.metadata?.customerEmail || "",
+        customerName: session.metadata?.customerName || "",
+        orderId: insertedOrder.id,
+        items: items.map((i) => ({
+          name: i.name, // এখন এটি নিশ্চিতভাবে string
+          quantity: i.quantity,
+          price: i.price,
+        })),
+        total: (session.amount_total ?? 0) / 100,
+        paymentMethod: "Card (Stripe)",
+      });
     } catch (err: any) {
       console.error(`[Webhook] ❌ Error processing session: ${err.message}`);
       return NextResponse.json({ error: err.message }, { status: 500 });

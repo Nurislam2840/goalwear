@@ -19,6 +19,7 @@
     "postcss": "^8.5.29",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "resend": "^6.34.1",
     "stripe": "^23.0.0"
   },
   "devDependencies": {

@@ -155,6 +155,21 @@ export async function POST(req: NextRequest) {
       console.error("[POST orders]", error.message);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+    
+    // 👇 COD অর্ডারের জন্য কনফার্মেশন ইমেইল পাঠানো
+    const { sendOrderConfirmationEmail } = await import("@/lib/email");
+    await sendOrderConfirmationEmail({
+    	to: customerInfo.email,
+    	customerName: customerInfo.name,
+    	orderId: data.id,
+    	items: verifiedItems.map((i) => ({
+    		name: i.name,
+    		quantity: i.quantity,
+    		price: i.price,
+    	})),
+    	total: finalTotal,
+    	paymentMethod: finalPaymentMethod,
+    });
 
     // 👇 Atomic স্টক কমানো (ডাটাবেস ফাংশন দিয়ে)
     for (const item of verifiedItems) {
