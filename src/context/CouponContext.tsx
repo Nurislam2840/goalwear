@@ -9,44 +9,10 @@ import {
   useRef,
   ReactNode,
 } from "react";
-
-export interface Coupon {
-  code: string;
-  type: "percent" | "fixed" | "shipping";
-  value: number;
-  description: string;
-}
-
-// 👇 এখানে কুপন যোগ/এডিট করবেন
-export const AVAILABLE_COUPONS: Coupon[] = [
-  {
-    code: "GOAL10",
-    type: "percent",
-    value: 10,
-    description: "10% off your order",
-  },
-  {
-    code: "WELCOME20",
-    type: "percent",
-    value: 20,
-    description: "20% off for new customers",
-  },
-  {
-    code: "FLAT15",
-    type: "fixed",
-    value: 15,
-    description: "$15 off your order",
-  },
-  {
-    code: "FREESHIP",
-    type: "shipping",
-    value: 0,
-    description: "Free shipping",
-  },
-];
+import { useSiteData, CouponData } from "./SiteDataContext";
 
 interface CouponContextType {
-  appliedCoupon: Coupon | null;
+  appliedCoupon: CouponData | null;
   applyCoupon: (code: string) => { success: boolean; error?: string };
   removeCoupon: () => void;
   calculateDiscount: (subtotal: number) => number;
@@ -56,7 +22,8 @@ interface CouponContextType {
 const CouponContext = createContext<CouponContextType | undefined>(undefined);
 
 export function CouponProvider({ children }: { children: ReactNode }) {
-  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
+  const { coupons } = useSiteData();
+  const [appliedCoupon, setAppliedCoupon] = useState<CouponData | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
   const hasLoadedRef = useRef(false);
 
@@ -68,13 +35,25 @@ export function CouponProvider({ children }: { children: ReactNode }) {
       const saved = localStorage.getItem("goalwear-coupon");
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed && parsed.code) setAppliedCoupon(parsed);
+        if (parsed?.code) {
+          const stillValid = coupons.find(
+            (c) =>
+              c.code === parsed.code &&
+              c.value === parsed.value &&
+              c.isActive
+          );
+          if (stillValid) {
+            setAppliedCoupon(stillValid);
+          } else {
+            localStorage.removeItem("goalwear-coupon");
+          }
+        }
       }
     } catch (err) {
       console.error("Failed to parse coupon", err);
     }
     setIsHydrated(true);
-  }, []);
+  }, [coupons]);
 
   useEffect(() => {
     if (!isHydrated) return;
@@ -87,32 +66,42 @@ export function CouponProvider({ children }: { children: ReactNode }) {
 
   const applyCoupon = (code: string) => {
     const trimmed = code.trim().toUpperCase();
-    const found = AVAILABLE_COUPONS.find((c) => c.code === trimmed);
+    const found = coupons.find((c) => c.code.toUpperCase() === trimmed);
 
     if (!found) {
       return { success: false, error: "Invalid coupon code" };
+    }
+    if (!found.isActive) {
+      return { success: false, error: "This coupon is not active" };
+    }
+    if (found.expiresAt && new Date(found.expiresAt) < new Date()) {
+      return { success: false, error: "This coupon has expired" };
     }
 
     setAppliedCoupon(found);
     return { success: true };
   };
 
-  const removeCoupon = () => {
-    setAppliedCoupon(null);
-  };
+  const removeCoupon = () => setAppliedCoupon(null);
 
-  // 👇 Fixed: Math.round — standard rounding (10% of $99.99 = $10.00)
   const calculateDiscount = (subtotal: number): number => {
     if (!appliedCoupon) return 0;
 
+    if (appliedCoupon.minOrder && subtotal < appliedCoupon.minOrder) {
+      return 0;
+    }
+
     if (appliedCoupon.type === "percent") {
-      const rawDiscount = (subtotal * appliedCoupon.value) / 100;
-      return Math.round(rawDiscount * 100) / 100;
+      let raw = (subtotal * appliedCoupon.value) / 100;
+      if (appliedCoupon.maxDiscount) {
+        raw = Math.min(raw, appliedCoupon.maxDiscount);
+      }
+      return Math.round(raw * 100) / 100;
     }
     if (appliedCoupon.type === "fixed") {
       return Math.min(appliedCoupon.value, subtotal);
     }
-    return 0; // shipping discount handled separately
+    return 0;
   };
 
   return (
@@ -131,7 +120,7 @@ export function CouponProvider({ children }: { children: ReactNode }) {
 }
 
 export function useCoupon() {
-  const context = useContext(CouponContext);
-  if (!context) throw new Error("useCoupon must be used within CouponProvider");
-  return context;
+  const ctx = useContext(CouponContext);
+  if (!ctx) throw new Error("useCoupon must be used within CouponProvider");
+  return ctx;
 }

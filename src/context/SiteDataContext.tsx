@@ -80,12 +80,17 @@ export interface Testimonial {
   rating: number;
 }
 
+// 👇 আপডেটেড Coupon interface
 export interface CouponData {
   id: number;
   code: string;
   type: "percent" | "fixed" | "shipping";
   value: number;
   description: string;
+  isActive: boolean;
+  minOrder?: number;
+  maxDiscount?: number;
+  expiresAt?: string;
 }
 
 export interface SiteConfigData {
@@ -176,7 +181,21 @@ function dbToCategory(row: any): Category { return { id: row.id, name: row.name,
 function dbToBrand(row: any): Brand { return { id: row.id, name: row.name, slug: row.slug, tagline: row.tagline, logo: row.logo || "" }; }
 function dbToTeam(row: any): Team { return { id: row.id, name: row.name, logo: row.logo, bgColor: row.bg_color }; }
 function dbToTestimonial(row: any): Testimonial { return { id: row.id, name: row.name, role: row.role, avatar: row.avatar, text: row.text, rating: row.rating }; }
-function dbToCoupon(row: any): CouponData { return { id: row.id, code: row.code, type: row.type, value: Number(row.value), description: row.description }; }
+
+// 👇 আপডেটেড converter — নতুন ফিল্ড সহ
+function dbToCoupon(row: any): CouponData {
+  return {
+    id: row.id,
+    code: row.code,
+    type: row.type,
+    value: Number(row.value),
+    description: row.description,
+    isActive: row.is_active !== false,
+    minOrder: row.min_order ? Number(row.min_order) : undefined,
+    maxDiscount: row.max_discount ? Number(row.max_discount) : undefined,
+    expiresAt: row.expires_at || undefined,
+  };
+}
 
 // ============ Context ============
 const SiteDataContext = createContext<SiteDataContextType | undefined>(undefined);
@@ -314,7 +333,25 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
   const updateTeams = async (teams: Team[]) => { setTeams(teams); await saveToServer("teams", teams.map((t, i) => ({ id: t.id, name: t.name, logo: t.logo, bg_color: t.bgColor, sort_order: i }))); };
   const updateTestimonials = async (testimonials: Testimonial[]) => { setTestimonials(testimonials); await saveToServer("testimonials", testimonials.map((t, i) => ({ id: t.id, name: t.name, role: t.role, avatar: t.avatar, text: t.text, rating: t.rating, sort_order: i }))); };
   const updateInstagramImages = async (images: string[]) => { setInstagramImages(images); await saveToServer("instagram_images", images.map((url, i) => ({ image_url: url, sort_order: i }))); };
-  const updateCoupons = async (coupons: CouponData[]) => { setCoupons(coupons); await saveToServer("coupons", coupons.map((c) => ({ id: c.id, code: c.code, type: c.type, value: c.value, description: c.description, is_active: true }))); };
+
+  // 👇 আপডেটেড coupon save — নতুন ফিল্ড সহ
+  const updateCoupons = async (coupons: CouponData[]) => {
+    setCoupons(coupons);
+    await saveToServer(
+      "coupons",
+      coupons.map((c) => ({
+        id: c.id,
+        code: c.code,
+        type: c.type,
+        value: c.value,
+        description: c.description,
+        is_active: c.isActive,
+        min_order: c.minOrder ?? 0,
+        max_discount: c.maxDiscount ?? 0,
+        expires_at: c.expiresAt || null,
+      }))
+    );
+  };
 
   const addProductReview = async (productId: number, review: Review) => {
     try {
